@@ -590,9 +590,9 @@ MAKEFLAGS=
 # Identity of this package.
 PACKAGE_NAME='BitBlocks Core'
 PACKAGE_TARNAME='bitblocks'
-PACKAGE_VERSION='2.0.0'
-PACKAGE_STRING='BitBlocks Core 2.0.0'
-PACKAGE_BUGREPORT='www.bitblocks.org'
+PACKAGE_VERSION='1.0.1'
+PACKAGE_STRING='BitBlocks Core'
+PACKAGE_BUGREPORT='www.bitblocksproject.com'
 PACKAGE_URL=''
 
 ac_unique_file="src/main.cpp"
