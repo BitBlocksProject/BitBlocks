@@ -106,7 +106,7 @@ public:
         nLastPOWBlock = 500;
         nMaturity = 15;
         nMasternodeCountDrift = 20;
-        nMasternodeCollateralLimit = 1000;
+        nMasternodeCollateralLimit = 30000;
         nModifierUpdateBlock = 615800;
         nMaxMoneyOut = 584000000 * COIN;
         const char* pszTimestamp = "Bitblocks fast transaction without fee by Edson";
