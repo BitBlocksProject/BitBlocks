@@ -19,14 +19,14 @@ BEGIN
     BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
-            VALUE "CompanyName",        "BitBlocks CWF"
-            VALUE "FileDescription",    "BitBlocks (CoinWebFactory Release)"
+            VALUE "CompanyName",        "BitBlocks"
+            VALUE "FileDescription",    "BitBlocks"
             VALUE "FileVersion",        VER_FILEVERSION_STR
             VALUE "InternalName",       "bitblocks-qt"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed by CoinWebFactory under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
             VALUE "OriginalFilename",   "bitblocks-qt.exe"
-            VALUE "ProductName",        "BitBlocks CWF"
+            VALUE "ProductName",        "BitBlocks"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END
