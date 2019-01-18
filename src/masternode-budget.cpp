@@ -1344,11 +1344,6 @@ bool CBudgetProposal::IsValid(std::string& strError, bool fCheckCollateral)
         return false;
     }
 
-    if (nAmount < 10 * COIN) {
-        strError = "Invalid nAmount";
-        return false;
-    }
-
     if (address == CScript()) {
         strError = "Invalid Payment Address";
         return false;
@@ -1379,12 +1374,6 @@ bool CBudgetProposal::IsValid(std::string& strError, bool fCheckCollateral)
     //         return false;
     //     }
     // }
-
-    //can only pay out 10% of the possible coins (min value of coins)
-    if (nAmount > budget.GetTotalBudget(nBlockStart)) {
-        strError = "Payment more than max";
-        return false;
-    }
 
     CBlockIndex* pindexPrev = chainActive.Tip();
     if (pindexPrev == NULL) {
