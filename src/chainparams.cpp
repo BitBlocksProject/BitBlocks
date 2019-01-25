@@ -133,9 +133,19 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
 
-        vSeeds.push_back(CDNSSeedData("31.220.57.53", "31.220.57.53"));
-        vSeeds.push_back(CDNSSeedData("31.220.57.56", "31.220.57.56"));
-        vSeeds.push_back(CDNSSeedData("31.220.57.61", "31.220.57.61"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s1.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s2.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s3.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s4.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s5.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s6.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s7.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s8.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s9.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s10.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s11.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s12.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s13.bitblocksproject.com"));
 
 	base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 25); // B
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 85); // b
