@@ -43,4 +43,4 @@ Transactions per second: 346 TPS (approximately)
 
 Masternode Support: Yes
 
-Coins necessary for masternode:  30,000 BBK
+Coins necessary for masternode:  150000 BBK
