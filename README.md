@@ -1,7 +1,4 @@
-======================================
-BitBlocks (fork of LightPayCoin and fork of PIVX) integration/staging repository
-======================================
-
+![alt text](https://i.imgur.com/agQOdVT.png)
 
  BITBLOCKS is a business-oriented
 cryptocurrency directed towards
