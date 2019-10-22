@@ -41,3 +41,36 @@ Transactions per second: 346 TPS (approximately)
 Masternode Support: Yes
 
 Coins necessary for masternode:  150000 BBK
+
+ANN: 
+https://bitcointalk.org/index.php?topic=5056486
+
+ WEBSITE:  
+https://bitblocksproject.com/
+
+ EXPLORERS: 
+https://bbk.overemo.com/
+
+
+ SOCIAL MEDIA:  
+https://twitter.com/BitBlocks_
+https://www.facebook.com/BitBlocks-209330362976708/
+https://t.me/BitblocksOfficial
+
+ EXCHANGES:
+https://app.stex.com/en/basic-trade/pair/BTC/BBK/1D
+https://crex24.com/pt/exchange/BBK-BTC
+
+ CRYPTOCURRENCY TRACKERS:  
+https://coinmarketcap.com/currencies/bitblocks/
+https://www.worldcoinindex.com/coin/bitblocks 
+https://coinlib.io/coin/BBK/BitBlocks
+https://www.coingecko.com/en/coins/bitblocks-project
+https://coincheckup.com/coins/bitblocks/
+https://www.livecoinwatch.com/price/BitBlocks-BBK
+
+ Masternodes info: 
+https://masternodes.online/currencies/BBK/
+https://mnrank.com/coin/BBK/
+https://masternodec.com/BBK.html
+https://nodecheck.io/currency/BBK
