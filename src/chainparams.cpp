@@ -55,10 +55,10 @@ static void convertSeed6(std::vector<CAddress>& vSeedsOut, const SeedSpec6* data
 // + Contains no strange transactions
 static Checkpoints::MapCheckpoints mapCheckpoints =
     boost::assign::map_list_of
-    (0, uint256("0x0000072fa90af55d6d2e8c4ddefef154787e152b85b37e8a1bcfd20daf88cb78"))
+    	(0, uint256("0x0000072fa90af55d6d2e8c4ddefef154787e152b85b37e8a1bcfd20daf88cb78"))
 	(58482, uint256("0x05878445b7877aea2ef3d7e52a7cbfbd5a4d12eaf5103d1ccdc02561b6170f78"))
 	(70774, uint256("0x1600a54444d64672652f4d32d26ef099c2d80822fd68836e1d819dc5aa9e8db2"))
-  (645690, uint256("0x1f481c78eb7bd136a70cca5a709a7eb0e1f17ee5a4af6724c9a4f0941244af63"));
+  	(645690, uint256("0x1f481c78eb7bd136a70cca5a709a7eb0e1f17ee5a4af6724c9a4f0941244af63"));
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
@@ -147,6 +147,9 @@ public:
 		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s11.bitblocksproject.com"));
 		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s12.bitblocksproject.com"));
 		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s13.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s14.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s15.bitblocksproject.com"));
+		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s16.bitblocksproject.com"));
 
 	base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 25); // B
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 85); // b
