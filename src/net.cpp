@@ -61,7 +61,7 @@ using namespace std;
 
 namespace
 {
-const int MAX_OUTBOUND_CONNECTIONS = 16;
+const int MAX_OUTBOUND_CONNECTIONS = 32;
 
 struct ListenSocket {
     SOCKET socket;
