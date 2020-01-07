@@ -58,8 +58,18 @@ https://www.facebook.com/BitBlocks-209330362976708/
 https://t.me/BitblocksOfficial
 
  EXCHANGES:  
-https://app.stex.com/en/basic-trade/pair/BTC/BBK/1D  
-https://crex24.com/pt/exchange/BBK-BTC
+https://vindax.com/?ref=e3f94c40f1e215a5f21ae73ab93653be  
+https://app.stex.com/en/basic-trade/pair/BTC/BBK/1D?ref=01532400  
+https://crex24.com/exchange/BBK-BTC?refid=gz9afyr0g7w0mbe18oct  
+https://broker.cointradecx.com/register/wNjQ1NTU1MjYs1MSEyQDMjMTUwOTM  
+https://exchange-assets.com/en/?market=bbk_btc  
+https://newcash.exchange/  
+https://p2pb2b.io/referral/5277fb8b-070f-4724-a3e0-307a40fbbf05  
+
+ MASTERNODE SERVICES:  
+https://central.zcore.cash/mn-coins/1000015647  
+https://www.4stake.com/5c463483fd5eb40004a31c86  
+https://gtmcoin.io/registration?referral=G9dZB  
 
  CRYPTOCURRENCY TRACKERS:  
 https://coinmarketcap.com/currencies/bitblocks/
