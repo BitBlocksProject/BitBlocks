@@ -50,7 +50,7 @@ https://bitblocksproject.com/
 
  EXPLORERS:  
 http://bbk.ccore.online/  
-http://explorer.bitblocksproject.com/  
+https://chainz.cryptoid.info/bbk/  
 
  SOCIAL:  
 https://twitter.com/BitBlocks_  
