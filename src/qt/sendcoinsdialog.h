@@ -33,7 +33,6 @@ class SendCoinsDialog : public QDialog
 
 public:
     explicit SendCoinsDialog(QWidget* parent = 0);
-    ~SendCoinsDialog();
 
     void setClientModel(ClientModel* clientModel);
     void setModel(WalletModel* model);
@@ -72,8 +71,6 @@ private:
 
 private slots:
     void on_sendButton_clicked();
-    void on_buttonChooseFee_clicked();
-    void on_buttonMinimizeFee_clicked();
     void removeEntry(SendCoinsEntry* entry);
     void updateDisplayUnit();
     void updateSwiftTX();
@@ -92,11 +89,7 @@ private slots:
     void coinControlClipboardChange();
     void splitBlockChecked(int);
     void splitBlockLineEditChanged(const QString& text);
-    void setMinimumFee();
-    void updateFeeSectionControls();
-    void updateMinFeeLabel();
-    void updateSmartFeeLabel();
-    void updateGlobalFeeVariables();
+
 
 signals:
     // Fired when a message should be reported to the user
