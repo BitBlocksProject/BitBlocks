@@ -3,12 +3,11 @@
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2017 The PIVX developers
 // Copyright (c) 2018 LightPayCoin developers
-// Copyright (c) 2018-2020 The BitBlocks developers
+// Copyright (c) 2018-2022 The BitBlocks developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "chainparams.h"
-
 #include "random.h"
 #include "util.h"
 #include "utilstrencodings.h"
@@ -55,17 +54,20 @@ static void convertSeed6(std::vector<CAddress>& vSeedsOut, const SeedSpec6* data
 // + Contains no strange transactions
 static Checkpoints::MapCheckpoints mapCheckpoints =
     boost::assign::map_list_of
-    	(0, uint256("0x0000072fa90af55d6d2e8c4ddefef154787e152b85b37e8a1bcfd20daf88cb78"))
-	(58482, uint256("0x05878445b7877aea2ef3d7e52a7cbfbd5a4d12eaf5103d1ccdc02561b6170f78"))
-	(70774, uint256("0x1600a54444d64672652f4d32d26ef099c2d80822fd68836e1d819dc5aa9e8db2"))
-  	(645690, uint256("0x1f481c78eb7bd136a70cca5a709a7eb0e1f17ee5a4af6724c9a4f0941244af63"));
+	(58482, uint256("05878445b7877aea2ef3d7e52a7cbfbd5a4d12eaf5103d1ccdc02561b6170f78"))
+	(70774, uint256("1600a54444d64672652f4d32d26ef099c2d80822fd68836e1d819dc5aa9e8db2"))
+    (200154, uint256("f2ac17e26dfdf09c46ee78c1712899f32becae9b28145cfe11ced3107cc9a454"))
+  	(645690, uint256("1f481c78eb7bd136a70cca5a709a7eb0e1f17ee5a4af6724c9a4f0941244af63"))
+    (925690, uint256("7eddd7815a9014271d50d1385ad64f7f5bc7cd8fd9b78b2b4984672fefa047f4"))
+    (1520623, uint256("8a7b6d89dc9159246543ddef90c5cdd8751df6a998f98756ea28bd432271ba76"))
+    (1820623, uint256("6317adddf2635964924e327caa8db289625106fbe1a0b87841f6656442737c79"));
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1577394731, // * UNIX timestamp of last checkpoint block
-    1564183,          // * total number of transactions between genesis and last checkpoint
+    1648304018, // * UNIX timestamp of last checkpoint block
+    4084340,          // * total number of transactions between genesis and last checkpoint
                 //   (the tx=... number in the SetBestChain debug.log lines)
-    2880        // * estimated number of transactions per day after checkpoint
+    2900        // * estimated number of transactions per day after checkpoint
 };
 
 static Checkpoints::MapCheckpoints mapCheckpointsTestnet =
@@ -104,7 +106,7 @@ public:
         nRejectBlockOutdatedMajority = 950;
         nToCheckBlockUpgradeMajority = 1000;
         nMinerThreads = 0;
-        nTargetTimespan = 1 * 60; // BitBlocks: 1 day
+        nTargetTimespan = 1 * 60; // BitBlocks: 1 minute
         nTargetSpacing = 1 * 30;  // BitBlocks: 30 seconds
         nLastPOWBlock = 500;
         nMaturity = 15;
