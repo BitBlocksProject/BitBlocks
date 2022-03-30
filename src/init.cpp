@@ -506,15 +506,15 @@ std::string HelpMessage(HelpMessageMode mode)
 
 std::string LicenseInfo()
 {
-    return FormatParagraph(strprintf(_("Copyright (C) 2009-%i The Bitcoin Core Developers"), COPYRIGHT_YEAR)) + "\n" +
+    return  FormatParagraph(_("Copyright (C) 2009-2014 Bitcoin Core Developers")) + "\n" +
            "\n" +
-           FormatParagraph(strprintf(_("Copyright (C) 2014-%i The Dash Core Developers"), COPYRIGHT_YEAR)) + "\n" +
+            FormatParagraph(_("Copyright (C) 2014-2015 Dash Core Developers")) + "\n" +
            "\n" +
-           FormatParagraph(strprintf(_("Copyright (C) 2015-%i The PIVX Core Developers"), COPYRIGHT_YEAR)) + "\n" +
+           FormatParagraph(_("Copyright (C) 2015-2017 The PIVX Core Developers")) + "\n" +
            "\n" +
-           FormatParagraph(_("Copyright (C) 2018 LightPayCoin Developers")) + "\n" +
+           FormatParagraph(_("Copyright (C) 2018 LightPayCoin Core Developers")) + "\n" +
            "\n" +
-           FormatParagraph(_("Copyright (C) 2018 The BitBlocks Core Developers")) + "\n" +
+           FormatParagraph(strprintf(_("Copyright (C) 2018-%i The BitBlocks Core Developers"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
            FormatParagraph(_("This is experimental software.")) + "\n" +
            "\n" +
