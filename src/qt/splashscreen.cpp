@@ -35,7 +35,7 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle* networkStyle) 
 
     // define text to place
     QString titleText = tr("BitBlocks Core");
-    QString versionText = QString(tr("Version: 1.1.1")).arg(QString::fromStdString(FormatFullVersion()));
+    QString versionText = QString(tr("Version: 1.1.2")).arg(QString::fromStdString(FormatFullVersion()));
     QString copyrightTextBtc = QChar(0xA9) + QString(tr(" 2009-2014 The Bitcoin developers"));
     QString copyrightTextDash = QChar(0xA9) + QString(tr(" 2014-2015 The Dash developers"));
     QString copyrightTextPivx = QChar(0xA9) + QString(tr(" 2015-2017 The Pivx developers"));
