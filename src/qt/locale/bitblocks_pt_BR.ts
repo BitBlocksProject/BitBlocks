@@ -912,7 +912,7 @@
     <message numerus="yes">
         <location line="+2"/>
         <source>%n day(s)</source>
-        <translation><numerusform>%n dia</numerusform><numerusform>$n dias</numerusform></translation>
+        <translation><numerusform>%n dia</numerusform><numerusform>%n dias</numerusform></translation>
     </message>
     <message numerus="yes">
         <location line="+2"/>
@@ -1671,7 +1671,7 @@ MultiSend: %1</translation>
     </message>
     <message>
         <location line="+13"/>
-        <source>S&amp;tart alias</source>
+        <source>Start alias</source>
         <translation>iniciar apelido</translation>
     </message>
     <message>
@@ -2167,7 +2167,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-204"/>
         <source>Map port using &amp;UPnP</source>
-        <translation type="unfinished"/>
+        <translation>Mapear porta usando UPnP</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -2651,7 +2651,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-108"/>
         <source>Cannot start bitblocks: click-to-pay handler</source>
-        <translation type="unfinished"/>
+        <translation>Não foi possivel iniciar o aplicativo, error: click-to-pay handler></translation>
     </message>
     <message>
         <location line="+114"/>
@@ -2723,7 +2723,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+9"/>
         <source>Bad response from server %1</source>
-        <translation type="unfinished"/>
+        <translation>Resposta incorreta do servidor %1</translation>
     </message>
     <message>
         <location line="+20"/>
@@ -2845,7 +2845,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location filename="../forms/rpcconsole.ui" line="+14"/>
         <source>Tools window</source>
-        <translation type="unfinished"/>
+        <translation>Ferramentas</translation>
     </message>
     <message>
         <location line="+10"/>
