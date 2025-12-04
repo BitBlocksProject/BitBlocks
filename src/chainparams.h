@@ -72,6 +72,8 @@ public:
     bool RequireStandard() const { return fRequireStandard; }
     int64_t TargetTimespan() const { return nTargetTimespan; }
     int64_t TargetSpacing() const { return nTargetSpacing; }
+    int64_t TargetTimespanPOW() const { return nTargetTimespanPOW; }
+    int64_t TargetSpacingPOW() const { return nTargetSpacingPOW; }
     int64_t Interval() const { return nTargetTimespan / nTargetSpacing; }
     int LAST_POW_BLOCK() const { return nLastPOWBlock; }
     int COINBASE_MATURITY() const { return nMaturity; }
@@ -110,8 +112,10 @@ protected:
     int nEnforceBlockUpgradeMajority;
     int nRejectBlockOutdatedMajority;
     int nToCheckBlockUpgradeMajority;
-    int64_t nTargetTimespan;
-    int64_t nTargetSpacing;
+    int64_t nTargetTimespan;      // PoS target timespan
+    int64_t nTargetSpacing;       // PoS target spacing
+    int64_t nTargetTimespanPOW;   // PoW target timespan
+    int64_t nTargetSpacingPOW;    // PoW target spacing
     int nLastPOWBlock;
     int nMasternodeCountDrift;
     int nMasternodeCollateralLimit;
