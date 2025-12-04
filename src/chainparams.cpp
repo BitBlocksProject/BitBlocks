@@ -136,22 +136,11 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
 
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s1.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s2.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s3.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s4.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s5.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s6.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s7.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s8.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s9.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s10.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s11.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s12.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s13.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s14.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s15.bitblocksproject.com"));
-		vSeeds.push_back(CDNSSeedData("bitblocksproject.com", "s16.bitblocksproject.com"));
+        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed1.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed2.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed3.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed4.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed5.bitblockscrypto.com"));
 
 	base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 25); // B
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 85); // b
