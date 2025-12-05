@@ -3,7 +3,7 @@
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2017 The PIVX developers
 // Copyright (c) 2018 LightPayCoin developers
-// Copyright (c) 2018-2022 The BitBlocks developers
+// Copyright (c) 2018-2025 The BitBlocks developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -60,14 +60,18 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
   	(645690, uint256("1f481c78eb7bd136a70cca5a709a7eb0e1f17ee5a4af6724c9a4f0941244af63"))
     (925690, uint256("7eddd7815a9014271d50d1385ad64f7f5bc7cd8fd9b78b2b4984672fefa047f4"))
     (1520623, uint256("8a7b6d89dc9159246543ddef90c5cdd8751df6a998f98756ea28bd432271ba76"))
-    (1820623, uint256("6317adddf2635964924e327caa8db289625106fbe1a0b87841f6656442737c79"));
+    (1820623, uint256("6317adddf2635964924e327caa8db289625106fbe1a0b87841f6656442737c79"))
+    (2500000, uint256("4d13a16a6fdf9912a1ad933008c2a17dbd644c389fe5042482d932cac8488ba0"))
+    (3000000, uint256("240ba7086366818c6bb3ae94576d9e452c37f4666c7bb1def429faeca8d48902"))
+    (3500000, uint256("c18ae698b3c715f503cafdce96847c8deb7f22a4f29b21c0409da35f92ec4e74"))
+    (3685080, uint256("51896e4e2c945550ce3722bb5fe793fb0cc076a4d437f5dd805e97d0bc05b4e9"));
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1648304018, // * UNIX timestamp of last checkpoint block
-    4084340,          // * total number of transactions between genesis and last checkpoint
-                //   (the tx=... number in the SetBestChain debug.log lines)
-    2900        // * estimated number of transactions per day after checkpoint
+    1764953919, // * UNIX timestamp of last checkpoint block
+    7430917,    // * total number of transactions between genesis and last checkpoint
+                 //   (the tx=... number in the SetBestChain debug.log lines)
+    1440         // * estimated number of transactions per day after checkpoint
 };
 
 static Checkpoints::MapCheckpoints mapCheckpointsTestnet =
