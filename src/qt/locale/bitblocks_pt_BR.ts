@@ -165,7 +165,7 @@
     <message>
         <location line="+33"/>
         <source>Serves to disable the trivial sendmoney when OS account compromised. Provides no real security.</source>
-        <translation type="unfinished"/>
+        <translation>Serve para desabilitar o envio trivial de dinheiro quando a conta do sistema operacional está comprometida. Não fornece segurança real.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -380,12 +380,12 @@
     <message>
         <location line="-80"/>
         <source>&amp;BIP 38 Decrypt</source>
-        <translation type="unfinished"/>
+        <translation>Descriptografar &amp;BIP 38</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>Enter the BIP 38 encrypted private key. Enter the passphrase in the middle box. Click Decrypt Key to compute the private key. After the key is decrypted, clicking &apos;Import Address&apos; will add this private key to the wallet.</source>
-        <translation type="unfinished"/>
+        <translation>Digite a chave privada criptografada BIP 38. Digite a senha na caixa do meio. Clique em Descriptografar Chave para calcular a chave privada. Após a chave ser descriptografada, clicar em &apos;Importar Endereço&apos; adicionará esta chave privada à carteira.</translation>
     </message>
     <message>
         <location line="+25"/>
@@ -731,7 +731,7 @@
     <message numerus="yes">
         <location line="+428"/>
         <source>Processed %n blocks of transaction history.</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>Processado %n bloco do histórico de transações.</numerusform><numerusform>Processados %n blocos do histórico de transações.</numerusform></translation>
     </message>
     <message>
         <location line="+32"/>
@@ -877,7 +877,7 @@
     <message numerus="yes">
         <location line="+190"/>
         <source>%n active connection(s) to BitBlocks network</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>%n conexão ativa com a rede BitBlocks</numerusform><numerusform>%n conexões ativas com a rede BitBlocks</numerusform></translation>
     </message>
     <message>
         <location line="+15"/>
@@ -928,7 +928,7 @@
     <message numerus="yes">
         <location line="+0"/>
         <source>%n year(s)</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>%n ano</numerusform><numerusform>%n anos</numerusform></translation>
     </message>
     <message>
         <location line="+4"/>
@@ -1116,7 +1116,7 @@ MultiSend: %1</translation>
     <message>
         <location line="+214"/>
         <source>Dust:</source>
-        <translation type="unfinished"/>
+        <translation>Poeira:</translation>
     </message>
     <message>
         <location line="+48"/>
@@ -1171,7 +1171,7 @@ MultiSend: %1</translation>
     <message>
         <location line="+5"/>
         <source>DS Rounds</source>
-        <translation type="unfinished"/>
+        <translation>Rodadas DS</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -1531,17 +1531,17 @@ MultiSend: %1</translation>
     <message>
         <location line="+8"/>
         <source>UI Options:</source>
-        <translation type="unfinished"/>
+        <translation>Opções da Interface:</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Choose data directory on startup (default: %u)</source>
-        <translation type="unfinished"/>
+        <translation>Escolher diretório de dados na inicialização (padrão: %u)</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>Show splash screen on startup (default: %u)</source>
-        <translation type="unfinished"/>
+        <translation>Mostrar tela de abertura na inicialização (padrão: %u)</translation>
     </message>
     <message>
         <location line="-3"/>
@@ -1632,7 +1632,7 @@ MultiSend: %1</translation>
     <message>
         <location line="+16"/>
         <source>Note: Status of your masternodes in local wallet can potentially be slightly incorrect.&lt;br /&gt;Always wait for wallet to sync additional data and then double check from another node&lt;br /&gt;if your node should be running but you still see &quot;MISSING&quot; in &quot;Status&quot; field.</source>
-        <translation type="unfinished"/>
+        <translation>Nota: O status dos seus masternodes na carteira local pode estar potencialmente um pouco incorreto.&lt;br /&gt;Sempre aguarde a carteira sincronizar dados adicionais e então verifique novamente em outro nó&lt;br /&gt;se seu nó deveria estar em execução mas você ainda vê &quot;MISSING&quot; no campo &quot;Status&quot;.</translation>
     </message>
     <message>
         <location line="+74"/>
@@ -1677,12 +1677,12 @@ MultiSend: %1</translation>
     <message>
         <location line="+7"/>
         <source>Start &amp;all</source>
-        <translation type="unfinished"/>
+        <translation>Iniciar &amp;todos</translation>
     </message>
     <message>
         <location line="+7"/>
         <source>Start &amp;MISSING</source>
-        <translation type="unfinished"/>
+        <translation>Iniciar &amp;MISSING</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1702,7 +1702,7 @@ MultiSend: %1</translation>
     <message>
         <location filename="../masternodelist.cpp" line="+45"/>
         <source>Start alias</source>
-        <translation type="unfinished"/>
+        <translation>Iniciar apelido</translation>
     </message>
     <message>
         <location line="+190"/>
@@ -1773,7 +1773,10 @@ MultiSend: %1</translation>
 To Add: enter percentage to give and BitBlocks address to add to the MultiSend vector.
 To Delete: Enter address to delete and press delete.
 MultiSend will not be activated unless you have clicked Activate</source>
-        <translation type="unfinished"/>
+        <translation>MultiSend permite que você envie automaticamente até 100% da sua recompensa de stake ou masternode para uma lista de outros endereços BitBlocks após amadurecer.
+Para Adicionar: digite a porcentagem a dar e o endereço BitBlocks para adicionar ao vetor MultiSend.
+Para Deletar: Digite o endereço para deletar e pressione deletar.
+MultiSend não será ativado a menos que você tenha clicado em Ativar</translation>
     </message>
     <message>
         <location line="+38"/>
@@ -1808,7 +1811,7 @@ MultiSend will not be activated unless you have clicked Activate</source>
     <message>
         <location line="+16"/>
         <source>Percentage of stake to send</source>
-        <translation type="unfinished"/>
+        <translation>Porcentagem de stake para enviar</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2050,7 +2053,7 @@ Favor verificar o endereço e tente novamente.</translation>
     <message>
         <location line="+27"/>
         <source>Number of script &amp;verification threads</source>
-        <translation type="unfinished"/>
+        <translation>Número de threads de &amp;verificação de script</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -2065,7 +2068,7 @@ Favor verificar o endereço e tente novamente.</translation>
     <message>
         <location line="+32"/>
         <source>If you disable the spending of unconfirmed change, the change from a transaction&lt;br/&gt;cannot be used until that transaction has at least one confirmation.&lt;br/&gt;This also affects how your balance is computed.</source>
-        <translation type="unfinished"/>
+        <translation>Se você desabilitar o gasto de troco não confirmado, o troco de uma transação&lt;br/&gt;não poderá ser usado até que essa transação tenha pelo menos uma confirmação.&lt;br/&gt;Isso também afeta como seu saldo é calculado.</translation>
     </message>
     <message>
         <location line="+33"/>
@@ -2115,7 +2118,7 @@ Favor verificar o endereço e tente novamente.</translation>
     <message>
         <location line="+24"/>
         <source>This amount acts as a threshold to turn off Obfuscation once it&apos;s reached.</source>
-        <translation type="unfinished"/>
+        <translation>Este valor atua como um limite para desligar a Ofuscação uma vez que seja atingido.</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -2125,7 +2128,7 @@ Favor verificar o endereço e tente novamente.</translation>
     <message>
         <location line="+38"/>
         <source>Whether to show coin control features or not.</source>
-        <translation type="unfinished"/>
+        <translation>Se deve mostrar ou não os recursos de controle de moeda.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2135,7 +2138,7 @@ Favor verificar o endereço e tente novamente.</translation>
     <message>
         <location line="+7"/>
         <source>Show additional tab listing all your masternodes in first sub-tab&lt;br/&gt;and all masternodes on the network in second sub-tab.</source>
-        <translation type="unfinished"/>
+        <translation>Mostrar aba adicional listando todos os seus masternodes na primeira sub-aba&lt;br/&gt;e todos os masternodes na rede na segunda sub-aba.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2145,7 +2148,7 @@ Favor verificar o endereço e tente novamente.</translation>
     <message>
         <location line="+10"/>
         <source>&amp;Spend unconfirmed change</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Gastar troco não confirmado</translation>
     </message>
     <message>
         <location line="+24"/>
@@ -2212,7 +2215,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+7"/>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.</source>
-        <translation type="unfinished"/>
+        <translation>Minimizar ao invés de fechar o aplicativo quando a janela é fechada. Quando esta opção está habilitada, o aplicativo será fechado apenas após selecionar Sair no menu.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2232,7 +2235,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+53"/>
         <source>User Interface Theme:</source>
-        <translation>Usar tema de inferface:</translation>
+        <translation>Tema da Interface do Usuário:</translation>
     </message>
     <message>
         <location line="+21"/>
@@ -2253,7 +2256,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
         <location line="+14"/>
         <location line="+13"/>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
-        <translation type="unfinished"/>
+        <translation>URLs de terceiros (ex: um explorador de blocos) que aparecem na aba de transações como itens do menu de contexto. %s na URL é substituído pelo hash da transação. Múltiplas URLs são separadas por barra vertical |.</translation>
     </message>
     <message>
         <location line="-10"/>
@@ -2263,7 +2266,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+41"/>
         <source>Active command-line options that override above options:</source>
-        <translation type="unfinished"/>
+        <translation>Opções ativas da linha de comando que sobrescrevem as opções acima:</translation>
     </message>
     <message>
         <location line="+43"/>
@@ -2357,7 +2360,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-29"/>
         <source>Staked or masternode rewards that has not yet matured</source>
-        <translation type="unfinished"/>
+        <translation>Recompensas de stake ou masternode que ainda não amadureceram</translation>
     </message>
     <message>
         <location line="-163"/>
@@ -2404,7 +2407,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+51"/>
         <source>Your current balance in watch-only addresses</source>
-        <translation type="unfinished"/>
+        <translation>Seu saldo atual em endereços somente visualização</translation>
     </message>
     <message>
         <location line="+23"/>
@@ -2463,7 +2466,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+14"/>
         <source>Submitted Denom:</source>
-        <translation type="unfinished"/>
+        <translation>Denominação Enviada:</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -2483,7 +2486,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-469"/>
         <source>The denominations you submitted to the Masternode.&lt;br&gt;To mix, other users must submit the exact same denominations.</source>
-        <translation type="unfinished"/>
+        <translation>As denominações que você enviou ao Masternode.&lt;br&gt;Para misturar, outros usuários devem enviar exatamente as mesmas denominações.</translation>
     </message>
     <message>
         <location line="+501"/>
@@ -2526,12 +2529,12 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
         <location line="+35"/>
         <location line="+10"/>
         <source>%n Rounds</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>%n Rodada</numerusform><numerusform>%n Rodadas</numerusform></translation>
     </message>
     <message>
         <location line="-7"/>
         <source>Not enough compatible inputs to anonymize &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;will anonymize &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; instead</source>
-        <translation type="unfinished"/>
+        <translation>Inputs compatíveis insuficientes para anonimizar &lt;span style=&apos;color:red;&apos;&gt;%1&lt;/span&gt;,&lt;br&gt;será anonimizado &lt;span style=&apos;color:red;&apos;&gt;%2&lt;/span&gt; em vez disso</translation>
     </message>
     <message>
         <location line="+46"/>
@@ -2551,7 +2554,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message numerus="yes">
         <location line="+1"/>
         <source>Denominated inputs have %5 of %n rounds on average</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>Inputs denominados têm %5 de %n rodada em média</numerusform><numerusform>Inputs denominados têm %5 de %n rodadas em média</numerusform></translation>
     </message>
     <message>
         <location line="+44"/>
@@ -2631,7 +2634,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
         <location line="+12"/>
         <location line="+5"/>
         <source>URI handling</source>
-        <translation type="unfinished"/>
+        <translation>Tratamento de URI</translation>
     </message>
     <message>
         <location line="-16"/>
@@ -2641,7 +2644,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+29"/>
         <source>Payment request file handling</source>
-        <translation type="unfinished"/>
+        <translation>Tratamento de arquivo de requisição de pagamento</translation>
     </message>
     <message>
         <location line="-18"/>
@@ -2651,17 +2654,17 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-108"/>
         <source>Cannot start bitblocks: click-to-pay handler</source>
-        <translation>Não foi possivel iniciar o aplicativo, error: click-to-pay handler></translation>
+        <translation>Não foi possível iniciar o bitblocks: manipulador click-to-pay</translation>
     </message>
     <message>
         <location line="+114"/>
         <source>URI cannot be parsed! This can be caused by an invalid BitBlocks address or malformed URI parameters.</source>
-        <translation type="unfinished"/>
+        <translation>URI não pode ser analisada! Isso pode ser causado por um endereço BitBlocks inválido ou parâmetros URI malformados.</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Payment request file cannot be read! This can be caused by an invalid payment request file.</source>
-        <translation type="unfinished"/>
+        <translation>Arquivo de requisição de pagamento não pode ser lido! Isso pode ser causado por um arquivo de requisição de pagamento inválido.</translation>
     </message>
     <message>
         <location line="+67"/>
@@ -2673,7 +2676,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-38"/>
         <source>Payment request network doesn&apos;t match client network.</source>
-        <translation type="unfinished"/>
+        <translation>A rede da requisição de pagamento não corresponde à rede do cliente.</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -2688,12 +2691,12 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+25"/>
         <source>Unverified payment requests to custom payment scripts are unsupported.</source>
-        <translation type="unfinished"/>
+        <translation>Requisições de pagamento não verificadas para scripts de pagamento personalizados não são suportadas.</translation>
     </message>
     <message>
         <location line="+8"/>
         <source>Requested payment amount of %1 is too small (considered dust).</source>
-        <translation type="unfinished"/>
+        <translation>Valor de pagamento solicitado de %1 é muito pequeno (considerado poeira).</translation>
     </message>
     <message>
         <location line="+48"/>
@@ -2703,12 +2706,12 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+40"/>
         <source>Payment request %1 is too large (%2 bytes, allowed %3 bytes).</source>
-        <translation type="unfinished"/>
+        <translation>Requisição de pagamento %1 é muito grande (%2 bytes, permitido %3 bytes).</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>Payment request DoS protection</source>
-        <translation type="unfinished"/>
+        <translation>Proteção DoS de requisição de pagamento</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -2718,7 +2721,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+18"/>
         <source>Payment request cannot be parsed!</source>
-        <translation type="unfinished"/>
+        <translation>Requisição de pagamento não pode ser analisada!</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -2733,7 +2736,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+11"/>
         <source>Payment acknowledged</source>
-        <translation type="unfinished"/>
+        <translation>Pagamento reconhecido</translation>
     </message>
 </context>
 <context>
@@ -2741,7 +2744,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location filename="../peertablemodel.cpp" line="+113"/>
         <source>Address/Hostname</source>
-        <translation type="unfinished"/>
+        <translation>Endereço/Nome do Host</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -2794,7 +2797,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+4"/>
         <source>BLOOM</source>
-        <translation type="unfinished"/>
+        <translation>BLOOM</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2924,7 +2927,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+42"/>
         <source>Debug log file</source>
-        <translation type="unfinished"/>
+        <translation>Arquivo de log de depuração</translation>
     </message>
     <message>
         <location line="-249"/>
@@ -2949,7 +2952,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+49"/>
         <source>Using BerkeleyDB version</source>
-        <translation type="unfinished"/>
+        <translation>Usando versão BerkeleyDB</translation>
     </message>
     <message>
         <location line="+151"/>
@@ -2959,7 +2962,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+79"/>
         <source>Open the BitBlocks debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation type="unfinished"/>
+        <translation>Abrir o arquivo de log de depuração do BitBlocks do diretório de dados atual. Isso pode levar alguns segundos para arquivos de log grandes.</translation>
     </message>
     <message>
         <location line="-99"/>
@@ -3046,7 +3049,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+23"/>
         <source>Ban Score</source>
-        <translation type="unfinished"/>
+        <translation>Pontuação de Banimento</translation>
     </message>
     <message>
         <location line="+23"/>
@@ -3086,17 +3089,17 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+38"/>
         <source>Wallet In Use:</source>
-        <translation type="unfinished"/>
+        <translation>Carteira em Uso:</translation>
     </message>
     <message>
         <location line="+42"/>
         <source>Salvage wallet</source>
-        <translation type="unfinished"/>
+        <translation>Recuperar carteira</translation>
     </message>
     <message>
         <location line="+14"/>
         <source>Attempt to recover private keys from a corrupt wallet.dat.</source>
-        <translation type="unfinished"/>
+        <translation>Tentar recuperar chaves privadas de um wallet.dat corrompido.</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -3106,7 +3109,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+14"/>
         <source>Rescan the block chain for missing wallet transactions.</source>
-        <translation type="unfinished"/>
+        <translation>Reescanear a blockchain em busca de transações da carteira ausentes.</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -3116,7 +3119,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+14"/>
         <source>Recover transactions from blockchain (keep meta-data, e.g. account owner).</source>
-        <translation type="unfinished"/>
+        <translation>Recuperar transações da blockchain (manter metadados, ex: proprietário da conta).</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -3126,7 +3129,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+14"/>
         <source>Recover transactions from blockchain (drop meta-data).</source>
-        <translation type="unfinished"/>
+        <translation>Recuperar transações da blockchain (descartar metadados).</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -3136,7 +3139,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+44"/>
         <source>Rebuild block chain index from current blk000??.dat files.</source>
-        <translation type="unfinished"/>
+        <translation>Reconstruir índice da blockchain a partir dos arquivos blk000??.dat atuais.</translation>
     </message>
     <message>
         <location line="-216"/>
@@ -3151,7 +3154,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+199"/>
         <source>Upgrade wallet to latest format on startup. (Note: this is NOT an update of the wallet itself!)</source>
-        <translation type="unfinished"/>
+        <translation>Atualizar carteira para o formato mais recente na inicialização. (Nota: isso NÃO é uma atualização da carteira em si!)</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -3181,7 +3184,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+1"/>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
-        <translation type="unfinished"/>
+        <translation>Digite &lt;b&gt;help&lt;/b&gt; para uma visão geral dos comandos disponíveis.</translation>
     </message>
     <message>
         <location line="+138"/>
@@ -3222,7 +3225,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+0"/>
         <source>Outbound</source>
-        <translation type="unfinished"/>
+        <translation>saída</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -3241,12 +3244,12 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location filename="../forms/receivecoinsdialog.ui" line="+34"/>
         <source>Reuse one of the previously used receiving addresses.&lt;br&gt;Reusing addresses has security and privacy issues.&lt;br&gt;Do not use this unless re-generating a payment request made before.</source>
-        <translation type="unfinished"/>
+        <translation>Reutilizar um dos endereços de recebimento usados anteriormente.&lt;br&gt;Reutilizar endereços tem problemas de segurança e privacidade.&lt;br&gt;Não use isso a menos que esteja regenerando uma requisição de pagamento feita anteriormente.</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>R&amp;euse an existing receiving address (not recommended)</source>
-        <translation type="unfinished"/>
+        <translation>R&amp;eutilizar um endereço de recebimento existente (não recomendado)</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -3262,17 +3265,17 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-37"/>
         <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the BitBlocks network.</source>
-        <translation type="unfinished"/>
+        <translation>Uma mensagem opcional para anexar à requisição de pagamento, que será exibida quando a requisição for aberta. Nota: A mensagem não será enviada com o pagamento pela rede BitBlocks.</translation>
     </message>
     <message>
         <location line="+23"/>
         <source>An optional message to attach to the payment request, which will be displayed when the request is opened.&lt;br&gt;Note: The message will not be sent with the payment over the BitBlocks network.</source>
-        <translation type="unfinished"/>
+        <translation>Uma mensagem opcional para anexar à requisição de pagamento, que será exibida quando a requisição for aberta.&lt;br&gt;Nota: A mensagem não será enviada com o pagamento pela rede BitBlocks.</translation>
     </message>
     <message>
         <location line="+7"/>
         <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
-        <translation type="unfinished"/>
+        <translation>Use este formulário para solicitar pagamentos. Todos os campos são &lt;b&gt;opcionais&lt;/b&gt;.</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -3283,7 +3286,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
         <location line="+13"/>
         <location line="+22"/>
         <source>An optional amount to request. Leave this empty or zero to not request a specific amount.</source>
-        <translation type="unfinished"/>
+        <translation>Um valor opcional para solicitar. Deixe vazio ou zero para não solicitar um valor específico.</translation>
     </message>
     <message>
         <location line="-19"/>
@@ -3361,7 +3364,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+10"/>
         <source>Copy &amp;Address</source>
-        <translation type="unfinished"/>
+        <translation>Copiar &amp;Endereço</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -3470,7 +3473,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+20"/>
         <source>Inputs...</source>
-        <translation type="unfinished"/>
+        <translation>Inputs...</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -3515,7 +3518,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+32"/>
         <source>Dust:</source>
-        <translation type="unfinished"/>
+        <translation>Poeira:</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -3535,12 +3538,12 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+44"/>
         <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
-        <translation type="unfinished"/>
+        <translation>Se isso estiver ativado, mas o endereço de troco estiver vazio ou inválido, o troco será enviado para um endereço recém-gerado.</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Custom change address</source>
-        <translation type="unfinished"/>
+        <translation>Endereço de troco personalizado</translation>
     </message>
     <message>
         <location line="+20"/>
@@ -3600,7 +3603,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+46"/>
         <source>(read the tooltip)</source>
-        <translation type="unfinished"/>
+        <translation>(leia a dica de ferramenta)</translation>
     </message>
     <message>
         <location line="+228"/>
@@ -3625,7 +3628,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+16"/>
         <source>If the custom fee is set to 1000 uBBKs and the transaction is only 250 bytes, then &quot;per kilobyte&quot; only pays 250 uBBKs in fee,&lt;br /&gt;while &quot;total at least&quot; pays 1000 uBBKs. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation type="unfinished"/>
+        <translation>Se a taxa personalizada estiver definida para 1000 uBBKs e a transação for apenas de 250 bytes, então &quot;por kilobyte&quot; pagará apenas 250 uBBKs em taxa,&lt;br /&gt;enquanto &quot;total pelo menos&quot; pagará 1000 uBBKs. Para transações maiores que um kilobyte, ambas pagam por kilobyte.</translation>
     </message>
     <message>
         <location line="+33"/>
@@ -3666,7 +3669,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+3"/>
         <source>S&amp;end</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Enviar</translation>
     </message>
     <message>
         <location line="+23"/>
@@ -3741,12 +3744,12 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+140"/>
         <source>The split block tool does not work when sending to outside addresses. Try again.</source>
-        <translation type="unfinished"/>
+        <translation>A ferramenta de divisão de bloco não funciona ao enviar para endereços externos. Tente novamente.</translation>
     </message>
     <message>
         <location line="+25"/>
         <source>The split block tool does not work with multiple addresses. Try again.</source>
-        <translation type="unfinished"/>
+        <translation>A ferramenta de divisão de bloco não funciona com múltiplos endereços. Tente novamente.</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -3812,7 +3815,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message numerus="yes">
         <location line="+114"/>
         <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>Estimado para começar a confirmação dentro de %n bloco.</numerusform><numerusform>Estimado para começar a confirmação dentro de %n blocos.</numerusform></translation>
     </message>
     <message>
         <location line="-145"/>
@@ -3822,7 +3825,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-343"/>
         <source>(obfuscation requires this amount to be rounded up to the nearest %1).</source>
-        <translation type="unfinished"/>
+        <translation>(a ofuscação requer que este valor seja arredondado para o %1 mais próximo).</translation>
     </message>
     <message>
         <location line="+49"/>
@@ -3862,7 +3865,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+4"/>
         <source>The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
-        <translation type="unfinished"/>
+        <translation>A transação foi rejeitada! Isso pode acontecer se algumas das moedas na sua carteira já foram gastas, como se você usou uma cópia de wallet.dat e as moedas foram gastas na cópia mas não marcadas como gastas aqui.</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -3872,7 +3875,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+16"/>
         <source>Error: The wallet was unlocked only to anonymize coins. Unlock canceled.</source>
-        <translation type="unfinished"/>
+        <translation>Erro: A carteira foi desbloqueada apenas para anonimizar moedas. Desbloqueio cancelado.</translation>
     </message>
     <message>
         <location line="+84"/>
@@ -4314,7 +4317,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message numerus="yes">
         <location line="+2"/>
         <source>, broadcast through %n node(s)</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>, transmitido através de %n nó</numerusform><numerusform>, transmitido através de %n nós</numerusform></translation>
     </message>
     <message>
         <location line="+4"/>
@@ -4378,7 +4381,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message numerus="yes">
         <location line="-126"/>
         <source>matures in %n more block(s)</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>amadurece em mais %n bloco</numerusform><numerusform>amadurece em mais %n blocos</numerusform></translation>
     </message>
     <message>
         <location line="+2"/>
@@ -4441,12 +4444,12 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+6"/>
         <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
-        <translation type="unfinished"/>
+        <translation>Moedas geradas devem amadurecer %1 blocos antes de poderem ser gastas. Quando você gerou este bloco, ele foi transmitido para a rede para ser adicionado à blockchain. Se falhar em entrar na cadeia, seu estado mudará para &quot;não aceito&quot; e não será gastável. Isso pode ocasionalmente acontecer se outro nó gerar um bloco dentro de alguns segundos do seu.</translation>
     </message>
     <message>
         <location line="+7"/>
         <source>Debug information</source>
-        <translation type="unfinished"/>
+        <translation>Informações de depuração</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -4486,7 +4489,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+6"/>
         <source>This pane shows a detailed description of the transaction</source>
-        <translation type="unfinished"/>
+        <translation>Este painel mostra uma descrição detalhada da transação</translation>
     </message>
 </context>
 <context>
@@ -4509,7 +4512,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message numerus="yes">
         <location line="+57"/>
         <source>Open for %n more block(s)</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation><numerusform>Aberto por mais %n bloco</numerusform><numerusform>Aberto por mais %n blocos</numerusform></translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4574,22 +4577,22 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+11"/>
         <source>Obfuscation Denominate</source>
-        <translation type="unfinished"/>
+        <translation>Denominação de Ofuscação</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Obfuscation Collateral Payment</source>
-        <translation type="unfinished"/>
+        <translation>Pagamento de Garantia de Ofuscação</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Obfuscation Make Collateral Inputs</source>
-        <translation type="unfinished"/>
+        <translation>Ofuscação Criar Inputs de Garantia</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Obfuscation Create Denominations</source>
-        <translation type="unfinished"/>
+        <translation>Ofuscação Criar Denominações</translation>
     </message>
     <message>
         <location line="-14"/>
@@ -4599,7 +4602,7 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="-44"/>
         <source>Orphan Block - Generated but not accepted. This does not impact your holdings.</source>
-        <translation type="unfinished"/>
+        <translation>Bloco Órfão - Gerado mas não aceito. Isso não afeta seus fundos.</translation>
     </message>
     <message>
         <location line="+46"/>
@@ -4723,22 +4726,22 @@ https://www.transifex.com/bitblocks-project/bitblocks-project-translations</tran
     <message>
         <location line="+1"/>
         <source>Obfuscation Make Collateral Inputs</source>
-        <translation type="unfinished"/>
+        <translation>Ofuscação Criar Inputs de Garantia</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Obfuscation Create Denominations</source>
-        <translation type="unfinished"/>
+        <translation>Ofuscação Criar Denominações</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Obfuscation Denominate</source>
-        <translation type="unfinished"/>
+        <translation>Denominação de Ofuscação</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Obfuscation Collateral Payment</source>
-        <translation type="unfinished"/>
+        <translation>Pagamento de Garantia de Ofuscação</translation>
     </message>
     <message>
         <location line="+1"/>
