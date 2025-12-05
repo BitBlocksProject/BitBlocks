@@ -192,6 +192,13 @@ fi
 if test "x$CXXFLAGS_overridden" = "xno"; then
   CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter"
 fi
+# Allow dynamic exception specifications for compatibility with older code (C++11 allows them)
+# Force C++11 standard to allow throw() specifications
+case $host in
+  *mingw*)
+    CXXFLAGS="$CXXFLAGS -std=c++11"
+  ;;
+esac
 CPPFLAGS="$CPPFLAGS -DBOOST_SPIRIT_THREADSAFE -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
 
 AC_ARG_WITH([utils],

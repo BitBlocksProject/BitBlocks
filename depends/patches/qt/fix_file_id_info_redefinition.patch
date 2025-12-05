@@ -1,0 +1,19 @@
+--- old/qtbase/src/corelib/io/qfilesystemengine_win.cpp
++++ new/qtbase/src/corelib/io/qfilesystemengine_win.cpp
+@@ -616,6 +616,7 @@
+ 
+ #  if defined(Q_CC_MINGW) || (defined(Q_CC_MSVC) && (_MSC_VER < 1700 || WINVER <= 0x0601))
+ 
++#if !(defined(Q_CC_MINGW) && defined(FILE_SUPPORTS_INTEGRITY_STREAMS))
+ // MinGW-64 defines FILE_ID_128 as of gcc-4.8.1 along with FILE_SUPPORTS_INTEGRITY_STREAMS
+ #    if !(defined(Q_CC_MINGW) && defined(FILE_SUPPORTS_INTEGRITY_STREAMS))
+ typedef struct _FILE_ID_128 {
+@@ -627,7 +628,8 @@
+ typedef struct _FILE_ID_INFO {
+     ULONGLONG VolumeSerialNumber;
+     FILE_ID_128 FileId;
+ } FILE_ID_INFO, *PFILE_ID_INFO;
++#endif // !(Q_CC_MINGW && FILE_SUPPORTS_INTEGRITY_STREAMS)
+ #  endif // if defined (Q_CC_MINGW) || (defined(Q_CC_MSVC) && (_MSC_VER < 1700 || WINVER <= 0x0601))
+ 
+ // File ID for Windows up to version 7.
