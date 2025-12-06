@@ -58,6 +58,29 @@ bool TransactionFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex& 
     return true;
 }
 
+bool TransactionFilterProxy::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    QVariant leftData = sourceModel()->data(left, sortRole());
+    QVariant rightData = sourceModel()->data(right, sortRole());
+
+    if (leftData == rightData) {
+        if (left.column() == TransactionTableModel::Date) {
+            QModelIndex leftStatus = sourceModel()->index(left.row(), TransactionTableModel::Status);
+            QModelIndex rightStatus = sourceModel()->index(right.row(), TransactionTableModel::Status);
+            QString leftKey = sourceModel()->data(leftStatus, Qt::EditRole).toString();
+            QString rightKey = sourceModel()->data(rightStatus, Qt::EditRole).toString();
+
+            if (leftKey == rightKey) {
+                QString leftHash = sourceModel()->data(left, TransactionTableModel::TxHashRole).toString();
+                QString rightHash = sourceModel()->data(right, TransactionTableModel::TxHashRole).toString();
+                return leftHash < rightHash;
+            }
+            return leftKey < rightKey;
+        }
+    }
+    return QSortFilterProxyModel::lessThan(left, right);
+}
+
 void TransactionFilterProxy::setDateRange(const QDateTime& from, const QDateTime& to)
 {
     this->dateFrom = from;
