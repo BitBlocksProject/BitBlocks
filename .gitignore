@@ -1,0 +1,318 @@
+# ============================================================================
+# BitBlocks Core - .gitignore
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Build artifacts (compiled objects and libraries)
+# ----------------------------------------------------------------------------
+*.o
+*.lo
+*.a
+*.la
+*.so
+*.dylib
+*.dll
+*.exe
+*.obj
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.res.o
+*.rc
+# Specific build artifacts in subdirectories
+src/**/*.o
+src/**/*.lo
+src/**/*.a
+src/**/*.la
+src/**/*.exe
+src/**/*.res.o
+src/**/*.rc
+depends/**/*.o
+depends/**/*.lo
+depends/**/*.a
+depends/**/*.la
+depends/**/*.exe
+
+# ----------------------------------------------------------------------------
+# Executables
+# ----------------------------------------------------------------------------
+bitblocksd
+bitblocks-qt
+bitblocks-cli
+bitblocks-tx
+test_bitblocks
+
+# ----------------------------------------------------------------------------
+# Autotools generated files
+# ----------------------------------------------------------------------------
+Makefile
+Makefile.in
+**/Makefile
+!Makefile.am
+!**/Makefile.am
+!**/Makefile.test.include
+!**/Makefile.qt.include
+autom4te.cache/
+**/autom4te.cache/
+config.log
+config.status
+config.h
+config.h.in~
+configure~
+configure.ac~
+libtool
+stamp-h1
+.deps/
+.dirstamp
+.libs/
+**/.libs/
+obj/
+**/obj/
+aclocal.m4
+**/aclocal.m4
+build-aux/compile
+build-aux/config.guess
+build-aux/config.sub
+build-aux/depcomp
+build-aux/install-sh
+build-aux/ltmain.sh
+build-aux/missing
+build-aux/test-driver
+**/build-aux/compile
+**/build-aux/config.guess
+**/build-aux/config.sub
+**/build-aux/depcomp
+**/build-aux/install-sh
+**/build-aux/ltmain.sh
+**/build-aux/missing
+**/build-aux/test-driver
+depends/config.guess
+depends/config.sub
+depends/Makefile
+
+# ----------------------------------------------------------------------------
+# Build directories
+# ----------------------------------------------------------------------------
+build/
+dist/
+*.dSYM/
+
+# ----------------------------------------------------------------------------
+# Dependencies build cache and work directories
+# ----------------------------------------------------------------------------
+depends/work/
+depends/built/
+depends/sources/
+# Architecture-specific build directories (e.g., x86_64-w64-mingw32, i686-pc-linux-gnu)
+depends/*-*/
+depends/*/native/
+depends/*/bin/
+depends/*/lib/
+depends/*/include/
+depends/*/share/
+depends/*/staging/
+depends/*/pkgconfig/
+
+# ----------------------------------------------------------------------------
+# Qt build artifacts
+# ----------------------------------------------------------------------------
+*.moc
+*.qm
+*.qrc.depends
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.pro.user
+*.pro.user.*
+*.qmake.stash
+*.qmake.cache
+
+# ----------------------------------------------------------------------------
+# Qt Creator / IDE files
+# ----------------------------------------------------------------------------
+*.creator
+*.creator.user*
+*.includes
+*.files
+*.config
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ----------------------------------------------------------------------------
+# Generated headers and build info
+# ----------------------------------------------------------------------------
+src/config/bitblocks-config.h
+src/build.h
+obj/build.h
+# Generated config headers from .in files
+**/*-config.h
+!**/*-config.h.in
+src/secp256k1/src/libsecp256k1-config.h
+
+# ----------------------------------------------------------------------------
+# LevelDB build artifacts
+# ----------------------------------------------------------------------------
+src/leveldb/build_config.mk
+src/leveldb/libleveldb.a
+src/leveldb/libmemenv.a
+src/leveldb/*.o
+src/leveldb/*.lo
+src/leveldb/**/*.o
+src/leveldb/**/*.lo
+src/leveldb/**/*.a
+
+# ----------------------------------------------------------------------------
+# Test artifacts
+# ----------------------------------------------------------------------------
+test/*.o
+test/*.a
+test/*.exe
+test/**/*.o
+test/**/*.a
+test/**/*.exe
+qa/pull-tester/tests/*.o
+qa/pull-tester/tests/*.a
+qa/pull-tester/tests/*.exe
+qa/pull-tester/tests/**/*.o
+qa/pull-tester/tests/**/*.a
+qa/pull-tester/tests/**/*.exe
+
+# ----------------------------------------------------------------------------
+# Generated test data files
+# ----------------------------------------------------------------------------
+# These .h files are generated from .json and .raw source files during build
+src/test/data/*.json.h
+src/test/data/*.raw.h
+test/data/*.json.h
+test/data/*.raw.h
+**/test/data/*.json.h
+**/test/data/*.raw.h
+
+# ----------------------------------------------------------------------------
+# Backup and temporary files
+# ----------------------------------------------------------------------------
+*.bak
+*.backup
+*.orig
+*.rej
+*.tmp
+*.temp
+*.cache
+
+# ----------------------------------------------------------------------------
+# Log files
+# ----------------------------------------------------------------------------
+*.log
+debug.log
+test_framework.log
+
+# ----------------------------------------------------------------------------
+# Coverage reports
+# ----------------------------------------------------------------------------
+*.gcda
+*.gcno
+*.gcov
+coverage/
+*.info
+
+# ----------------------------------------------------------------------------
+# Package files
+# ----------------------------------------------------------------------------
+*.tar.gz
+*.zip
+*.deb
+*.rpm
+*.dmg
+
+# ----------------------------------------------------------------------------
+# Platform-specific files
+# ----------------------------------------------------------------------------
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+
+# ----------------------------------------------------------------------------
+# Backup files (files ending with ~)
+# ----------------------------------------------------------------------------
+*.in~
+**/*.in~
+
+# ----------------------------------------------------------------------------
+# ccache
+# ----------------------------------------------------------------------------
+.ccache/
+
+# ----------------------------------------------------------------------------
+# Python cache (if any Python scripts)
+# ----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# ----------------------------------------------------------------------------
+# Other generated files
+# ----------------------------------------------------------------------------
+*.pc
+*.jar
+*.war
+
+# ----------------------------------------------------------------------------
+# Protocol Buffer generated files
+# ----------------------------------------------------------------------------
+# Generated by protoc compiler
+*.pb.cc
+*.pb.h
+src/qt/paymentrequest.pb.cc
+src/qt/paymentrequest.pb.h
+
+# ----------------------------------------------------------------------------
+# Autotools m4 files (generated in build-aux)
+# ----------------------------------------------------------------------------
+# Note: Only ignore generated m4 files, not source m4 files
+build-aux/m4/libtool.m4
+build-aux/m4/ltoptions.m4
+build-aux/m4/ltsugar.m4
+build-aux/m4/ltversion.m4
+build-aux/m4/lt~obsolete.m4
+**/build-aux/m4/libtool.m4
+**/build-aux/m4/ltoptions.m4
+**/build-aux/m4/ltsugar.m4
+**/build-aux/m4/ltversion.m4
+**/build-aux/m4/lt~obsolete.m4
+
+# ----------------------------------------------------------------------------
+# Generated source files
+# ----------------------------------------------------------------------------
+# Note: autogen.sh and configure are typically generated but some projects
+# track them. Uncomment if you want to ignore them:
+# autogen.sh
+# **/autogen.sh
+# configure
+# **/configure
+
+# ----------------------------------------------------------------------------
+# Build directories in subdirectories
+# ----------------------------------------------------------------------------
+**/build/
+**/dist/
+**/*.dSYM/
