@@ -125,6 +125,9 @@ public slots:
     /** Update selected BBK amount from transactionview */
     void trxAmount(QString amount);
 
+private:
+    void transitionTo(QWidget* widget);
+
 signals:
     /** Signal that we want to show the main window */
     void showNormalIfMinimized();

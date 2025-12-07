@@ -28,7 +28,7 @@
 
 #define DECORATION_SIZE 48
 #define ICON_OFFSET 16
-#define NUM_ITEMS 5
+#define NUM_ITEMS 15
 
 class TxViewDelegate : public QAbstractItemDelegate
 {
@@ -122,11 +122,15 @@ OverviewPage::OverviewPage(QWidget* parent) : QWidget(parent),
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
     ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
-    ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
+    // Set minimum height to show at least 5 items, but allow expanding to show more (NUM_ITEMS)
+    ui->listTransactions->setMinimumHeight(5 * (DECORATION_SIZE + 2));
     ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
 
+    // Quick Action Buttons
+    connect(ui->buttonOverviewSend, SIGNAL(clicked()), this, SIGNAL(sendCoinsClicked()));
+    connect(ui->buttonOverviewReceive, SIGNAL(clicked()), this, SIGNAL(receiveCoinsClicked()));
 
     // init "out of sync" warning labels
     ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");

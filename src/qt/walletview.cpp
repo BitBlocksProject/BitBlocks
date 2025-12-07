@@ -33,6 +33,8 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QVBoxLayout>
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
 
 WalletView::WalletView(QWidget* parent) : QStackedWidget(parent),
                                           clientModel(0),
@@ -86,6 +88,10 @@ WalletView::WalletView(QWidget* parent) : QStackedWidget(parent),
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
+
+    // Connect Overview Page Quick Actions
+    connect(overviewPage, SIGNAL(sendCoinsClicked()), this, SLOT(gotoSendCoinsPage()));
+    connect(overviewPage, SIGNAL(receiveCoinsClicked()), this, SLOT(gotoReceiveCoinsPage()));
 
     // Double-clicking on a transaction on the transaction history page shows details
     connect(transactionView, SIGNAL(doubleClicked(QModelIndex)), transactionView, SLOT(showDetails()));
@@ -190,36 +196,36 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
 
 void WalletView::gotoOverviewPage()
 {
-    setCurrentWidget(overviewPage);
+    transitionTo(overviewPage);
 }
 
 void WalletView::gotoHistoryPage()
 {
-    setCurrentWidget(transactionsPage);
+    transitionTo(transactionsPage);
 }
 
 
 void WalletView::gotoBlockExplorerPage()
 {
-    setCurrentWidget(explorerWindow);
+    transitionTo(explorerWindow);
 }
 
 void WalletView::gotoMasternodePage()
 {
     QSettings settings;
     if (settings.value("fShowMasternodesTab").toBool()) {
-        setCurrentWidget(masternodeListPage);
+        transitionTo(masternodeListPage);
     }
 }
 
 void WalletView::gotoReceiveCoinsPage()
 {
-    setCurrentWidget(receiveCoinsPage);
+    transitionTo(receiveCoinsPage);
 }
 
 void WalletView::gotoSendCoinsPage(QString addr)
 {
-    setCurrentWidget(sendCoinsPage);
+    transitionTo(sendCoinsPage);
 
     if (!addr.isEmpty())
         sendCoinsPage->setAddress(addr);
@@ -375,4 +381,20 @@ void WalletView::showProgress(const QString& title, int nProgress)
 void WalletView::trxAmount(QString amount)
 {
     transactionSum->setText(amount);
+}
+
+void WalletView::transitionTo(QWidget* widget)
+{
+    setCurrentWidget(widget);
+    QWidget* current = currentWidget();
+    if (current) {
+        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(current);
+        current->setGraphicsEffect(effect);
+        QPropertyAnimation *anim = new QPropertyAnimation(effect, "opacity");
+        anim->setDuration(250);
+        anim->setStartValue(0.0);
+        anim->setEndValue(1.0);
+        anim->setEasingCurve(QEasingCurve::OutQuad);
+        anim->start(QAbstractAnimation::DeleteWhenStopped);
+    }
 }

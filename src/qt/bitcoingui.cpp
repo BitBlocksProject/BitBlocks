@@ -176,43 +176,53 @@ BitcoinGUI::BitcoinGUI(const NetworkStyle* networkStyle, QWidget* parent) : QMai
 
     // Create status bar
     statusBar();
+    // Disable QSizeGrip to prevent overlap with status bar icons
+    statusBar()->setSizeGripEnabled(false);
+
+    // Apply startup fade-in animation
+    GUIUtil::startupFadeIn(this);
 
     // Status bar notification icons
     QFrame* frameBlocks = new QFrame();
-    frameBlocks->setContentsMargins(0, 0, 0, 0);
+    frameBlocks->setContentsMargins(0, 0, 5, 0); // Add right margin to prevent overlap
     frameBlocks->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     QHBoxLayout* frameBlocksLayout = new QHBoxLayout(frameBlocks);
     frameBlocksLayout->setContentsMargins(3, 0, 3, 0);
-    frameBlocksLayout->setSpacing(3);
+    frameBlocksLayout->setSpacing(5); // Increased spacing between icons
     unitDisplayControl = new UnitDisplayStatusBarControl();
+    unitDisplayControl->setObjectName("unitDisplayControl");
+    unitDisplayControl->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    unitDisplayControl->setMaximumWidth(50); // Limit width to prevent overlap
     labelStakingIcon = new QLabel();
+    labelStakingIcon->setMaximumSize(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE);
     labelEncryptionIcon = new QLabel();
+    labelEncryptionIcon->setMaximumSize(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE);
     labelConnectionsIcon = new QPushButton();
     labelConnectionsIcon->setFlat(true); // Make the button look like a label, but clickable
     labelConnectionsIcon->setStyleSheet(".QPushButton { background-color: rgba(255, 255, 255, 0);}");
     labelConnectionsIcon->setMaximumSize(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE);
     labelBlocksIcon = new QLabel();
+    labelBlocksIcon->setMaximumSize(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE);
 
     if (enableWallet) {
-        frameBlocksLayout->addStretch();
         frameBlocksLayout->addWidget(unitDisplayControl);
-        frameBlocksLayout->addStretch();
         frameBlocksLayout->addWidget(labelEncryptionIcon);
     }
-    frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelStakingIcon);
-    frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelConnectionsIcon);
-    frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelBlocksIcon);
-    frameBlocksLayout->addStretch();
 
     // Progress bar and label for blocks download
     progressBarLabel = new QLabel();
     progressBarLabel->setVisible(true);
+    progressBarLabel->setMinimumWidth(180); // Ensure text is visible
+    progressBarLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     progressBar = new GUIUtil::ProgressBar();
     progressBar->setAlignment(Qt::AlignCenter);
     progressBar->setVisible(true);
+    progressBar->setMinimumWidth(250); // Minimum width for better visibility
+    progressBar->setMaximumWidth(400); // Increased width for more space
+    progressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     // Override style sheet for progress bar for styles that have a segmented progress bar,
     // as they make the text unreadable (workaround for issue #1071)

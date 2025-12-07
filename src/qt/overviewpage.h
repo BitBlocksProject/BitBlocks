@@ -43,6 +43,8 @@ public slots:
 
 signals:
     void transactionClicked(const QModelIndex& index);
+    void sendCoinsClicked();
+    void receiveCoinsClicked();
 
 private:
     QTimer* timer;
