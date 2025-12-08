@@ -39,6 +39,10 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY* eckey, ECDSA_SIG* ecsig, const unsigned ch
     int n = 0;
     int i = recid / 2;
 
+    const BIGNUM* ecsig_r = NULL;
+    const BIGNUM* ecsig_s = NULL;
+    ECDSA_SIG_get0(ecsig, &ecsig_r, &ecsig_s);
+
     const EC_GROUP* group = EC_KEY_get0_group(eckey);
     if ((ctx = BN_CTX_new()) == NULL) {
         ret = -1;
@@ -59,7 +63,7 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY* eckey, ECDSA_SIG* ecsig, const unsigned ch
         ret = -1;
         goto err;
     }
-    if (!BN_add(x, x, ecsig->r)) {
+    if (!BN_add(x, x, ecsig_r)) {
         ret = -1;
         goto err;
     }
@@ -106,21 +110,18 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY* eckey, ECDSA_SIG* ecsig, const unsigned ch
     }
     if (8 * msglen > n) BN_rshift(e, e, 8 - (n & 7));
     zero = BN_CTX_get(ctx);
-    if (!BN_zero(zero)) {
-        ret = -1;
-        goto err;
-    }
+    BN_zero(zero);
     if (!BN_mod_sub(e, zero, e, order, ctx)) {
         ret = -1;
         goto err;
     }
     rr = BN_CTX_get(ctx);
-    if (!BN_mod_inverse(rr, ecsig->r, order, ctx)) {
+    if (!BN_mod_inverse(rr, ecsig_r, order, ctx)) {
         ret = -1;
         goto err;
     }
     sor = BN_CTX_get(ctx);
-    if (!BN_mod_mul(sor, ecsig->s, rr, order, ctx)) {
+    if (!BN_mod_mul(sor, ecsig_s, rr, order, ctx)) {
         ret = -1;
         goto err;
     }
@@ -218,8 +219,9 @@ bool CECKey::Recover(const uint256& hash, const unsigned char* p64, int rec)
     if (rec < 0 || rec >= 3)
         return false;
     ECDSA_SIG* sig = ECDSA_SIG_new();
-    BN_bin2bn(&p64[0], 32, sig->r);
-    BN_bin2bn(&p64[32], 32, sig->s);
+    BIGNUM* sig_r = BN_bin2bn(&p64[0], 32, NULL);
+    BIGNUM* sig_s = BN_bin2bn(&p64[32], 32, NULL);
+    ECDSA_SIG_set0(sig, sig_r, sig_s);
     bool ret = ECDSA_SIG_recover_key_GFp(pkey, sig, (unsigned char*)&hash, sizeof(hash), rec, 0) == 1;
     ECDSA_SIG_free(sig);
     return ret;

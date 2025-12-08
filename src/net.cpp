@@ -57,6 +57,7 @@
 #endif
 
 using namespace boost;
+namespace fs = boost::filesystem;
 using namespace std;
 
 namespace

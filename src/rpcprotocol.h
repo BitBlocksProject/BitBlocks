@@ -110,7 +110,7 @@ public:
     bool connect(const std::string& server, const std::string& port)
     {
         using namespace boost::asio::ip;
-        tcp::resolver resolver(stream.get_io_service());
+        tcp::resolver resolver(stream.get_executor());
         tcp::resolver::iterator endpoint_iterator;
 #if BOOST_VERSION >= 104300
         try {

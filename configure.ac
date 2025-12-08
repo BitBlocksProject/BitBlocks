@@ -772,13 +772,14 @@ else
   fi
 fi
 
-AC_CHECK_LIB([crypto],[RAND_egd],[],[
-  AC_ARG_WITH([libressl],
-    [AS_HELP_STRING([--with-libressl],[Build with system LibreSSL (default is no; DANGEROUS; NOT SUPPORTED)])],
-    [AC_MSG_WARN([Detected LibreSSL: This is NOT supported, and may break consensus compatibility!])],
-    [AC_MSG_ERROR([Detected LibreSSL: This is NOT supported, and may break consensus compatibility!])]
-  )
-])
+dnl RAND_egd was removed in OpenSSL 1.1.0, so skip LibreSSL detection based on it
+dnl AC_CHECK_LIB([crypto],[RAND_egd],[],[
+dnl   AC_ARG_WITH([libressl],
+dnl     [AS_HELP_STRING([--with-libressl],[Build with system LibreSSL (default is no; DANGEROUS; NOT SUPPORTED)])],
+dnl     [AC_MSG_WARN([Detected LibreSSL: This is NOT supported, and may break consensus compatibility!])],
+dnl     [AC_MSG_ERROR([Detected LibreSSL: This is NOT supported, and may break consensus compatibility!])]
+dnl   )
+dnl ])
 
 CFLAGS_TEMP="$CFLAGS"
 LIBS_TEMP="$LIBS"

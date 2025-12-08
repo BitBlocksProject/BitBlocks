@@ -20,6 +20,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <algorithm>
+#include <random>
 #include <boost/assign/list_of.hpp>
 #include <openssl/rand.h>
 
@@ -549,8 +550,8 @@ void CObfuscationPool::Check()
             }
 
             // shuffle the outputs for improved anonymity
-            std::random_shuffle(txNew.vin.begin(), txNew.vin.end(), randomizeList);
-            std::random_shuffle(txNew.vout.begin(), txNew.vout.end(), randomizeList);
+            std::shuffle(txNew.vin.begin(), txNew.vin.end(), std::default_random_engine(std::random_device()()));
+            std::shuffle(txNew.vout.begin(), txNew.vout.end(), std::default_random_engine(std::random_device()()));
 
 
             LogPrint("obfuscation", "Transaction 1: %s\n", txNew.ToString());

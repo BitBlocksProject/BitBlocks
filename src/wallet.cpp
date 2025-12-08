@@ -27,6 +27,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
+#include <random>
 
 
 using namespace std;
@@ -1627,7 +1628,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
     vector<pair<CAmount, pair<const CWalletTx*, unsigned int> > > vValue;
     CAmount nTotalLower = 0;
 
-    random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
+    std::shuffle(vCoins.begin(), vCoins.end(), std::default_random_engine(std::random_device()()));
 
     // move denoms down on the list
     sort(vCoins.begin(), vCoins.end(), less_then_denom);
@@ -1790,7 +1791,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
     vector<COutput> vCoins;
     AvailableCoins(vCoins, true, NULL, ONLY_DENOMINATED);
 
-    std::random_shuffle(vCoins.rbegin(), vCoins.rend());
+    std::shuffle(vCoins.rbegin(), vCoins.rend(), std::default_random_engine(std::random_device()()));
 
     //keep track of each denomination that we have
     bool fFound10000 = false;
@@ -2718,7 +2719,7 @@ string CWallet::PrepareObfuscationDenominate(int minRounds, int maxRounds)
     }
 
     // randomize the output order
-    std::random_shuffle(vOut.begin(), vOut.end());
+    std::shuffle(vOut.begin(), vOut.end(), std::default_random_engine(std::random_device()()));
 
     // We also do not care about full amount as long as we have right denominations, just pass what we found
     obfuScationPool.SendObfuscationDenominate(vCoinsResult, vOut, nValueIn - nValueLeft);

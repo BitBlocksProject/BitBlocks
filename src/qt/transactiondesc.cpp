@@ -259,14 +259,14 @@ QString TransactionDesc::toHTML(CWallet* wallet, CWalletTx& wtx, TransactionReco
     strHTML += "<b>" + tr("Output index") + ":</b> " + QString::number(rec->getOutputIndex()) + "<br>";
 
     // Message from normal bitblocks:URI (bitblocks:XyZ...?message=example)
-    foreach (const PAIRTYPE(string, string) & r, wtx.vOrderForm)
+    for (const std::pair<std::string, std::string>& r : wtx.vOrderForm)
         if (r.first == "Message")
             strHTML += "<br><b>" + tr("Message") + ":</b><br>" + GUIUtil::HtmlEscape(r.second, true) + "<br>";
 
     //
     // PaymentRequest info:
     //
-    foreach (const PAIRTYPE(string, string) & r, wtx.vOrderForm) {
+    for (const std::pair<std::string, std::string>& r : wtx.vOrderForm) {
         if (r.first == "PaymentRequest") {
             PaymentRequestPlus req;
             req.parse(QByteArray::fromRawData(r.second.data(), r.second.size()));
