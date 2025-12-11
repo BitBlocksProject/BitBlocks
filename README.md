@@ -3,7 +3,7 @@
 BitBlocks (fork of PIVX) integration/staging repository
 ======================================
 No fee transactions
-https://bitblocksproject.com/
+[https://www.bitblockscrypto.com/](https://www.bitblockscrypto.com/)
 
 ***
 
