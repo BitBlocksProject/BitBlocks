@@ -63,18 +63,19 @@ For Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be inst
 
 	sudo apt-get install libboost-all-dev
 
- db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
- You can add the repository using the following command:
+ Berkeley DB 4.8 packages are available from the PIVX PPA, which supports Ubuntu LTS versions including Noble (24.04):
+ [https://launchpad.net/~pivx/+archive/ubuntu/berkeley-db4](https://launchpad.net/~pivx/+archive/ubuntu/berkeley-db4).
 
-        sudo add-apt-repository ppa:bitcoin/bitcoin
+ Add the repository and install the packages:
+
+        sudo apt-get install software-properties-common
+        sudo add-apt-repository ppa:pivx/berkeley-db4
         sudo apt-get update
+        sudo apt-get install libdb4.8-dev libdb4.8++-dev
 
- Ubuntu 12.04 and later have packages for libdb5.1-dev and libdb5.1++-dev,
- but using these will break binary wallet compatibility, and is not recommended.
-
-For other Debian & Ubuntu (with ppa):
-
-	sudo apt-get install libdb4.8-dev libdb4.8++-dev
+ Ubuntu and Debian also provide libdb-dev and libdb++-dev (Berkeley DB 5.x or later). Using these will break binary
+ wallet compatibility with builds that use BDB 4.8. If you do not care about that compatibility, you can pass
+ `--with-incompatible-bdb` to configure instead of using the PPA.
 
 Optional:
 

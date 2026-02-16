@@ -1,22 +1,38 @@
 GENERIC BUILD NOTES
 ====================
-Some notes on how to build BitBlocks Core based on the [depends](../depends/README.md) build system.
-
-Note on old build instructions
-------------------------------
-In the past, the build documentation contained instructions on how to build BitBlocks with system-wide installed dependencies
-like BerkeleyDB 4.8, boost and Qt. Building this way is considered deprecated and only building with the `depends` prefix
-is supported today.
+Some notes on how to build BitBlocks Core. You can either use system-installed dependencies (recommended on Ubuntu/Debian)
+or the [depends](../depends/README.md) build system.
 
 Required build tools and environment
 ------------------------------------
-Building the dependencies and BitBlocks Core requires some essential build tools to be installed before. Please see
+Building BitBlocks Core requires some essential build tools to be installed before. Please see
 [build-unix](build-unix.md), [build-osx](build-osx.md) and [build-windows](build-windows.md) for details.
 
-Building dependencies
----------------------
-BitBlocks inherited the `depends` folder from Bitcoin, which contains all dependencies required to build BitBlocks. These
-dependencies must be built before BitBlocks can actually be built. To do so, perform the following:
+Building with system dependencies (Ubuntu/Debian)
+------------------------------------------------
+On Ubuntu and Debian you can install dependencies from packages. Berkeley DB 4.8 (required for the wallet) is provided
+by the PIVX PPA, which supports current LTS releases including Ubuntu Noble (24.04):
+
+```bash
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:pivx/berkeley-db4
+sudo apt-get update
+sudo apt-get install libdb4.8-dev libdb4.8++-dev
+```
+
+Install the remaining build and library dependencies as described in [build-unix](build-unix.md), then run:
+
+```bash
+$ ./autogen.sh
+$ ./configure
+$ make -j$(nproc)
+$ make install # optional
+```
+
+Building with the depends system
+--------------------------------
+BitBlocks inherited the `depends` folder from Bitcoin. If your system does not provide suitable packages (e.g. for
+cross-compilation or older distros), you can build dependencies from source. These must be built before BitBlocks:
 
 ```bash
 $ cd depends
@@ -24,18 +40,11 @@ $ make -j4 # Choose a good -j value, depending on the number of CPU cores availa
 $ cd ..
 ```
 
-This will download and build all dependencies required to build BitBlocks Core. Caching of build results will ensure that only
-the packages are rebuilt which have changed since the last depends build.
+This will download and build all dependencies required to build BitBlocks Core. Please read the
+[depends](../depends/README.md) documentation for supported hosts and configuration options. If no host is specified,
+the depends system will default to your local host system.
 
-It is required to re-run the above commands from time to time when dependencies have been updated or added. If this is
-not done, build failures might occur when building BitBlocks.
-
-Please read the [depends](../depends/README.md) documentation for more details on supported hosts and configuration
-options. If no host is specified (as in the above example) when calling `make`, the depends system will default to your
-local host system. 
-
-Building BitBlocks Core
----------------------
+Then build BitBlocks Core with:
 
 ```bash
 $ ./autogen.sh
