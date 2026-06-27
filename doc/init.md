@@ -1,99 +1,124 @@
-Sample init scripts and service configuration for bitblocksd
-==========================================================
+Service Configuration for bitblocksd
+====================================
 
-Sample scripts and configuration files for systemd, Upstart and OpenRC
-can be found in the contrib/init folder.
+This document provides sample service configuration for running `bitblocksd` as a background service. The repository does not currently ship ready-made files under `contrib/init`, so copy and adapt the examples below for your host.
 
-    contrib/init/bitblocksd.service:    systemd service unit configuration
-    contrib/init/bitblocksd.openrc:     OpenRC compatible SysV style init script
-    contrib/init/bitblocksd.openrcconf: OpenRC conf.d file
-    contrib/init/bitblocksd.conf:       Upstart service configuration file
-    contrib/init/bitblocksd.init:       CentOS compatible SysV style init script
+Service user
+------------
 
-1. Service User
----------------------------------
+Create a dedicated user and directories:
 
-All three startup configurations assume the existence of a "bitblocks" user
-and group.  They must be created before attempting to use these scripts.
+```bash
+sudo useradd --system --home /var/lib/bitblocksd --shell /usr/sbin/nologin bitblocks
+sudo mkdir -p /etc/bitblocks /var/lib/bitblocksd
+sudo chown bitblocks:bitblocks /var/lib/bitblocksd
+sudo chmod 700 /var/lib/bitblocksd
+```
 
-2. Configuration
----------------------------------
+Minimal configuration
+---------------------
 
-At a bare minimum, bitblocksd requires that the rpcpassword setting be set
-when running as a daemon.  If the configuration file does not exist or this
-setting is not set, bitblocksd will shutdown promptly after startup.
+Create `/etc/bitblocks/bitblocks.conf`:
 
-This password does not have to be remembered or typed as it is mostly used
-as a fixed token that bitblocksd and client programs read from the configuration
-file, however it is recommended that a strong and secure password be used
-as this password is security critical to securing the wallet should the
-wallet be enabled.
+```ini
+rpcuser=bitblocks_rpc
+rpcpassword=change_this_to_a_strong_random_password
+rpcport=59768
+port=58697
+server=1
+daemon=1
+datadir=/var/lib/bitblocksd
+```
 
-If bitblocksd is run with "-daemon" flag, and no rpcpassword is set, it will
-print a randomly generated suitable password to stderr.  You can also
-generate one from the shell yourself like this:
+Protect the file because it contains RPC credentials:
 
-bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'
+```bash
+sudo chown bitblocks:bitblocks /etc/bitblocks/bitblocks.conf
+sudo chmod 600 /etc/bitblocks/bitblocks.conf
+```
 
-Once you have a password in hand, set rpcpassword= in /etc/bitblocks/bitblocks.conf
+systemd example
+---------------
 
-For an example configuration file that describes the configuration settings,
-see contrib/debian/examples/bitblocks.conf.
+Create `/etc/systemd/system/bitblocksd.service`:
 
-3. Paths
----------------------------------
+```ini
+[Unit]
+Description=BitBlocks daemon
+After=network-online.target
+Wants=network-online.target
 
-All three configurations assume several paths that might need to be adjusted.
+[Service]
+User=bitblocks
+Group=bitblocks
+Type=forking
+ExecStart=/usr/local/bin/bitblocksd -conf=/etc/bitblocks/bitblocks.conf -datadir=/var/lib/bitblocksd -daemon
+ExecStop=/usr/local/bin/bitblocks-cli -conf=/etc/bitblocks/bitblocks.conf -datadir=/var/lib/bitblocksd stop
+Restart=on-failure
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+TimeoutStopSec=120
 
-Binary:              /usr/bin/bitblocksd
-Configuration file:  /etc/bitblocks/bitblocks.conf
-Data directory:      /var/lib/bitblocksd
-PID file:            /var/run/bitblocksd/bitblocksd.pid (OpenRC and Upstart)
-                     /var/lib/bitblocksd/bitblocksd.pid (systemd)
+[Install]
+WantedBy=multi-user.target
+```
 
-The configuration file, PID directory (if applicable) and data directory
-should all be owned by the bitblocks user and group.  It is advised for security
-reasons to make the configuration file and data directory only readable by the
-bitblocks user and group.  Access to bitblocks-cli and other bitblocksd rpc clients
-can then be controlled by group membership.
+Enable and start it:
 
-4. Installing Service Configuration
------------------------------------
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable bitblocksd
+sudo systemctl start bitblocksd
+sudo systemctl status bitblocksd
+```
 
-4a) systemd
+OpenRC example
+--------------
 
-Installing this .service file consists on just copying it to
-/usr/lib/systemd/system directory, followed by the command
-"systemctl daemon-reload" in order to update running systemd configuration.
+Create `/etc/init.d/bitblocksd`:
 
-To test, run "systemctl start bitblocksd" and to enable for system startup run
-"systemctl enable bitblocksd"
+```sh
+#!/sbin/openrc-run
+name="bitblocksd"
+description="BitBlocks daemon"
+command="/usr/local/bin/bitblocksd"
+command_args="-conf=/etc/bitblocks/bitblocks.conf -datadir=/var/lib/bitblocksd -daemon"
+command_user="bitblocks:bitblocks"
+pidfile="/var/lib/bitblocksd/bitblocksd.pid"
+start_stop_daemon_args="--wait 1000"
 
-4b) OpenRC
+depend() {
+    need net
+}
+```
 
-Rename bitblocksd.openrc to bitblocksd and drop it in /etc/init.d.  Double
-check ownership and permissions and make it executable.  Test it with
-"/etc/init.d/bitblocksd start" and configure it to run on startup with
-"rc-update add bitblocksd"
+Then run:
 
-4c) Upstart (for Debian/Ubuntu based distributions)
+```bash
+sudo chmod +x /etc/init.d/bitblocksd
+sudo rc-update add bitblocksd default
+sudo rc-service bitblocksd start
+```
 
-Drop bitblocksd.conf in /etc/init.  Test by running "service bitblocksd start"
-it will automatically start on reboot.
+Upstart example
+---------------
 
-NOTE: This script is incompatible with CentOS 5 and Amazon Linux 2014 as they
-use old versions of Upstart and do not supply the start-stop-daemon uitility.
+Create `/etc/init/bitblocksd.conf` on systems that still use Upstart:
 
-4d) CentOS
+```text
+description "BitBlocks daemon"
+start on runlevel [2345]
+stop on runlevel [016]
+respawn
+setuid bitblocks
+setgid bitblocks
+exec /usr/local/bin/bitblocksd -conf=/etc/bitblocks/bitblocks.conf -datadir=/var/lib/bitblocksd -daemon=0
+```
 
-Copy bitblocksd.init to /etc/init.d/bitblocksd. Test by running "service bitblocksd start".
+Troubleshooting
+---------------
 
-Using this script, you can adjust the path and flags to the bitblocksd program by
-setting the BitBlocksD and FLAGS environment variables in the file
-/etc/sysconfig/bitblocksd. You can also use the DAEMONOPTS environment variable here.
-
-5. Auto-respawn
------------------------------------
-
-Auto respawning is currently only configured for Upstart and systemd.
-Reasonable defaults have been chosen but YMMV.
+- Check `debug.log` under `/var/lib/bitblocksd`.
+- Confirm that `/usr/local/bin/bitblocksd` and `/usr/local/bin/bitblocks-cli` match your install path.
+- Confirm that the RPC password in `bitblocks.conf` is the same file used by both the daemon and CLI.

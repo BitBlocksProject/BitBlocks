@@ -1,56 +1,50 @@
-Expectations for DNS Seed operators
-====================================
+Dnsseed Policy
+==============
 
-BitBlocks Core attempts to minimize the level of trust in DNS seeds,
-but DNS seeds still pose a small amount of risk for the network.
-As such, DNS seeds must be run by entities which have some minimum
-level of trust within the BitBlocks community.
+BitBlocks DNS seeds help new mainnet nodes discover peers. Seed operators should provide stable, well-maintained infrastructure and avoid returning stale or malicious peers.
 
-Other implementations of BitBlocks software may also use the same
-seeds and may be more exposed. In light of this exposure this
-document establishes some basic expectations for the expectations
-for the operation of dnsseeds.
+Current mainnet seeds
+---------------------
 
-0. A DNS seed operating organization or person is expected
-to follow good host security practices and maintain control of
-their serving infrastructure and not sell or transfer control of their
-DNS seed. Any hosting services contracted by the operator are
-equally expected to uphold these expectations.
+The source tree configures these seeds:
 
-1. The DNS seed results must consist exclusively of fairly selected and
-functioning BitBlocks nodes from the public network to the best of the
-operators understanding and capability.
+```text
+seed1.bitblockscrypto.com
+seed2.bitblockscrypto.com
+seed3.bitblockscrypto.com
+seed4.bitblockscrypto.com
+seed5.bitblockscrypto.com
+```
 
-2. For the avoidance of doubt, the results may be randomized but must not
-single-out any group of hosts to receive different results unless due to an
-urgent technical necessity and disclosed.
+Other networks
+--------------
 
-3. The results may not be served with a DNS TTL of less than one minute.
+Testnet currently ships with no active DNS seeds. Operators should use `-addnode`, `-connect`, or manual peer discovery when bootstrapping a testnet node.
 
-4. Any logging of DNS queries should be only that which is necessary
-for the operation of the service or urgent health of the BitBlocks
-network and must not be retained longer than necessary or disclosed
-to any third party.
+Regtest and unit-test networks do not use DNS seeds.
 
-5. Information gathered as a result of the operators node-spidering
-(not from DNS queries) may be freely published or retained, but only
-if this data was not made more complete by biasing node connectivity
-(a violation of expectation (1)).
+Fixed seeds
+-----------
 
-6. Operators are encouraged, but not required, to publicly document the
-details of their operating practices.
+The source tree may also include hardcoded fixed seed addresses for network bootstrapping. Changes to fixed seeds and DNS seeds should be reviewed together during release preparation.
 
-7. A reachable email contact address must be published for inquiries
-related to the DNS seed operation.
+Operator expectations
+---------------------
 
-If these expectations cannot be satisfied the operator should
-discontinue providing services and contact the active BitBlocks
-Core development team as well as posting on the
-[BitBlocks Forum](https://forum.bitblocks.org).
+Seed operators should:
 
-Behavior outside of these expectations may be reasonable in some
-situations but should be discussed in public in advance.
+- Crawl the BitBlocks network regularly.
+- Return peers that recently served valid blocks.
+- Filter private, unroutable, and misbehaving addresses.
+- Monitor seed availability.
+- Coordinate changes through https://github.com/BitBlocksProject/BitBlocks/issues.
 
-See also
-----------
-- [bitcoin-seeder](https://github.com/sipa/bitcoin-seeder) is a reference implementation of a DNS seed.
+Adding or removing a seed
+-------------------------
+
+Changes to hardcoded DNS seeds require a source change, review, and release. Proposed seeds should include:
+
+- Operator contact.
+- Hostname.
+- Monitoring approach.
+- Expected geographic and network diversity.

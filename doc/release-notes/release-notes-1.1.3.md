@@ -1,12 +1,12 @@
 BitBlocks Core version 1.1.3 is now available from:
 
-  <https://github.com/bitblocks-project/bitblocks/releases>
+  <https://github.com/BitBlocksProject/BitBlocks/releases>
 
 This is a new patch version release, including various bug fixes, performance improvements, GUI enhancements, and updated translations.
 
 Please report bugs using the issue tracker at github:
 
-  <https://github.com/bitblocks-project/bitblocks/issues>
+  <https://github.com/BitBlocksProject/BitBlocks/issues>
 
 Compatibility
 ==============
@@ -74,8 +74,7 @@ behavior, not code moves, refactors and string updates.
 ### Translations
 - Completed pt_BR translations and fixed typo
 
-Credits
-=======
+## Credits
 
 Thanks to everyone who directly contributed to this release:
 - Healseyn (Edson Guimarães)

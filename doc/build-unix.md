@@ -1,214 +1,134 @@
-UNIX BUILD NOTES
-====================
-Some notes on how to build BitBlocks in Unix.
+Unix Build Notes
+================
 
-Note
----------------------
-Always use absolute paths to configure and compile bitblocks and the dependencies,
-for example, when specifying the the path of the dependency:
+These notes cover building BitBlocks Core on Linux and other Unix-like systems. Wallet-compatible builds should use Berkeley DB 4.8.
 
-	../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
+Dependencies
+------------
 
-Here BDB_PREFIX must absolute path - it is defined using $(pwd) which ensures
-the usage of the absolute path.
+Required host packages on Ubuntu/Debian:
 
-To Build
----------------------
+```bash
+sudo apt-get update
+sudo apt-get install git build-essential libtool autotools-dev autoconf automake pkg-config bsdmainutils     curl ca-certificates libssl-dev libboost-all-dev
+```
+
+Optional packages:
+
+```bash
+sudo apt-get install libminiupnpc-dev libqrencode-dev protobuf-compiler libprotobuf-dev qtbase5-dev qttools5-dev qttools5-dev-tools
+```
+
+Berkeley DB 4.8
+---------------
+
+The desktop wallet currently uses Berkeley DB 4.8. To keep `wallet.dat` portable between desktop and Ubuntu builds, build Berkeley DB 4.8 through the repository `depends` system instead of using distribution Berkeley DB 5.x packages.
+
+The `depends` package is `db-4.8.30.NC` and builds `libdb_cxx-4.8.a`.
+
+Clean Ubuntu VPS daemon build
+-----------------------------
+
+On a fresh Ubuntu VPS, install the headless build dependencies:
+
+```bash
+sudo apt-get update
+sudo apt-get install git build-essential libtool autotools-dev autoconf automake pkg-config bsdmainutils     curl ca-certificates libssl-dev libboost-all-dev     libminiupnpc-dev protobuf-compiler libprotobuf-dev
+```
+
+Clone and build Berkeley DB 4.8 with the rest of the pinned dependencies:
+
+```bash
+git clone https://github.com/BitBlocksProject/BitBlocks.git
+cd BitBlocks
+cd depends
+make -j$(nproc)
+cd ..
+```
+
+Build the daemon:
 
 ```bash
 ./autogen.sh
-./configure
-make
+./configure --prefix="$PWD/depends/x86_64-linux" --without-gui
+make -j$(nproc)
+sudo make install
+```
+
+If your `depends/` directory was created with another host name, replace `x86_64-linux` with the generated directory name.
+
+Create a minimal configuration:
+
+```bash
+mkdir -p ~/.bitblocks
+cat > ~/.bitblocks/bitblocks.conf <<'EOF'
+rpcuser=bitblocks_rpc
+rpcpassword=change_this_to_a_long_random_password
+rpcport=59768
+port=58697
+server=1
+daemon=1
+listen=1
+EOF
+chmod 600 ~/.bitblocks/bitblocks.conf
+```
+
+Start and inspect the node:
+
+```bash
+bitblocksd -daemon
+grep "Using BerkeleyDB version" ~/.bitblocks/debug.log
+bitblocks-cli getblockchaininfo
+bitblocks-cli getnetworkinfo
+```
+
+Build
+-----
+
+If Berkeley DB 4.8 is already available through your chosen prefix:
+
+```bash
+./autogen.sh
+./configure --prefix="$PWD/depends/x86_64-linux"
+make -j$(nproc)
+make check
 make install # optional
 ```
 
-This will build bitblocks-qt as well if the dependencies are met.
-
-Dependencies
----------------------
-
-These dependencies are required:
-
- Library     | Purpose          | Description
- ------------|------------------|----------------------
- libssl      | SSL Support      | Secure communications
- libboost    | Boost            | C++ Library
-
-Optional dependencies:
-
- Library     | Purpose          | Description
- ------------|------------------|----------------------
- miniupnpc   | UPnP Support     | Firewall-jumping support
- libdb4.8    | Berkeley DB      | Wallet storage (only needed when wallet enabled)
- qt          | GUI              | GUI toolkit (only needed when GUI enabled)
- protobuf    | Payments in GUI  | Data interchange format used for payment protocol (only needed when GUI enabled)
- libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
-
-For the versions used in the release, see [release-process.md](release-process.md) under *Fetch and build inputs*.
-
-System requirements
---------------------
-
-C++ compilers are memory-hungry. It is recommended to have at least 1 GB of
-memory available when compiling BitBlocks Core. With 512MB of memory or less
-compilation will take much longer due to swap thrashing.
-
-Dependency Build Instructions: Ubuntu & Debian
-----------------------------------------------
-Build requirements:
-
-	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev
-
-For Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
-
-	sudo apt-get install libboost-all-dev
-
- Berkeley DB 4.8 packages are available from the PIVX PPA, which supports Ubuntu LTS versions including Noble (24.04):
- [https://launchpad.net/~pivx/+archive/ubuntu/berkeley-db4](https://launchpad.net/~pivx/+archive/ubuntu/berkeley-db4).
-
- Add the repository and install the packages:
-
-        sudo apt-get install software-properties-common
-        sudo add-apt-repository ppa:pivx/berkeley-db4
-        sudo apt-get update
-        sudo apt-get install libdb4.8-dev libdb4.8++-dev
-
- Ubuntu and Debian also provide libdb-dev and libdb++-dev (Berkeley DB 5.x or later). Using these will break binary
- wallet compatibility with builds that use BDB 4.8. If you do not care about that compatibility, you can pass
- `--with-incompatible-bdb` to configure instead of using the PPA.
-
-Optional:
-
-	sudo apt-get install libminiupnpc-dev (see --with-miniupnpc and --enable-upnp-default)
-
-Dependencies for the GUI: Ubuntu & Debian
------------------------------------------
-
-If you want to build BitBlocks-Qt, make sure that the required packages for Qt development
-are installed. Qt 5 is necessary to build the GUI.
-If both Qt 4 and Qt 5 are installed, Qt 5 will be used.
-To build without GUI pass `--without-gui`.
-
-For Qt 5 you need the following:
-
-    sudo apt-get install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler
-
-libqrencode (optional) can be installed with:
-
-    sudo apt-get install libqrencode-dev
-
-Once these are installed, they will be found by configure and a bitblocks-qt executable will be
-built by default.
-
-Notes
------
-The release is built with GCC and then "strip bitblocksd" to strip the debug
-symbols, which reduces the executable size by about 90%.
-
-
-miniupnpc
----------
-
-[miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
-http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
-turned off by default.  See the configure options for upnp behavior desired:
-
-	--without-miniupnpc      No UPnP support miniupnp not required
-	--disable-upnp-default   (the default) UPnP support turned off by default at runtime
-	--enable-upnp-default    UPnP support turned on by default at runtime
-
-To build:
-
-	tar -xzvf miniupnpc-1.6.tar.gz
-	cd miniupnpc-1.6
-	make
-	sudo su
-	make install
-
-
-Berkeley DB
------------
-It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
+Daemon-only build:
 
 ```bash
-BitBlocks_ROOT=$(pwd)
-
-# Pick some path to install BDB to, here we create a directory within the bitblocks directory
-BDB_PREFIX="${BitBlocks_ROOT}/db4"
-mkdir -p $BDB_PREFIX
-
-# Fetch the source and verify that it is not tampered with
-wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
-echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
-# -> db-4.8.30.NC.tar.gz: OK
-tar -xzvf db-4.8.30.NC.tar.gz
-
-# Build the library and install to our prefix
-cd db-4.8.30.NC/build_unix/
-#  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
-../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
-make install
-
-# Configure BitBlocks Core to use our own-built instance of BDB
-cd $BitBlocks_ROOT
-./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
+./configure --prefix="$PWD/depends/x86_64-linux" --without-gui
+make -j$(nproc)
 ```
 
-**Note**: You only need Berkeley DB if the wallet is enabled (see the section *Disable-Wallet mode* below).
+Useful targets
+--------------
 
-Boost
------
-If you need to build Boost yourself:
+```bash
+make check              # unit tests
+src/test/test_bitblocks # direct unit test binary
+```
 
-	sudo su
-	./bootstrap.sh
-	./bjam install
+Output binaries
+---------------
 
+- `src/bitblocksd`
+- `src/bitblocks-cli`
+- `src/bitblocks-tx`
+- `src/qt/bitblocks-qt` when Qt is enabled
 
-Security
---------
-To help make your BitBlocks installation more secure by making certain attacks impossible to
-exploit even if a vulnerability is found, binaries are hardened by default.
-This can be disabled with:
+Runtime defaults
+----------------
 
-Hardening Flags:
+- Mainnet P2P port: `58697`
+- Mainnet RPC port: `59768`
+- Data directory: `~/.bitblocks`
 
-	./configure --enable-hardening
-	./configure --disable-hardening
+Troubleshooting
+---------------
 
-
-Hardening enables the following features:
-
-* Position Independent Executable
-    Build position independent code to take advantage of Address Space Layout Randomization
-    offered by some kernels. An attacker who is able to cause execution of code at an arbitrary
-    memory location is thwarted if he doesn't know where anything useful is located.
-    The stack and heap are randomly located by default but this allows the code section to be
-    randomly located as well.
-
-    On an Amd64 processor where a library was not compiled with -fPIC, this will cause an error
-    such as: "relocation R_X86_64_32 against `......' can not be used when making a shared object;"
-
-    To test that you have built PIE executable, install scanelf, part of paxutils, and use:
-
-    	scanelf -e ./bitblocksd
-
-    The output should contain:
-     TYPE
-    ET_DYN
-
-* Non-executable Stack
-    If the stack is executable then trivial stack based buffer overflow exploits are possible if
-    vulnerable buffers are found. By default, bitblocks should be built with a non-executable stack
-    but if one of the libraries it uses asks for an executable stack or someone makes a mistake
-    and uses a compiler extension which requires an executable stack, it will silently build an
-    executable without the non-executable stack protection.
-
-    To verify that the stack is non-executable after compiling use:
-    `scanelf -e ./bitblocksd`
-
-    the output should contain:
-	STK/REL/PTL
-	RW- R-- RW-
-
-    The STK RW- means that the stack is readable and writeable but not executable.
+- Always use absolute paths when passing custom dependency prefixes to `./configure`.
+- If `configure` cannot find Berkeley DB, verify that `depends/` was built and that `--prefix` points to the generated host directory.
+- If `configure` reports a Berkeley DB version other than 4.8, you are using a system library instead of the `depends` build.
+- If Qt is not detected, build without the GUI using `--without-gui` or install the Qt development packages.

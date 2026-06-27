@@ -1,58 +1,43 @@
-##SwiftTX Technical Information
+# SwiftTX
 
-SwiftTX has been integrated into the Core Daemon in two ways:
-* "push" notifications (ZMQ and `-swifttxnotify` cmd-line/config option);
-* RPC commands.
+SwiftTX is BitBlocks Core's instant transaction locking feature. It uses masternode participation to reduce the time a recipient needs to wait before treating a transaction as settled.
 
-####ZMQ
+Using SwiftTX
+-------------
 
-When a "Transaction Lock" occurs the hash of the related transaction is broadcasted through ZMQ using both the `zmqpubrawtxlock` and `zmqpubhashtxlock` channels.
+The wallet RPC entry point for an instant send is `sendtoaddressix`:
 
-* `zmqpubrawtxlock`: publishes the raw transaction when locked via SwiftTX
-* `zmqpubhashtxlock`: publishes the transaction hash when locked via SwiftTX
-
-This mechanism has been integrated into Bitcore-Node-BitBlocks which allows for notification to be broadcast through Insight API in one of two ways:
-* WebSocket: [https://github.com/BitBlocks-Project/insight-api-bitblocks#web-socket-api](https://github.com/BitBlocks-Project/insight-api-bitblocks#web-socket-api) 
-* API: [https://github.com/BitBlocks-Project/insight-api-bitblocks#swifttx-transactions](https://github.com/BitBlocks-Project/insight-api-bitblocks#swifttx-transactions) 
-
-####Command line option
-
-When a wallet SwiftTX transaction is successfully locked a shell command provided in this option is executed (`%s` in `<cmd>` is replaced by TxID):
-
-```
--swifttxnotify=<cmd>
+```bash
+bitblocks-cli help sendtoaddressix
+bitblocks-cli sendtoaddressix "BExampleAddress" 1.0
 ```
 
-####RPC
+Regular `sendtoaddress` and `sendmany` create normal wallet transactions and do not request SwiftTX locking in this codebase.
 
-Details pertaining to an observed "Transaction Lock" can also be retrieved through RPC, it’s important however to understand the underlying mechanism.
+Configuration
+-------------
 
-By default, the BitBlocks Core daemon will launch using the following constant:
+SwiftTX can be controlled with runtime options:
 
-```
-static const int DEFAULT_SWIFTTX_DEPTH = 5;
-```
-
-This value can be overridden by passing the following argument to the BitBlocks Core daemon:
-
-```
--swifttxdepth=<n>
+```bash
+bitblocksd -help | grep -i swifttx
 ```
 
-The key thing to understand is that this value indicates the number of "confirmations" a successful Transaction Lock represents. When Wallet RPC commands are performed (such as `listsinceblock`) this attribute is taken into account when returning information about the transaction. The value in `confirmations` field you see through RPC is showing the number of `"Blockchain Confirmations" + "SwiftTX Depth"` (assuming the funds were sent via SwiftTX).
+Important options include `-enableswifttx` and `-swifttxdepth`.
 
-There is also a field named `bcconfirmations`. The value in this field represents the total number of `"Blockchain Confirmations"` for a given transaction without taking into account whether it was SwiftTX or not.
+Confirmation depth
+------------------
 
-**Examples**
-* SwiftTX transaction just occurred:
-    * confirmations: 5
-    * bcconfirmations: 0
-* SwiftTX transaction received one confirmation from blockchain:
-    * confirmations: 6
-    * bcconfirmations: 1
-* non-SwiftTX transaction just occurred:
-    * confirmations: 0
-    * bcconfirmations: 0
-* non-SwiftTX transaction received one confirmation from blockchain:
-    * confirmations: 1
-    * bcconfirmations: 1
+BitBlocks Core uses a default SwiftTX depth of `5`, with a maximum accepted depth of `60`.
+
+Operational notes
+-----------------
+
+- SwiftTX relies on a healthy masternode network.
+- Wallets should still handle normal confirmation flows when instant locking is unavailable.
+- Exchanges and services should set policies based on their own risk tolerance.
+
+Explorer
+--------
+
+Use the official explorer for public transaction lookup: https://explorer.bitblockscrypto.com

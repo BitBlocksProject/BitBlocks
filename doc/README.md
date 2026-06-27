@@ -1,71 +1,78 @@
-BitBlocks Core
-=====================
+BitBlocks Core Documentation
+============================
 
-Setup
----------------------
-[BitBlocks Core](http://bitblocks.org/wallet) is the original BitBlocks client and it builds the backbone of the network. However, it downloads and stores the entire history of BitBlocks transactions; depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more. Thankfully you only have to do this once.
+BitBlocks Core is the reference wallet and node software for the BitBlocks network. It stores and validates the blockchain, relays transactions and blocks, and provides the command-line, RPC, and Qt interfaces used by operators and wallets.
 
-Running
----------------------
-The following are some helpful notes on how to run BitBlocks on your native platform.
+Official links
+--------------
 
-### Unix
+- Website: https://www.bitblockscrypto.com/
+- Source code: https://github.com/BitBlocksProject/BitBlocks
+- Releases: https://github.com/BitBlocksProject/BitBlocks/releases
+- Issues: https://github.com/BitBlocksProject/BitBlocks/issues
+- Explorer: https://explorer.bitblockscrypto.com
+- Community: https://discord.gg/bitblocks
 
-Unpack the files into a directory and run:
+Network defaults
+----------------
 
-- bin/32/bitblocks-qt (GUI, 32-bit) or bin/32/bitblocksd (headless, 32-bit)
-- bin/64/bitblocks-qt (GUI, 64-bit) or bin/64/bitblocksd (headless, 64-bit)
+| Network | P2P port | RPC port | Data directory suffix |
+| ------- | -------- | -------- | --------------------- |
+| Mainnet | 58697 | 59768 | default |
+| Testnet | 39795 | 39799 | testnet4 |
+| Regtest | 39793 | 39799 | regtest |
 
-### Windows
+Default data directories:
 
-Unpack the files into a directory, and then run bitblocks-qt.exe.
+- Linux: `~/.bitblocks`
+- Windows: `%APPDATA%\BitBlocks`
+- macOS: `~/Library/Application Support/BitBlocks`
 
-### OSX
+Running BitBlocks Core
+----------------------
 
-Drag BitBlocks-Qt to your applications folder, and then run BitBlocks-Qt.
+Download a release from https://github.com/BitBlocksProject/BitBlocks/releases or build from source. Common binaries are:
 
-### Need Help?
+- `bitblocks-qt`: graphical wallet
+- `bitblocksd`: background daemon
+- `bitblocks-cli`: command-line RPC client
+- `bitblocks-tx`: transaction utility built from source; it may not be included in every installer package
 
-* See the documentation at the [BitBlocks Wiki](https://en.bitcoin.it/wiki/Main_Page) ***TODO***
-for help and more information.
-* Ask for help on [BitcoinTalk](https://bitcointalk.org/index.php?topic=1262920.0) or on the [BitBlocks Forum](http://forum.bitblocks.org/).
-* Join one of our Slack groups [BitBlocks Slack Groups](https://bitblocks.org/slack-logins/).
+Typical daemon usage:
+
+```bash
+bitblocksd -daemon
+bitblocks-cli getblockchaininfo
+bitblocks-cli stop
+```
 
 Building
----------------------
-The following are developer notes on how to build BitBlocks on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+--------
 
-- [OSX Build Notes](build-osx.md)
-- [Unix Build Notes](build-unix.md)
-- [Gitian Building Guide](gitian-building.md)
+- [Generic build notes](build-generic.md)
+- [Unix build notes](build-unix.md)
+- [Windows build notes](build-windows.md)
+- [macOS build notes](build-osx.md)
+- [macOS packaging notes](README_osx.md)
+- [Windows notes](README_windows.txt)
+- [Gitian build notes](gitian-building.md)
 
-Development
----------------------
-The BitBlocks repo's [root README](https://github.com/BitBlocks-Project/BitBlocks/blob/master/README.md) contains relevant information on the development process and automated testing.
+Operations
+----------
 
-- [Developer Notes](developer-notes.md)
-- [Multiwallet Qt Development](multiwallet-qt.md)
-- [Release Notes](release-notes.md)
-- [Release Process](release-process.md)
-- [Source Code Documentation (External Link)](https://dev.visucore.com/bitcoin/doxygen/) ***TODO***
-- [Translation Process](translation_process.md)
-- [Unit Tests](unit-tests.md)
-- [Unauthenticated REST Interface](REST-interface.md)
-- [Dnsseed Policy](dnsseed-policy.md)
-
-### Resources
-
-* Discuss on the [BitcoinTalk](https://bitcointalk.org/index.php?topic=1262920.0) or the [BitBlocks](http://forum.bitblocks.org/) forum.
-* Join the [BitBlocks-Dev](https://bitblocks-dev.slack.com/) Slack group ([Sign-Up](https://bitblocks-dev.herokuapp.com/)).
-
-### Miscellaneous
-- [Assets Attribution](assets-attribution.md)
-- [Files](files.md)
-- [Tor Support](tor.md)
-- [Init Scripts (systemd/upstart/openrc)](init.md)
+- [Bootstrap and synchronization](bootstrap.md)
+- [Masternode configuration](masternode_conf.md)
+- [Start-many masternode guide](guide-startmany.md)
+- [Masternode budget commands](masternode-budget.md)
+- [SwiftTX instant locks](swifttx.md)
+- [Init scripts and service examples](init.md)
+- [Tor support](tor.md)
+- [ZMQ interface](zmq.md)
+- [Unauthenticated REST interface](REST-interface.md)
+- [Dnsseed policy](dnsseed-policy.md)
+- [Data files](files.md)
 
 License
----------------------
-Distributed under the [MIT/X11 software license](http://www.opensource.org/licenses/mit-license.php).
-This product includes software developed by the OpenSSL Project for use in the [OpenSSL Toolkit](https://www.openssl.org/). This product includes
-cryptographic software written by Eric Young ([eay@cryptsoft.com](mailto:eay@cryptsoft.com)), and UPnP software written by Thomas Bernard.
+-------
+
+BitBlocks Core is distributed under the MIT software license. See [COPYING](../COPYING) for details.

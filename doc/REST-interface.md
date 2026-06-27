@@ -1,27 +1,51 @@
 Unauthenticated REST Interface
 ==============================
 
-The REST API can be enabled with the `-rest` option.
+BitBlocks Core can expose a small unauthenticated REST interface when REST support is enabled. The interface is served by the RPC HTTP server, so mainnet examples use RPC port `59768` unless you configured another `-rpcport`.
 
-Supported API
--------------
-`GET /rest/tx/TX-HASH.{bin|hex|json}`
+Enable REST
+-----------
 
-Given a transaction hash,
-Returns a transaction, in binary, hex-encoded binary or JSON formats.
+Start the node with REST enabled:
 
-`GET /rest/block/BLOCK-HASH.{bin|hex|json}`
-`GET /rest/block/notxdetails/BLOCK-HASH.{bin|hex|json}`
+```bash
+bitblocksd -daemon -rest
+```
 
-Given a block hash,
-Returns a block, in binary, hex-encoded binary or JSON formats.
+Available paths
+---------------
 
-The HTTP request and response are both handled entirely in-memory, thus making maximum memory usage at least 2.66MB (1 MB max block, plus hex encoding) per request.
+This tree registers REST handlers for transactions and blocks:
 
-With the /notxdetails/ option JSON response will only contain the transaction hash instead of the complete transaction details. The option only affects the JSON response.
+```text
+/rest/tx/<txid>.<bin|hex|json>
+/rest/block/<blockhash>.<bin|hex|json>
+/rest/block/notxdetails/<blockhash>.<bin|hex|json>
+```
 
-For full TX query capability, one must enable the transaction index via "txindex=1" command line / configuration option.
+Examples
+--------
 
-Risks
--------------
-Running a webbrowser on the same node with a REST enabled bitblocksd can be a risk. Accessing prepared XSS websites could read out tx/block data of your node by placing links like `<script src="http://127.0.0.1:1234/tx/json/1234567890">` which might break the nodes privacy.
+```bash
+curl http://127.0.0.1:59768/rest/block/HEX_BLOCK_HASH.json
+curl http://127.0.0.1:59768/rest/block/notxdetails/HEX_BLOCK_HASH.json
+curl http://127.0.0.1:59768/rest/tx/HEX_TXID.json
+```
+
+Use RPC for chain summary data:
+
+```bash
+bitblocks-cli getblockchaininfo
+```
+
+Security
+--------
+
+The REST interface is unauthenticated. Bind RPC to localhost unless you have a carefully controlled reverse proxy or firewall:
+
+```ini
+rpcbind=127.0.0.1
+rpcallowip=127.0.0.1
+```
+
+Do not expose RPC or REST directly to the public internet.

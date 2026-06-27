@@ -170,6 +170,7 @@ moc_*
 *.tmp
 ui_*
 build*
+!doc/build-windows.md
 bitblocksd.*
 bitblocksd-new-gui.*
 /cov-int/

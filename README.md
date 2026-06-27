@@ -9,7 +9,7 @@ No fee transactions
 
 What is BitBlocks
 -
- BitBlocks is an experimental cryptocurrency that enables instant payments without any fee to anyone anywhere in the world. BitBlocks uses peer-to-peer technology to operate with no central authority: managing transactions and issuing money are carried out collectively by the network. BitBlocks Core is the name of the open-source software which enables the use of this currency.
+ BitBlocks is an cryptocurrency that enables instant payments without any fee to anyone anywhere in the world. BitBlocks uses peer-to-peer technology to operate with no central authority: managing transactions and issuing money are carried out collectively by the network. BitBlocks Core is the name of the open-source software which enables the use of this currency.
 
 Building
 -

@@ -1,163 +1,58 @@
-Masternode Budget API
-=======================
+Masternode Budget Commands
+==========================
 
-BitBlocks now supports full decentralized budgets that are paid directly from the blockchain via superblocks once per month.
+BitBlocks Core includes budget RPC commands for proposal preparation, submission, voting, and projection.
 
-Budgets go through a series of stages before being paid:
-* prepare - create a special transaction that destroys coins in order to make a proposal
-* submit - propagate transaction to peers on network
-* voting - lobby for votes on your proposal
-* get enough votes - make it into the budget
-* finalization - at the end of each payment period, proposals are sorted then compiled into a finalized budget
-* finalized budget voting - masternodes that agree with the finalization will vote on that budget
-* payment - the winning finalized budget is paid
+Common commands
+---------------
 
+Use a budget-cycle-aligned start block. Mainnet budget cycles are `43,200` blocks, so examples use `820800`.
 
-Prepare collateral transaction
-------------------------
-
-mnbudget prepare \<proposal-name\> \<url\> \<payment_count\> \<block_start\> \<bitblocks_address\> \<monthly_payment_bitblocks\> [use_ix(true|false)]
-
-Example:
-```
-mnbudget prepare cool-project http://www.cool-project/one.json 12 100000 y6R9oN12KnB9zydzTLc3LikD9cCjjQzYG7 1200 true
+```bash
+bitblocks-cli walletpassphrase "your passphrase" 120
+bitblocks-cli preparebudget "proposal-name" "https://example.com/proposal" 12 820800 "BExamplePayoutAddress" 500
+bitblocks-cli submitbudget "proposal-name" "https://example.com/proposal" 12 820800 "BExamplePayoutAddress" 500 "fee-txid"
+bitblocks-cli getbudgetprojection
+bitblocks-cli mnbudgetvote many "proposal-hash" yes
 ```
 
-Output: `464a0eb70ea91c94295214df48c47baa72b3876cfb658744aaf863c7b5bf1ff0` - This is the collateral hash, copy this output for the next step
+Legacy wrapper
+--------------
 
-In this transaction we prepare collateral for "_cool-project_". This proposal will pay _1200_ BitBlocks, _12_ times over the course of a year totaling _24000_ BitBlocks.
+Some releases also expose the `mnbudget` wrapper. Prefer the direct RPC commands above for new scripts, but legacy forms may still work for compatibility.
 
-**Warning -- if you change any fields within this command, the collateral transaction will become invalid.**
+Proposal fields
+---------------
 
-Submit proposal to network
-------------------------
+- `proposal-name`: short unique name, maximum `20` characters.
+- `url`: public proposal details, maximum `64` characters.
+- `payment-count`: number of payments requested.
+- `block-start`: first payment block; it must be aligned to the budget payment cycle.
+- `payment-address`: BitBlocks payout address.
+- `monthly-payment`: requested amount per payment.
+- `fee-txid`: transaction id returned by `preparebudget`.
 
-mnbudget submit \<proposal-name\> \<url\> \<payment_count\> \<block_start\> \<bitblocks_address\> \<monthly_payment_bitblocks\> \<collateral_hash\>
+Voting
+------
 
-Example:
-```
-mnbudget submit cool-project http://www.cool-project/one.json 12 100000 y6R9oN12KnB9zydzTLc3LikD9cCjjQzYG7 1200 464a0eb70ea91c94295214df48c47baa72b3876cfb658744aaf863c7b5bf1ff0
-```
+Masternode operators can vote from the controller wallet after their masternodes are active:
 
-Output: `a2b29778ae82e45a973a94309ffa6aa2e2388b8f95b39ab3739f0078835f0491` - This is your proposal hash, which other nodes will use to vote on it
-
-Lobby for votes
-------------------------
-
-Double check your information:
-
-mnbudget getinfo \<proposal-name\>
-
-Example:
-```
-mnbudget getinfo cool-project
-```
-Output:
-```
-{
-    "Name" : "cool-project",
-    "Hash" : "a2b29778ae82e45a973a94309ffa6aa2e2388b8f95b39ab3739f0078835f0491",
-    "FeeHash" : "464a0eb70ea91c94295214df48c47baa72b3876cfb658744aaf863c7b5bf1ff0",
-    "URL" : "http://www.cool-project/one.json",
-    "BlockStart" : 100000,
-    "BlockEnd" : 100625,
-    "TotalPaymentCount" : 12,
-    "RemainingPaymentCount" : 12,
-    "PaymentAddress" : "y6R9oN12KnB9zydzTLc3LikD9cCjjQzYG7",
-    "Ratio" : 0.00000000,
-    "Yeas" : 0,
-    "Nays" : 0,
-    "Abstains" : 0,
-    "TotalPayment" : 14400.00000000,
-    "MonthlyPayment" : 1200.00000000,
-    "IsValid" : true,
-    "fValid" : true
-}
+```bash
+bitblocks-cli mnbudgetvote many "proposal-hash" yes
+bitblocks-cli mnbudgetvote many "proposal-hash" no
 ```
 
-If everything looks correct, you can ask for votes from other masternodes. To vote on a proposal, load a wallet with _masternode.conf_ file. You do not need to access your cold wallet to vote for proposals.
+Use the proposal hash returned by `submitbudget`, not the fee transaction id returned by `preparebudget`.
 
-mnbudget vote \<proposal_hash\> [yes|no]
+Review projections before voting:
 
-Example:
-```
-mnbudget vote a2b29778ae82e45a973a94309ffa6aa2e2388b8f95b39ab3739f0078835f0491 yes
-```
-
-Output: `Voted successfully` - Your vote has been submitted and accepted.
-
-Make it into the budget
-------------------------
-
-After you get enough votes, execute `mnbudget projection` to see if you made it into the budget. If you the budget was finalized at this moment which proposals would be in it. Note: Proposals must be active at least 1 day on the network and receive 10% of the masternode network in yes votes in order to qualify (E.g. if there is 2500 masternodes, you will need 250 yes votes.)
-
-Example:
-```
-mnbudget projection
+```bash
+bitblocks-cli getbudgetprojection
 ```
 
-Output:
-```
-{
-    "cool-project" : {
-	    "Hash" : "a2b29778ae82e45a973a94309ffa6aa2e2388b8f95b39ab3739f0078835f0491",
-	    "FeeHash" : "464a0eb70ea91c94295214df48c47baa72b3876cfb658744aaf863c7b5bf1ff0",
-	    "URL" : "http://www.cool-project/one.json",
-	    "BlockStart" : 100000,
-	    "BlockEnd" : 100625,
-	    "TotalPaymentCount" : 12,
-	    "RemainingPaymentCount" : 12,
-	    "PaymentAddress" : "y6R9oN12KnB9zydzTLc3LikD9cCjjQzYG7",
-	    "Ratio" : 1.00000000,
-	    "Yeas" : 33,
-	    "Nays" : 0,
-	    "Abstains" : 0,
-	    "TotalPayment" : 14400.00000000,
-	    "MonthlyPayment" : 1200.00000000,
-	    "IsValid" : true,
-	    "fValid" : true
-	}
-}
-```
+Security notes
+--------------
 
-Finalized budget
-------------------------
-
-```
-"main" : {
-        "FeeTX" : "d6b8de9a4cadfe148f91e8fe8eed407199f96639b482f956ae6f539b8339f87c",
-        "Hash" : "6e8bbaba5113de592f6888f200f146448440b7e606fcf62ef84e60e1d5ac7d64",
-        "BlockStart" : 100000,
-        "BlockEnd" : 100000,
-        "Proposals" : "cool-project",
-        "VoteCount" : 46,
-        "Status" : "OK"
-    },
-```
-
-Get paid
-------------------------
-
-When block `1000000` is reached you'll receive a payment for `1200` BitBlocks.
-
-
-RPC Commands
-------------------------
-
-The following new RPC commands are supported:
-- mnbudget "command"... ( "passphrase" )
- * prepare            - Prepare proposal for network by signing and creating tx
- * submit             - Submit proposal for network
- * vote-many          - Vote on a BitBlocks initiative
- * vote-alias         - Vote on a BitBlocks initiative
- * vote               - Vote on a BitBlocks initiative/budget
- * getvotes           - Show current masternode budgets
- * getinfo            - Show current masternode budgets
- * show               - Show all budgets
- * projection         - Show the projection of which proposals will be paid the next cycle
- * check              - Scan proposals and remove invalid
-
-- mnfinalbudget "command"... ( "passphrase" )
- * vote-many   - Vote on a finalized budget
- * vote        - Vote on a finalized budget
- * show        - Show existing finalized budgets
+- Verify proposal URLs before voting.
+- Keep controller wallets encrypted and locked when not signing.
+- Do not paste private keys into public proposal discussions.

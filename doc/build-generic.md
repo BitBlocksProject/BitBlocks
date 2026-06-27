@@ -1,17 +1,39 @@
-GENERIC BUILD NOTES
-====================
-Some notes on how to build BitBlocks Core. You can either use system-installed dependencies (recommended on Ubuntu/Debian)
-or the [depends](../depends/README.md) build system.
+Generic Build Notes
+===================
 
-Required build tools and environment
-------------------------------------
-Building BitBlocks Core requires some essential build tools to be installed before. Please see
-[build-unix](build-unix.md), [build-osx](build-osx.md) and [build-windows](build-windows.md) for details.
+BitBlocks Core uses the Autotools build system. The normal build flow is:
 
-Building with system dependencies (Ubuntu/Debian)
-------------------------------------------------
-On Ubuntu and Debian you can install dependencies from packages. Berkeley DB 4.8 (required for the wallet) is provided
-by the PIVX PPA, which supports current LTS releases including Ubuntu Noble (24.04):
+```bash
+./autogen.sh
+./configure
+make -j$(nproc)
+make install # optional
+```
+
+Build documentation
+-------------------
+
+- [Unix build notes](build-unix.md)
+- [Windows build notes](build-windows.md)
+- [macOS build notes](build-osx.md)
+- [Depends build system](../depends/README.md)
+
+Required tools
+--------------
+
+Install a C++ compiler, Autotools, pkg-config, and the development libraries for OpenSSL and Boost. Wallet builds also require Berkeley DB 4.8 for compatibility with existing wallet files.
+
+Ubuntu and Debian example:
+
+```bash
+sudo apt-get update
+sudo apt-get install build-essential libtool autotools-dev autoconf automake pkg-config libssl-dev libboost-all-dev
+```
+
+Berkeley DB 4.8
+---------------
+
+Wallet compatibility depends on Berkeley DB 4.8. One commonly used packaging source is the external `ppa:pivx/berkeley-db4` repository:
 
 ```bash
 sudo apt-get install software-properties-common
@@ -20,70 +42,35 @@ sudo apt-get update
 sudo apt-get install libdb4.8-dev libdb4.8++-dev
 ```
 
-Install the remaining build and library dependencies as described in [build-unix](build-unix.md), then run:
+If you do not need compatibility with existing BDB 4.8 wallet files, you can build with a newer Berkeley DB by passing `--with-incompatible-bdb` to `./configure`.
+
+Building with depends
+---------------------
+
+The `depends` tree can build pinned dependencies for local and cross builds:
 
 ```bash
-$ ./autogen.sh
-$ ./configure
-$ make -j$(nproc)
-$ make install # optional
+cd depends
+make -j4
+cd ..
+./autogen.sh
+./configure --prefix="$PWD/depends/$(./depends/config.guess)"
+make -j$(nproc)
 ```
 
-Building with the depends system
---------------------------------
-BitBlocks inherited the `depends` folder from Bitcoin. If your system does not provide suitable packages (e.g. for
-cross-compilation or older distros), you can build dependencies from source. These must be built before BitBlocks:
+For cross-compilation, pass a host triplet to `make`, then use the generated prefix with `./configure`. See [Windows build notes](build-windows.md) for a Windows example.
+
+Useful configure flags
+----------------------
 
 ```bash
-$ cd depends
-$ make -j4 # Choose a good -j value, depending on the number of CPU cores available
-$ cd ..
+./configure --without-gui      # daemon and CLI only
+./configure --disable-wallet   # no wallet support
+./configure --with-incompatible-bdb
 ```
 
-This will download and build all dependencies required to build BitBlocks Core. Please read the
-[depends](../depends/README.md) documentation for supported hosts and configuration options. If no host is specified,
-the depends system will default to your local host system.
+Source and releases
+-------------------
 
-Then build BitBlocks Core with:
-
-```bash
-$ ./autogen.sh
-$ ./configure --prefix=`pwd`/depends/<host>
-$ make
-$ make install # optional
-```
-
-Please replace `<host>` with your local system's `host-platform-triplet`. The following triplets are usually valid:
-- `i686-pc-linux-gnu` for Linux32
-- `x86_64-pc-linux-gnu` for Linux64
-- `x86_64-w64-mingw32` for Win64
-- `x86_64-apple-darwin19` for macOS
-- `arm-linux-gnueabihf` for Linux ARM 32 bit
-- `aarch64-linux-gnu` for Linux ARM 64 bit
-
-If you want to cross-compile for another platform, choose the appropriate `<host>` and make sure to build the
-dependencies with the same host before.
-
-If you want to build for the same host but different distro, add `--enable-glibc-back-compat LDFLAGS=-static-libstdc++` when calling `./configure`.
-
-
-ccache
-------
-`./configure` of BitBlocks Core will autodetect the presence of ccache and enable use of it. To disable ccache, use
-`./configure --prefix=<prefix> --disable-ccache`. When installed and enabled, [ccache](https://ccache.samba.org/) will
-cache build results on source->object level.
-
-The default maximum cache size is 5G, which might not be enough to cache multiple builds when switching Git branches
-very often. It is advised to increase the maximum cache size:
-
-```bash
-$ ccache -M20G
-```
-
-Additional Configure Flags
---------------------------
-A list of additional configure flags can be displayed with:
-
-```bash
-./configure --help
-```
+- Source: https://github.com/BitBlocksProject/BitBlocks
+- Releases: https://github.com/BitBlocksProject/BitBlocks/releases
