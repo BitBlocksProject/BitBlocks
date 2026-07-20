@@ -142,11 +142,9 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
 
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed1.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed2.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed3.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed4.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed5.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("seed1.bitblockscrypto.com", "seed1.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("seed2.bitblockscrypto.com", "seed2.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("seed3.bitblockscrypto.com", "seed3.bitblockscrypto.com"));
 
 	base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 25); // B
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 85); // b

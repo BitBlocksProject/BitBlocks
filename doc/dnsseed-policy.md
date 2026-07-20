@@ -12,8 +12,6 @@ The source tree configures these seeds:
 seed1.bitblockscrypto.com
 seed2.bitblockscrypto.com
 seed3.bitblockscrypto.com
-seed4.bitblockscrypto.com
-seed5.bitblockscrypto.com
 ```
 
 Other networks
