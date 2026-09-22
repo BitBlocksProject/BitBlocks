@@ -3233,10 +3233,11 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
     return true;
 }
 
-bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev)
+bool CheckWork(const CBlock& block, CBlockIndex* const pindexPrev, CValidationState& state)
 {
     if (pindexPrev == NULL)
-        return error("%s : null pindexPrev for block %s", __func__, block.GetHash().ToString().c_str());
+        return state.DoS(0, error("%s : null pindexPrev for block %s", __func__, block.GetHash().ToString().c_str()),
+            REJECT_INVALID, "bad-prevblk");
 
     unsigned int nBitsRequired = GetNextWorkRequired(pindexPrev, &block);
 
@@ -3245,21 +3246,23 @@ bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev)
         double n2 = ConvertBitsToDouble(nBitsRequired);
 
         if (abs(n1 - n2) > n1 * 0.5)
-            return error("%s : incorrect proof of work (DGW pre-fork) - %f %f %f at %d", __func__, abs(n1 - n2), n1, n2, pindexPrev->nHeight + 1);
+            return state.DoS(50, error("%s : incorrect proof of work (DGW pre-fork) - %f %f %f at %d", __func__, abs(n1 - n2), n1, n2, pindexPrev->nHeight + 1),
+                REJECT_INVALID, "bad-diffbits");
 
         return true;
     }
 
     if (block.nBits != nBitsRequired)
-        return error("%s : incorrect proof of work at %d", __func__, pindexPrev->nHeight + 1);
+        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, pindexPrev->nHeight + 1),
+            REJECT_INVALID, "bad-diffbits");
 
     if (block.IsProofOfStake()) {
         uint256 hashProofOfStake;
         uint256 hash = block.GetHash();
 
-        if(!CheckProofOfStake(block, hashProofOfStake)) {
+        if(!CheckProofOfStake(block, hashProofOfStake, pindexPrev, state)) {
             LogPrintf("WARNING: ProcessBlock(): check proof-of-stake failed for block %s\n", hash.ToString().c_str());
-            return false;
+            return false; // CheckProofOfStake() has already set state
         }
         if(!mapProofOfStake.count(hash)) // add to mapProofOfStake
             mapProofOfStake.insert(make_pair(hash, hashProofOfStake));
@@ -3404,7 +3407,11 @@ bool AcceptBlock(CBlock& block, CValidationState& state, CBlockIndex** ppindex, 
             return state.DoS(100, error("%s : prev block invalid", __func__), REJECT_INVALID, "bad-prevblk");
     }
 
-    if (block.GetHash() != Params().HashGenesisBlock() && !CheckWork(block, pindexPrev))
+    // NOTE: this must stay ahead of AcceptBlockHeader() (the only caller of
+    // AddToBlockIndex) and of the block write further down. It is what keeps a
+    // block with a forged stake from ever reaching our block index or our disk.
+    // See the fake-stake mitigation notes; do not reorder.
+    if (block.GetHash() != Params().HashGenesisBlock() && !CheckWork(block, pindexPrev, state))
         return false;
 
     if (!AcceptBlockHeader(block, state, &pindex))

@@ -361,47 +361,66 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock blockFrom, const CTra
 }
 
 // Check kernel hash target and coinstake signature
-bool CheckProofOfStake(const CBlock block, uint256& hashProofOfStake)
+//
+// DoS scoring discipline: only conditions that the sending peer could have
+// checked itself, using data we both have, score above zero. Anything that
+// depends on our own local state (missing txindex, unreadable block file,
+// being behind on sync) scores zero, otherwise we would ban honest peers.
+bool CheckProofOfStake(const CBlock& block, uint256& hashProofOfStake, CBlockIndex* pindexPrev, CValidationState& state)
 {
-    const CTransaction tx = block.vtx[1];
+    const CTransaction& tx = block.vtx[1];
     if (!tx.IsCoinStake())
-        return error("CheckProofOfStake() : called on non-coinstake %s", tx.GetHash().ToString().c_str());
+        return state.DoS(100, error("CheckProofOfStake() : called on non-coinstake %s", tx.GetHash().ToString().c_str()),
+            REJECT_INVALID, "bad-pos-not-coinstake");
 
     // Kernel (input 0) must match the stake hash target per coin age (nBits)
+    // IsCoinStake() above guarantees vin.size() > 0.
     const CTxIn& txin = tx.vin[0];
 
     // First try finding the previous transaction in database
     uint256 hashBlock;
     CTransaction txPrev;
     if (!GetTransaction(txin.prevout.hash, txPrev, hashBlock, true))
-        return error("CheckProofOfStake() : INFO: read txPrev failed");
+        return state.DoS(0, error("CheckProofOfStake() : INFO: read txPrev failed"),
+            REJECT_INVALID, "bad-pos-prevout-missing");
 
     // The prevout index is attacker controlled: reject it before it is ever
     // used to index into txPrev.vout, here and inside CheckStakeKernelHash.
     if (txin.prevout.n >= txPrev.vout.size())
-        return error("CheckProofOfStake() : prevout index %u out of range (vout.size=%u) on coinstake %s",
-            txin.prevout.n, (unsigned int)txPrev.vout.size(), tx.GetHash().ToString().c_str());
+        return state.DoS(100, error("CheckProofOfStake() : prevout index %u out of range (vout.size=%u) on coinstake %s",
+                                  txin.prevout.n, (unsigned int)txPrev.vout.size(), tx.GetHash().ToString().c_str()),
+            REJECT_INVALID, "bad-pos-prevout-index");
 
     //verify signature and script
     if (!VerifyScript(txin.scriptSig, txPrev.vout[txin.prevout.n].scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&tx, 0)))
-        return error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString().c_str());
+        return state.DoS(100, error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString().c_str()),
+            REJECT_INVALID, "bad-pos-scriptsig");
 
     CBlockIndex* pindex = NULL;
     BlockMap::iterator it = mapBlockIndex.find(hashBlock);
     if (it != mapBlockIndex.end())
         pindex = it->second;
     else
-        return error("CheckProofOfStake() : read block failed");
+        return state.DoS(0, error("CheckProofOfStake() : read block failed"),
+            REJECT_INVALID, "bad-pos-blockfrom");
 
     // Read block header
     CBlock blockprev;
     if (!ReadBlockFromDisk(blockprev, pindex->GetBlockPos()))
-        return error("CheckProofOfStake(): INFO: failed to find block");
+        return state.DoS(0, error("CheckProofOfStake(): INFO: failed to find block"),
+            REJECT_INVALID, "bad-pos-blockfrom-read");
 
     unsigned int nInterval = 0;
     unsigned int nTime = block.nTime;
-    if (!CheckStakeKernelHash(block.nBits, blockprev, txPrev, txin.prevout, nTime, nInterval, true, hashProofOfStake, fDebug))
-        return error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s, hashProof=%s \n", tx.GetHash().ToString().c_str(), hashProofOfStake.ToString().c_str()); // may occur during initial download or if behind on block chain sync
+    if (!CheckStakeKernelHash(block.nBits, blockprev, txPrev, txin.prevout, nTime, nInterval, true, hashProofOfStake, fDebug)) {
+        // The kernel hash depends on the stake modifier, which depends on our
+        // view of the chain. Only punish when our view is authoritative: fully
+        // synced and building directly on our current tip. Otherwise this can
+        // fail for an entirely honest block.
+        int nDoS = (!IsInitialBlockDownload() && pindexPrev != NULL && chainActive.Tip() == pindexPrev) ? 100 : 0;
+        return state.DoS(nDoS, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s, hashProof=%s \n", tx.GetHash().ToString().c_str(), hashProofOfStake.ToString().c_str()),
+            REJECT_INVALID, "bad-pos-kernel"); // may occur during initial download or if behind on block chain sync
+    }
 
     return true;
 }
