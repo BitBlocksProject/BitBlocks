@@ -5,6 +5,14 @@
 #ifndef BITCOIN_QT_WALLETMODELTRANSACTION_H
 #define BITCOIN_QT_WALLETMODELTRANSACTION_H
 
+#if defined(HAVE_CONFIG_H)
+#include "config/bitblocks-config.h"
+#endif
+
+// walletmodel.h and this header include each other, so CAmount has to be
+// included here rather than arrive by accident through whatever else
+// walletmodel.h happens to pull in.
+#include "amount.h"
 #include "walletmodel.h"
 
 #include <QObject>
