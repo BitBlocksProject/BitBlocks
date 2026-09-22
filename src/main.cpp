@@ -57,6 +57,20 @@ CCriticalSection cs_main;
 BlockMap mapBlockIndex;
 map<uint256, uint256> mapProofOfStake;
 map<unsigned int, unsigned int> mapHashedBlocks;
+
+/**
+ * Bounded, runtime-only guard against stake amplification: maps a stake
+ * (outpoint, block nTime) to the hash of the first block we saw carrying it.
+ *
+ * Deliberately NOT the old setStakeSeen: that one was populated for every
+ * historical block at load time, which would have made -reindex, -loadblock and
+ * ReprocessBlocks() fail. This one is only ever filled by blocks arriving at
+ * runtime, is keyed to the first block hash so re-submitting a block we already
+ * have is not a false duplicate, and never marks the block index. Dropping a
+ * block here is a local decision that cannot fork the network.
+ */
+static map<pair<COutPoint, unsigned int>, uint256> mapStakeSeenRecent;
+static const size_t MAX_STAKE_SEEN_RECENT = 5000;
 CChain chainActive;
 CBlockIndex* pindexBestHeader = NULL;
 int64_t nTimeBestReceived = 0;
@@ -3515,10 +3529,29 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
     bool checked = CheckBlock(*pblock, state);
 
     // ppcoin: check proof-of-stake
-    // Limited duplicity on stake: prevents block flood attack
-    // Duplicate stake allowed only when there is orphan child block
-    //if (pblock->IsProofOfStake() && setStakeSeen.count(pblock->GetProofOfStake())/* && !mapOrphanBlocksByPrev.count(hash)*/)
-    //    return error("ProcessNewBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, pblock->GetHash().ToString().c_str());
+    // Limited duplicity on stake: prevents block flood attack.
+    // Two DIFFERENT blocks carrying the same stake at the same nTime is stake
+    // amplification. Drop it locally; never score DoS (an honest staker can
+    // race itself) and never touch the block index.
+    //
+    // This is a cheap pre-check only. The cache is populated further down, once
+    // the block has actually been accepted -- see the note there.
+    //
+    // Restricted to network-sourced blocks (pfrom != NULL). During -reindex and
+    // -loadblock the block file is read in arrival order, not chain order, and
+    // it can legitimately hold two competing blocks sharing one stake key; if
+    // the side-branch one were read first it would evict the main-chain one and
+    // corrupt the rebuilt index. Blocks from our own miner are exempt for the
+    // same reason. The guard exists to damp a network flood, nothing else.
+    if (pfrom != NULL && pblock->IsProofOfStake()) {
+        const pair<COutPoint, unsigned int> kStake = pblock->GetProofOfStake();
+        const uint256 hashThis = pblock->GetHash();
+        LOCK(cs_main);
+        map<pair<COutPoint, unsigned int>, uint256>::const_iterator itStake = mapStakeSeenRecent.find(kStake);
+        if (itStake != mapStakeSeenRecent.end() && itStake->second != hashThis && !mapBlockIndex.count(hashThis))
+            return error("ProcessNewBlock() : duplicate proof-of-stake (%s, %d) for block %s (first seen %s)",
+                kStake.first.ToString().c_str(), kStake.second, hashThis.ToString().c_str(), itStake->second.ToString().c_str());
+    }
 
     // NovaCoin: check proof-of-stake block signature
     if (!pblock->CheckBlockSignature())
@@ -3555,6 +3588,18 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
         CheckBlockIndex();
         if (!ret)
             return error("%s : AcceptBlock FAILED", __func__);
+
+        // Only a block that passed full validation and was stored may claim a
+        // stake key. Populating this earlier would let an attacker relay a
+        // mutated copy of an honest block, poison the cache with it, and make
+        // us drop the honest block that follows -- trading one denial of
+        // service for another. Runs under the cs_main held by this loop, and is
+        // limited to network-sourced blocks for the reindex reason noted above.
+        if (pfrom != NULL && pblock->IsProofOfStake()) {
+            if (mapStakeSeenRecent.size() > MAX_STAKE_SEEN_RECENT)
+                mapStakeSeenRecent.clear();
+            mapStakeSeenRecent[pblock->GetProofOfStake()] = pblock->GetHash();
+        }
         break;
     }
 
