@@ -332,21 +332,44 @@ AC_DEFUN([_BITCOIN_QT_FIND_STATIC_PLUGINS],[
           QT_LIBS="$QT_LIBS -L$qt_plugin_path/accessible"
         fi
       fi
-     m4_ifdef([PKG_CHECK_MODULES],[
-     if test x$use_pkgconfig = xyes; then
-       PKG_CHECK_MODULES([QTPLATFORM], [Qt5PlatformSupport], [QT_LIBS="$QTPLATFORM_LIBS $QT_LIBS"])
-       if test x$TARGET_OS = xlinux; then
-         PKG_CHECK_MODULES([X11XCB], [x11-xcb], [QT_LIBS="$X11XCB_LIBS $QT_LIBS"])
-         if ${PKG_CONFIG} --exists "Qt5Core >= 5.5" 2>/dev/null; then
-           PKG_CHECK_MODULES([QTXCBQPA], [Qt5XcbQpa], [QT_LIBS="$QTXCBQPA_LIBS $QT_LIBS"])
-         fi
-       elif test x$TARGET_OS = xdarwin; then
-         PKG_CHECK_MODULES([QTPRINT], [Qt5PrintSupport], [QT_LIBS="$QTPRINT_LIBS $QT_LIBS"])
+     dnl A static Qt keeps its bundled third-party code in separate archives
+     dnl (-qt-libpng, -qt-pcre and friends). Nothing else pulls them in, so
+     dnl append whichever ones this Qt was actually built with.
+     for qt_bundled_lib in qtpcre2 qtpcre qtlibpng qtharfbuzz qtlibjpeg qtfreetype; do
+       AC_CHECK_LIB([$qt_bundled_lib],[main],[QT_LIBS="$QT_LIBS -l$qt_bundled_lib"],[])
+     done
+
+     dnl Qt 5.8 replaced the single Qt5PlatformSupport library with one static
+     dnl library per feature. Probe for one of them and use that set when it is
+     dnl there; fall back to the old single library for Qt 5.0 - 5.7.
+     AC_CHECK_LIB([Qt5EventDispatcherSupport],[main],[bitcoin_cv_split_platformsupport=yes],[bitcoin_cv_split_platformsupport=no])
+     if test x$bitcoin_cv_split_platformsupport = xyes; then
+       QT_LIBS="-lQt5EventDispatcherSupport -lQt5FontDatabaseSupport -lQt5ThemeSupport -lQt5AccessibilitySupport $QT_LIBS"
+       if test x$TARGET_OS = xwindows; then
+         dnl The windows QPA plugin drives the UI Automation bridge and talks to
+         dnl uxtheme/dwm/wtsapi directly; none of that is pulled in by Qt5Gui.
+         QT_LIBS="-lQt5WindowsUIAutomationSupport $QT_LIBS"
+         QT_LIBS="$QT_LIBS -luxtheme -ldwmapi -lwtsapi32 -lversion -lwinspool -ld3d11 -ldxgi -ldxguid -lnetapi32 -luserenv -lmpr"
+       elif test x$TARGET_OS = xlinux; then
+         QT_LIBS="-lQt5XcbQpa -lQt5ServiceSupport -lQt5EdidSupport -lQt5GlxSupport $QT_LIBS"
        fi
-       else
-         QT_LIBS="-lQt5PlatformSupport $QT_LIBS"
+     else
+       m4_ifdef([PKG_CHECK_MODULES],[
+       if test x$use_pkgconfig = xyes; then
+         PKG_CHECK_MODULES([QTPLATFORM], [Qt5PlatformSupport], [QT_LIBS="$QTPLATFORM_LIBS $QT_LIBS"])
+         if test x$TARGET_OS = xlinux; then
+           PKG_CHECK_MODULES([X11XCB], [x11-xcb], [QT_LIBS="$X11XCB_LIBS $QT_LIBS"])
+           if ${PKG_CONFIG} --exists "Qt5Core >= 5.5" 2>/dev/null; then
+             PKG_CHECK_MODULES([QTXCBQPA], [Qt5XcbQpa], [QT_LIBS="$QTXCBQPA_LIBS $QT_LIBS"])
+           fi
+         elif test x$TARGET_OS = xdarwin; then
+           PKG_CHECK_MODULES([QTPRINT], [Qt5PrintSupport], [QT_LIBS="$QTPRINT_LIBS $QT_LIBS"])
+         fi
+         else
+           QT_LIBS="-lQt5PlatformSupport $QT_LIBS"
+       fi
+       ])
      fi
-     ])
   else
     if test x$qt_plugin_path != x; then
       QT_LIBS="$QT_LIBS -L$qt_plugin_path/accessible"
