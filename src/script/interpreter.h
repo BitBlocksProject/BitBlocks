@@ -108,6 +108,13 @@ public:
     MutableTransactionSignatureChecker(const CMutableTransaction* txToIn, unsigned int nInIn) : TransactionSignatureChecker(&txTo, nInIn), txTo(*txToIn) {}
 };
 
+/** Script encoding predicates. Exposed so that test/verifier_scan_tests.cpp
+ *  measures the real consensus code instead of a copy that could drift. */
+bool IsValidSignatureEncoding(const std::vector<unsigned char>& sig);
+bool IsLowDERSignature(const std::vector<unsigned char>& vchSig, ScriptError* serror);
+bool IsCompressedOrUncompressedPubKey(const std::vector<unsigned char>& vchPubKey);
+bool CheckSignatureEncoding(const std::vector<unsigned char>& vchSig, unsigned int flags, ScriptError* serror);
+
 bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& script, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* error = NULL);
 bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, unsigned int flags, const BaseSignatureChecker& checker, ScriptError* error = NULL);
 

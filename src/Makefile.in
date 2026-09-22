@@ -841,14 +841,15 @@ am__test_test_bitblocks_SOURCES_DIST = test/bignum.h \
 	test/pmt_tests.cpp test/rpc_tests.cpp test/sanity_tests.cpp \
 	test/script_P2SH_tests.cpp test/script_tests.cpp \
 	test/scriptnum_tests.cpp test/serialize_tests.cpp \
-	test/sighash_tests.cpp test/sigopcount_tests.cpp \
-	test/skiplist_tests.cpp test/test_bitblocks.cpp \
-	test/timedata_tests.cpp test/transaction_tests.cpp \
-	test/uint256_tests.cpp test/univalue_tests.cpp \
-	test/util_tests.cpp test/accounting_tests.cpp \
-	test/wallet_tests.cpp test/rpc_wallet_tests.cpp \
-	test/data/script_valid.json test/data/base58_keys_valid.json \
-	test/data/sig_canonical.json test/data/sig_noncanonical.json \
+	test/sighash_tests.cpp test/sigencoding_tests.cpp \
+	test/sigopcount_tests.cpp test/skiplist_tests.cpp \
+	test/test_bitblocks.cpp test/timedata_tests.cpp \
+	test/transaction_tests.cpp test/uint256_tests.cpp \
+	test/univalue_tests.cpp test/util_tests.cpp \
+	test/accounting_tests.cpp test/wallet_tests.cpp \
+	test/rpc_wallet_tests.cpp test/data/script_valid.json \
+	test/data/base58_keys_valid.json test/data/sig_canonical.json \
+	test/data/sig_noncanonical.json \
 	test/data/base58_encode_decode.json \
 	test/data/base58_keys_invalid.json \
 	test/data/script_invalid.json test/data/tx_invalid.json \
@@ -883,6 +884,7 @@ am__test_test_bitblocks_SOURCES_DIST = test/bignum.h \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-scriptnum_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-serialize_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-sighash_tests.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	test/test_bitblocks-sigencoding_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-sigopcount_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-skiplist_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-test_bitblocks.$(OBJEXT) \
@@ -1194,6 +1196,7 @@ am__depfiles_remade = ./$(DEPDIR)/bitblocks_cli-bitblocks-cli.Po \
 	test/$(DEPDIR)/test_bitblocks-script_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-scriptnum_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-serialize_tests.Po \
+	test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-sighash_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-sigopcount_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-skiplist_tests.Po \
@@ -2171,6 +2174,7 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_TESTS_TRUE@	test/scriptnum_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/serialize_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/sighash_tests.cpp \
+@ENABLE_TESTS_TRUE@	test/sigencoding_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/sigopcount_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/skiplist_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks.cpp \
@@ -3144,6 +3148,8 @@ test/test_bitblocks-serialize_tests.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/test_bitblocks-sighash_tests.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
+test/test_bitblocks-sigencoding_tests.$(OBJEXT): test/$(am__dirstamp) \
+	test/$(DEPDIR)/$(am__dirstamp)
 test/test_bitblocks-sigopcount_tests.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/test_bitblocks-skiplist_tests.$(OBJEXT): test/$(am__dirstamp) \
@@ -3454,6 +3460,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-script_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-scriptnum_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-serialize_tests.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-sighash_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-sigopcount_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-skiplist_tests.Po@am__quote@ # am--include-marker
@@ -7074,6 +7081,20 @@ test/test_bitblocks-sighash_tests.obj: test/sighash_tests.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test/test_bitblocks-sighash_tests.obj `if test -f 'test/sighash_tests.cpp'; then $(CYGPATH_W) 'test/sighash_tests.cpp'; else $(CYGPATH_W) '$(srcdir)/test/sighash_tests.cpp'; fi`
 
+test/test_bitblocks-sigencoding_tests.o: test/sigencoding_tests.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test/test_bitblocks-sigencoding_tests.o -MD -MP -MF test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Tpo -c -o test/test_bitblocks-sigencoding_tests.o `test -f 'test/sigencoding_tests.cpp' || echo '$(srcdir)/'`test/sigencoding_tests.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Tpo test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='test/sigencoding_tests.cpp' object='test/test_bitblocks-sigencoding_tests.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test/test_bitblocks-sigencoding_tests.o `test -f 'test/sigencoding_tests.cpp' || echo '$(srcdir)/'`test/sigencoding_tests.cpp
+
+test/test_bitblocks-sigencoding_tests.obj: test/sigencoding_tests.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test/test_bitblocks-sigencoding_tests.obj -MD -MP -MF test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Tpo -c -o test/test_bitblocks-sigencoding_tests.obj `if test -f 'test/sigencoding_tests.cpp'; then $(CYGPATH_W) 'test/sigencoding_tests.cpp'; else $(CYGPATH_W) '$(srcdir)/test/sigencoding_tests.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Tpo test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='test/sigencoding_tests.cpp' object='test/test_bitblocks-sigencoding_tests.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test/test_bitblocks-sigencoding_tests.obj `if test -f 'test/sigencoding_tests.cpp'; then $(CYGPATH_W) 'test/sigencoding_tests.cpp'; else $(CYGPATH_W) '$(srcdir)/test/sigencoding_tests.cpp'; fi`
+
 test/test_bitblocks-sigopcount_tests.o: test/sigopcount_tests.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test/test_bitblocks-sigopcount_tests.o -MD -MP -MF test/$(DEPDIR)/test_bitblocks-sigopcount_tests.Tpo -c -o test/test_bitblocks-sigopcount_tests.o `test -f 'test/sigopcount_tests.cpp' || echo '$(srcdir)/'`test/sigopcount_tests.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) test/$(DEPDIR)/test_bitblocks-sigopcount_tests.Tpo test/$(DEPDIR)/test_bitblocks-sigopcount_tests.Po
@@ -8007,6 +8028,7 @@ distclean: distclean-recursive
 	-rm -f test/$(DEPDIR)/test_bitblocks-script_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-scriptnum_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-serialize_tests.Po
+	-rm -f test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-sighash_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-sigopcount_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-skiplist_tests.Po
@@ -8331,6 +8353,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f test/$(DEPDIR)/test_bitblocks-script_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-scriptnum_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-serialize_tests.Po
+	-rm -f test/$(DEPDIR)/test_bitblocks-sigencoding_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-sighash_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-sigopcount_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-skiplist_tests.Po
