@@ -844,12 +844,12 @@ am__test_test_bitblocks_SOURCES_DIST = test/bignum.h \
 	test/sighash_tests.cpp test/sigencoding_tests.cpp \
 	test/sigopcount_tests.cpp test/skiplist_tests.cpp \
 	test/test_bitblocks.cpp test/timedata_tests.cpp \
-	test/transaction_tests.cpp test/uint256_tests.cpp \
-	test/univalue_tests.cpp test/util_tests.cpp \
-	test/accounting_tests.cpp test/wallet_tests.cpp \
-	test/rpc_wallet_tests.cpp test/data/script_valid.json \
-	test/data/base58_keys_valid.json test/data/sig_canonical.json \
-	test/data/sig_noncanonical.json \
+	test/transaction_tests.cpp test/verifier_scan_tests.cpp \
+	test/uint256_tests.cpp test/univalue_tests.cpp \
+	test/util_tests.cpp test/accounting_tests.cpp \
+	test/wallet_tests.cpp test/rpc_wallet_tests.cpp \
+	test/data/script_valid.json test/data/base58_keys_valid.json \
+	test/data/sig_canonical.json test/data/sig_noncanonical.json \
 	test/data/base58_encode_decode.json \
 	test/data/base58_keys_invalid.json \
 	test/data/script_invalid.json test/data/tx_invalid.json \
@@ -890,6 +890,7 @@ am__test_test_bitblocks_SOURCES_DIST = test/bignum.h \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-test_bitblocks.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-timedata_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-transaction_tests.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	test/test_bitblocks-verifier_scan_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-uint256_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-univalue_tests.$(OBJEXT) \
 @ENABLE_TESTS_TRUE@	test/test_bitblocks-util_tests.$(OBJEXT) \
@@ -1206,6 +1207,7 @@ am__depfiles_remade = ./$(DEPDIR)/bitblocks_cli-bitblocks-cli.Po \
 	test/$(DEPDIR)/test_bitblocks-uint256_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-univalue_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-util_tests.Po \
+	test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Po \
 	test/$(DEPDIR)/test_bitblocks-wallet_tests.Po \
 	univalue/$(DEPDIR)/univalue.Po \
 	univalue/$(DEPDIR)/univalue_read.Po \
@@ -2180,6 +2182,7 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_TESTS_TRUE@	test/test_bitblocks.cpp \
 @ENABLE_TESTS_TRUE@	test/timedata_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/transaction_tests.cpp \
+@ENABLE_TESTS_TRUE@	test/verifier_scan_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/uint256_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/univalue_tests.cpp test/util_tests.cpp \
 @ENABLE_TESTS_TRUE@	$(am__append_18)
@@ -3160,6 +3163,8 @@ test/test_bitblocks-timedata_tests.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/test_bitblocks-transaction_tests.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
+test/test_bitblocks-verifier_scan_tests.$(OBJEXT):  \
+	test/$(am__dirstamp) test/$(DEPDIR)/$(am__dirstamp)
 test/test_bitblocks-uint256_tests.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/test_bitblocks-univalue_tests.$(OBJEXT): test/$(am__dirstamp) \
@@ -3470,6 +3475,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-uint256_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-univalue_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-util_tests.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_bitblocks-wallet_tests.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@univalue/$(DEPDIR)/univalue.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@univalue/$(DEPDIR)/univalue_read.Po@am__quote@ # am--include-marker
@@ -7165,6 +7171,20 @@ test/test_bitblocks-transaction_tests.obj: test/transaction_tests.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test/test_bitblocks-transaction_tests.obj `if test -f 'test/transaction_tests.cpp'; then $(CYGPATH_W) 'test/transaction_tests.cpp'; else $(CYGPATH_W) '$(srcdir)/test/transaction_tests.cpp'; fi`
 
+test/test_bitblocks-verifier_scan_tests.o: test/verifier_scan_tests.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test/test_bitblocks-verifier_scan_tests.o -MD -MP -MF test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Tpo -c -o test/test_bitblocks-verifier_scan_tests.o `test -f 'test/verifier_scan_tests.cpp' || echo '$(srcdir)/'`test/verifier_scan_tests.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Tpo test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='test/verifier_scan_tests.cpp' object='test/test_bitblocks-verifier_scan_tests.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test/test_bitblocks-verifier_scan_tests.o `test -f 'test/verifier_scan_tests.cpp' || echo '$(srcdir)/'`test/verifier_scan_tests.cpp
+
+test/test_bitblocks-verifier_scan_tests.obj: test/verifier_scan_tests.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test/test_bitblocks-verifier_scan_tests.obj -MD -MP -MF test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Tpo -c -o test/test_bitblocks-verifier_scan_tests.obj `if test -f 'test/verifier_scan_tests.cpp'; then $(CYGPATH_W) 'test/verifier_scan_tests.cpp'; else $(CYGPATH_W) '$(srcdir)/test/verifier_scan_tests.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Tpo test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='test/verifier_scan_tests.cpp' object='test/test_bitblocks-verifier_scan_tests.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test/test_bitblocks-verifier_scan_tests.obj `if test -f 'test/verifier_scan_tests.cpp'; then $(CYGPATH_W) 'test/verifier_scan_tests.cpp'; else $(CYGPATH_W) '$(srcdir)/test/verifier_scan_tests.cpp'; fi`
+
 test/test_bitblocks-uint256_tests.o: test/uint256_tests.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_test_bitblocks_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test/test_bitblocks-uint256_tests.o -MD -MP -MF test/$(DEPDIR)/test_bitblocks-uint256_tests.Tpo -c -o test/test_bitblocks-uint256_tests.o `test -f 'test/uint256_tests.cpp' || echo '$(srcdir)/'`test/uint256_tests.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) test/$(DEPDIR)/test_bitblocks-uint256_tests.Tpo test/$(DEPDIR)/test_bitblocks-uint256_tests.Po
@@ -8038,6 +8058,7 @@ distclean: distclean-recursive
 	-rm -f test/$(DEPDIR)/test_bitblocks-uint256_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-univalue_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-util_tests.Po
+	-rm -f test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-wallet_tests.Po
 	-rm -f univalue/$(DEPDIR)/univalue.Po
 	-rm -f univalue/$(DEPDIR)/univalue_read.Po
@@ -8363,6 +8384,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f test/$(DEPDIR)/test_bitblocks-uint256_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-univalue_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-util_tests.Po
+	-rm -f test/$(DEPDIR)/test_bitblocks-verifier_scan_tests.Po
 	-rm -f test/$(DEPDIR)/test_bitblocks-wallet_tests.Po
 	-rm -f univalue/$(DEPDIR)/univalue.Po
 	-rm -f univalue/$(DEPDIR)/univalue_read.Po
