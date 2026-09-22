@@ -10,6 +10,7 @@
 #include "config/bitblocks-config.h"
 #endif
 
+#include "key.h"
 #include "util.h"
 #include "uritests.h"
 
@@ -33,6 +34,7 @@ Q_IMPORT_PLUGIN(qkrcodecs)
 int main(int argc, char *argv[])
 {
     SetupEnvironment();
+    ECC_Start();
     bool fInvalid = false;
 
     // Don't remove this, it's needed to access
@@ -49,5 +51,6 @@ int main(int argc, char *argv[])
         fInvalid = true;
 #endif
 
+    ECC_Stop();
     return fInvalid;
 }

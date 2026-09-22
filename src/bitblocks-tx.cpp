@@ -600,6 +600,7 @@ static int CommandLineRawTx(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
     SetupEnvironment();
+    ECC_Start();
 
     try {
         if (!AppInitRawTx(argc, argv))
@@ -620,5 +621,6 @@ int main(int argc, char* argv[])
     } catch (...) {
         PrintExceptionContinue(NULL, "CommandLineRawTx()");
     }
+    ECC_Stop();
     return ret;
 }

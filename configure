@@ -964,6 +964,7 @@ enable_hardening
 enable_reduce_exports
 enable_ccache
 enable_lcov
+enable_openssl_ecdsa
 enable_glibc_back_compat
 enable_zmq
 with_protoc_bindir
@@ -1688,6 +1689,9 @@ Optional Features:
   --enable-ccache         use ccache for building (default is yes if ccache is
                           found)
   --enable-lcov           enable lcov testing (default is no)
+  --enable-openssl-ecdsa  verify consensus signatures with OpenSSL instead of
+                          libsecp256k1 (default is no; for differential
+                          testing and rollback only)
   --enable-glibc-back-compat
                           enable backwards compatibility with glibc and
                           libstdc++
@@ -19916,6 +19920,15 @@ else $as_nop
 fi
 
 
+# Check whether --enable-openssl-ecdsa was given.
+if test ${enable_openssl_ecdsa+y}
+then :
+  enableval=$enable_openssl_ecdsa; use_openssl_ecdsa=$enableval
+else $as_nop
+  use_openssl_ecdsa=no
+fi
+
+
 # Check whether --enable-glibc-back-compat was given.
 if test ${enable_glibc_back_compat+y}
 then :
@@ -29324,6 +29337,51 @@ fi
 	fi
 
 
+            if test "x$BOOST_UNIT_TEST_FRAMEWORK_LIB" = "x"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for exit in -lboost_unit_test_framework" >&5
+printf %s "checking for exit in -lboost_unit_test_framework... " >&6; }
+if test ${ac_cv_lib_boost_unit_test_framework_exit+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lboost_unit_test_framework  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int exit ();
+}
+int
+main (void)
+{
+return conftest::exit ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  ac_cv_lib_boost_unit_test_framework_exit=yes
+else $as_nop
+  ac_cv_lib_boost_unit_test_framework_exit=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_boost_unit_test_framework_exit" >&5
+printf "%s\n" "$ac_cv_lib_boost_unit_test_framework_exit" >&6; }
+if test "x$ac_cv_lib_boost_unit_test_framework_exit" = xyes
+then :
+  BOOST_UNIT_TEST_FRAMEWORK_LIB="-lboost_unit_test_framework"
+else $as_nop
+  as_fn_error $? "boost_unit_test_framework library not found; install libboost-test-dev or pass --with-boost-libdir" "$LINENO" 5
+fi
+
+
+  fi
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for dynamic linked boost test" >&5
 printf %s "checking for dynamic linked boost test... " >&6; }
   TEMP_LIBS="$LIBS"
@@ -30805,6 +30863,15 @@ else
 fi
 
 
+if test x$use_openssl_ecdsa = xyes; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Using OpenSSL for consensus signature verification" >&5
+printf "%s\n" "Using OpenSSL for consensus signature verification" >&6; }
+else
+
+printf "%s\n" "#define USE_SECP256K1 1" >>confdefs.h
+
+fi
+
 
 printf "%s\n" "#define CLIENT_VERSION_MAJOR 1" >>confdefs.h
 
@@ -30877,7 +30944,18 @@ PKGCONFIG_LIBDIR_TEMP="$PKG_CONFIG_LIBDIR"
 unset PKG_CONFIG_LIBDIR
 PKG_CONFIG_LIBDIR="$PKGCONFIG_LIBDIR_TEMP"
 
-ac_configure_args="${ac_configure_args} --disable-shared --with-pic"
+case $host in
+  x86_64-*|amd64-*)
+    secp256k1_args="--with-field=64bit --with-scalar=64bit"
+    ;;
+  *)
+    secp256k1_args="--with-field=32bit --with-scalar=32bit"
+    ;;
+esac
+secp256k1_args="$secp256k1_args --with-bignum=none"
+
+
+ac_configure_args="${ac_configure_args} --disable-shared --with-pic $secp256k1_args"
 
 
 subdirs="$subdirs src/secp256k1"

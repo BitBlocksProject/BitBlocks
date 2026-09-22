@@ -155,6 +155,12 @@ AC_ARG_ENABLE([lcov],
   [use_lcov=yes],
   [use_lcov=no])
 
+AC_ARG_ENABLE([openssl-ecdsa],
+  [AS_HELP_STRING([--enable-openssl-ecdsa],
+  [verify consensus signatures with OpenSSL instead of libsecp256k1 (default is no; for differential testing and rollback only)])],
+  [use_openssl_ecdsa=$enableval],
+  [use_openssl_ecdsa=no])
+
 AC_ARG_ENABLE([glibc-back-compat],
   [AS_HELP_STRING([--enable-glibc-back-compat],
   [enable backwards compatibility with glibc and libstdc++])],
@@ -634,6 +640,18 @@ if test x$use_tests = xyes; then
 
   AX_BOOST_UNIT_TEST_FRAMEWORK
 
+  dnl ax_boost_unit_test_framework.m4 locates the library by globbing
+  dnl filenames under $BOOSTLIBDIR. On a modern multiarch layout that glob can
+  dnl come up empty, and the macro then leaves BOOST_UNIT_TEST_FRAMEWORK_LIB
+  dnl unset without failing, so the test binary links without the framework
+  dnl and without a main(). Fall back to the plain library name.
+  if test "x$BOOST_UNIT_TEST_FRAMEWORK_LIB" = "x"; then
+    AC_CHECK_LIB([boost_unit_test_framework],[exit],
+      [BOOST_UNIT_TEST_FRAMEWORK_LIB="-lboost_unit_test_framework"],
+      [AC_MSG_ERROR([boost_unit_test_framework library not found; install libboost-test-dev or pass --with-boost-libdir])])
+    AC_SUBST(BOOST_UNIT_TEST_FRAMEWORK_LIB)
+  fi
+
   dnl Determine if -DBOOST_TEST_DYN_LINK is needed
   AC_MSG_CHECKING([for dynamic linked boost test])
   TEMP_LIBS="$LIBS"
@@ -940,6 +958,15 @@ AM_CONDITIONAL([USE_COMPARISON_TOOL_REORG_TESTS],[test x$use_comparison_tool_reo
 AM_CONDITIONAL([GLIBC_BACK_COMPAT],[test x$use_glibc_compat = xyes])
 AM_CONDITIONAL([USE_LIBSECP256K1],[test x$use_libsecp256k1 = xyes])
 
+dnl Consensus signature verification: libsecp256k1 by default, with the old
+dnl OpenSSL path kept buildable for differential testing and rollback.
+dnl See doc/secp256k1-migration.md.
+if test x$use_openssl_ecdsa = xyes; then
+  AC_MSG_RESULT([Using OpenSSL for consensus signature verification])
+else
+  AC_DEFINE([USE_SECP256K1],[1],[Define this symbol to use libsecp256k1 for consensus signature verification])
+fi
+
 AC_DEFINE(CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MAJOR, [Major version])
 AC_DEFINE(CLIENT_VERSION_MINOR, _CLIENT_VERSION_MINOR, [Minor version])
 AC_DEFINE(CLIENT_VERSION_REVISION, _CLIENT_VERSION_REVISION, [Build revision])
@@ -993,7 +1020,39 @@ PKGCONFIG_LIBDIR_TEMP="$PKG_CONFIG_LIBDIR"
 unset PKG_CONFIG_LIBDIR
 PKG_CONFIG_LIBDIR="$PKGCONFIG_LIBDIR_TEMP"
 
-ac_configure_args="${ac_configure_args} --disable-shared --with-pic"
+dnl secp256k1 backend selection.
+dnl
+dnl Its build-aux/m4/bitcoin_secp.m4 is missing from this tree, so the macros
+dnl SECP_INT128_CHECK / SECP_64BIT_ASM_CHECK / SECP_GMP_CHECK are left
+dnl unexpanded in the pre-generated src/secp256k1/configure and silently do
+dnl nothing. Autodetection therefore always falls through to the slow 32-bit
+dnl backend, even on x86_64 where __int128 is available. Regenerating that
+dnl configure is not an option either: autoconf errors out on the undefined
+dnl macros. So select the backend explicitly here, which bypasses the broken
+dnl detection entirely -- the explicit path in src/secp256k1/configure.ac
+dnl defines USE_FIELD_5X52_INT128 without consulting those macros.
+dnl
+dnl 64bit_asm is deliberately avoided: it needs yasm plus a YASM_BINFMT that
+dnl is AC_SUBST'ed but never set (again, the missing m4).
+case $host in
+  x86_64-*|amd64-*)
+    secp256k1_args="--with-field=64bit --with-scalar=64bit"
+    ;;
+  *)
+    secp256k1_args="--with-field=32bit --with-scalar=32bit"
+    ;;
+esac
+secp256k1_args="$secp256k1_args --with-bignum=none"
+
+dnl Do NOT add --disable-tests or --disable-benchmark here. Everything put in
+dnl ac_configure_args is also recorded by config.status and replayed verbatim
+dnl by "config.status --recheck", which automake triggers from an ordinary
+dnl make. The top level has its own --enable-tests, so a --disable-tests meant
+dnl for the subdirectory silently turns off our entire test suite on the next
+dnl rebuild, leaving a Makefile that links test_bitblocks with no objects at
+dnl all ("undefined reference to main").
+
+ac_configure_args="${ac_configure_args} --disable-shared --with-pic $secp256k1_args"
 AC_CONFIG_SUBDIRS([src/secp256k1])
 
 AC_OUTPUT
