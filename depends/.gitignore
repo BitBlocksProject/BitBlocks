@@ -1,0 +1,15 @@
+# Everything the depends build produces. The host prefixes are named after the
+# target triplet, so they are matched by pattern rather than listed one by one
+# (this tree builds x86_64-w64-mingw32; the rest are here for other hosts).
+/built
+/work
+/sources
+/x86_64*
+/i686*
+/arm*
+/aarch64*
+/riscv32*
+/riscv64*
+/mips*
+/powerpc*
+/s390x*

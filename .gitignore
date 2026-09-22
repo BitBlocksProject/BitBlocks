@@ -1,4 +1,7 @@
-.gitignore
+# NOTE: a bare ".gitignore" rule used to live here. Git never applies an ignore
+# rule to a tracked file, so it did nothing for this file -- it only hid the
+# per-directory .gitignore files (depends/, src/...) from "git status", which
+# made them impossible to add without -f.
 *.sublime-project
 *.sublime-workspace
 todo.txt
@@ -64,6 +67,7 @@ libtool
 src/config/bitblocks-config.h
 src/config/bitblocks-config.h.in
 src/config/stamp-h1
+src/secp256k1/src/libsecp256k1-config.h
 src/obj
 share/setup.nsi
 share/qt/Info.plist
@@ -81,6 +85,7 @@ src/qt/test/moc*.cpp
 .dirstamp
 .libs
 .*.swp
+*~
 *.*~*
 *.bak
 *.rej
