@@ -154,6 +154,7 @@ cache/*
 venv*/
 
 !src/leveldb*/Makefile
+!depends/Makefile
 
 .cproject
 .project
