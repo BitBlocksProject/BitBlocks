@@ -1,23 +1,26 @@
 package=openssl
-$(package)_version=1.1.1w
-$(package)_download_path=https://www.openssl.org/source
+$(package)_version=3.0.16
+$(package)_download_path=https://github.com/openssl/openssl/releases/download/openssl-$($(package)_version)
 $(package)_file_name=$(package)-$($(package)_version).tar.gz
-$(package)_sha256_hash=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8
+$(package)_sha256_hash=57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86
 
-# 1.0.1k went end-of-life in 2016 and, more immediately, does not have
-# ECDSA_SIG_get0()/ECDSA_SIG_set0(), which src/ecwrapper.cpp has required since
-# the source moved to the OpenSSL 1.1 API. The Windows cross build could not
-# compile at all while this was pinned there.
+# src/bignum.h calls BN_check_prime(), which OpenSSL added in 3.0, so anything
+# older cannot build this tree at all -- 1.0.1k could not even reach that far,
+# lacking the ECDSA_SIG_get0()/set0() that src/ecwrapper.cpp needs.
 #
-# 1.1.0 replaced the build system, so this is not a version bump: Makefile.org
-# and util/mkbuildinf.pl are gone (the old preprocess step patched both),
-# INSTALL_PREFIX became DESTDIR, install_sw became install_dev, and many of the
-# old no-* switches no longer exist -- Configure fails outright on an option it
-# does not recognise, so the list below is deliberately short.
+# 3.0 keeps the 1.1 build system, so relative to 1.0.x: Makefile.org and
+# util/mkbuildinf.pl that the old preprocess step patched are gone,
+# INSTALL_PREFIX became DESTDIR, install_sw became install_dev, and Configure
+# fails outright on an unrecognised no-* switch, so the option list below is
+# deliberately short. --libdir=lib keeps it out of lib64 on x86_64 linux.
+#
+# Note this is still only a build dependency for hashing, RNG, wallet AES,
+# base64, X.509 and RPC TLS. Consensus signature verification moved to
+# libsecp256k1; see doc/secp256k1-migration.md.
 
 define $(package)_set_vars
 $(package)_config_env=AR="$($(package)_ar)" RANLIB="$($(package)_ranlib)" CC="$($(package)_cc)"
-$(package)_config_opts=--prefix=$(host_prefix) --openssldir=$(host_prefix)/etc/openssl
+$(package)_config_opts=--prefix=$(host_prefix) --openssldir=$(host_prefix)/etc/openssl --libdir=lib
 $(package)_config_opts+=no-asm
 $(package)_config_opts+=no-comp
 $(package)_config_opts+=no-shared
