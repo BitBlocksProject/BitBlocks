@@ -376,6 +376,12 @@ bool CheckProofOfStake(const CBlock block, uint256& hashProofOfStake)
     if (!GetTransaction(txin.prevout.hash, txPrev, hashBlock, true))
         return error("CheckProofOfStake() : INFO: read txPrev failed");
 
+    // The prevout index is attacker controlled: reject it before it is ever
+    // used to index into txPrev.vout, here and inside CheckStakeKernelHash.
+    if (txin.prevout.n >= txPrev.vout.size())
+        return error("CheckProofOfStake() : prevout index %u out of range (vout.size=%u) on coinstake %s",
+            txin.prevout.n, (unsigned int)txPrev.vout.size(), tx.GetHash().ToString().c_str());
+
     //verify signature and script
     if (!VerifyScript(txin.scriptSig, txPrev.vout[txin.prevout.n].scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&tx, 0)))
         return error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString().c_str());
