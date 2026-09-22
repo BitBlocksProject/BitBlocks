@@ -180,3 +180,4 @@ to_backport.txt
 .ci-cppcheck/
 .mypy_cache/
 *.old
+temp/
