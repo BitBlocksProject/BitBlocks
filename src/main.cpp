@@ -56,8 +56,21 @@ CCriticalSection cs_main;
 
 BlockMap mapBlockIndex;
 map<uint256, uint256> mapProofOfStake;
-set<pair<COutPoint, unsigned int> > setStakeSeen;
 map<unsigned int, unsigned int> mapHashedBlocks;
+
+/**
+ * Bounded, runtime-only guard against stake amplification: maps a stake
+ * (outpoint, block nTime) to the hash of the first block we saw carrying it.
+ *
+ * Deliberately NOT the old setStakeSeen: that one was populated for every
+ * historical block at load time, which would have made -reindex, -loadblock and
+ * ReprocessBlocks() fail. This one is only ever filled by blocks arriving at
+ * runtime, is keyed to the first block hash so re-submitting a block we already
+ * have is not a false duplicate, and never marks the block index. Dropping a
+ * block here is a local decision that cannot fork the network.
+ */
+static map<pair<COutPoint, unsigned int>, uint256> mapStakeSeenRecent;
+static const size_t MAX_STAKE_SEEN_RECENT = 5000;
 CChain chainActive;
 CBlockIndex* pindexBestHeader = NULL;
 int64_t nTimeBestReceived = 0;
@@ -2910,10 +2923,6 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
     pindexNew->nSequenceId = 0;
     BlockMap::iterator mi = mapBlockIndex.insert(make_pair(hash, pindexNew)).first;
 
-    //mark as PoS seen
-    if (pindexNew->IsProofOfStake())
-        setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
-
     pindexNew->phashBlock = &((*mi).first);
     BlockMap::iterator miPrev = mapBlockIndex.find(block.hashPrevBlock);
     if (miPrev != mapBlockIndex.end()) {
@@ -3233,10 +3242,11 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
     return true;
 }
 
-bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev)
+bool CheckWork(const CBlock& block, CBlockIndex* const pindexPrev, CValidationState& state)
 {
     if (pindexPrev == NULL)
-        return error("%s : null pindexPrev for block %s", __func__, block.GetHash().ToString().c_str());
+        return state.DoS(0, error("%s : null pindexPrev for block %s", __func__, block.GetHash().ToString().c_str()),
+            REJECT_INVALID, "bad-prevblk");
 
     unsigned int nBitsRequired = GetNextWorkRequired(pindexPrev, &block);
 
@@ -3245,21 +3255,23 @@ bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev)
         double n2 = ConvertBitsToDouble(nBitsRequired);
 
         if (abs(n1 - n2) > n1 * 0.5)
-            return error("%s : incorrect proof of work (DGW pre-fork) - %f %f %f at %d", __func__, abs(n1 - n2), n1, n2, pindexPrev->nHeight + 1);
+            return state.DoS(50, error("%s : incorrect proof of work (DGW pre-fork) - %f %f %f at %d", __func__, abs(n1 - n2), n1, n2, pindexPrev->nHeight + 1),
+                REJECT_INVALID, "bad-diffbits");
 
         return true;
     }
 
     if (block.nBits != nBitsRequired)
-        return error("%s : incorrect proof of work at %d", __func__, pindexPrev->nHeight + 1);
+        return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, pindexPrev->nHeight + 1),
+            REJECT_INVALID, "bad-diffbits");
 
     if (block.IsProofOfStake()) {
         uint256 hashProofOfStake;
         uint256 hash = block.GetHash();
 
-        if(!CheckProofOfStake(block, hashProofOfStake)) {
+        if(!CheckProofOfStake(block, hashProofOfStake, pindexPrev, state)) {
             LogPrintf("WARNING: ProcessBlock(): check proof-of-stake failed for block %s\n", hash.ToString().c_str());
-            return false;
+            return false; // CheckProofOfStake() has already set state
         }
         if(!mapProofOfStake.count(hash)) // add to mapProofOfStake
             mapProofOfStake.insert(make_pair(hash, hashProofOfStake));
@@ -3404,7 +3416,11 @@ bool AcceptBlock(CBlock& block, CValidationState& state, CBlockIndex** ppindex, 
             return state.DoS(100, error("%s : prev block invalid", __func__), REJECT_INVALID, "bad-prevblk");
     }
 
-    if (block.GetHash() != Params().HashGenesisBlock() && !CheckWork(block, pindexPrev))
+    // NOTE: this must stay ahead of AcceptBlockHeader() (the only caller of
+    // AddToBlockIndex) and of the block write further down. It is what keeps a
+    // block with a forged stake from ever reaching our block index or our disk.
+    // See the fake-stake mitigation notes; do not reorder.
+    if (block.GetHash() != Params().HashGenesisBlock() && !CheckWork(block, pindexPrev, state))
         return false;
 
     if (!AcceptBlockHeader(block, state, &pindex))
@@ -3513,14 +3529,34 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
     bool checked = CheckBlock(*pblock, state);
 
     // ppcoin: check proof-of-stake
-    // Limited duplicity on stake: prevents block flood attack
-    // Duplicate stake allowed only when there is orphan child block
-    //if (pblock->IsProofOfStake() && setStakeSeen.count(pblock->GetProofOfStake())/* && !mapOrphanBlocksByPrev.count(hash)*/)
-    //    return error("ProcessNewBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, pblock->GetHash().ToString().c_str());
+    // Limited duplicity on stake: prevents block flood attack.
+    // Two DIFFERENT blocks carrying the same stake at the same nTime is stake
+    // amplification. Drop it locally; never score DoS (an honest staker can
+    // race itself) and never touch the block index.
+    //
+    // This is a cheap pre-check only. The cache is populated further down, once
+    // the block has actually been accepted -- see the note there.
+    //
+    // Restricted to network-sourced blocks (pfrom != NULL). During -reindex and
+    // -loadblock the block file is read in arrival order, not chain order, and
+    // it can legitimately hold two competing blocks sharing one stake key; if
+    // the side-branch one were read first it would evict the main-chain one and
+    // corrupt the rebuilt index. Blocks from our own miner are exempt for the
+    // same reason. The guard exists to damp a network flood, nothing else.
+    if (pfrom != NULL && pblock->IsProofOfStake()) {
+        const pair<COutPoint, unsigned int> kStake = pblock->GetProofOfStake();
+        const uint256 hashThis = pblock->GetHash();
+        LOCK(cs_main);
+        map<pair<COutPoint, unsigned int>, uint256>::const_iterator itStake = mapStakeSeenRecent.find(kStake);
+        if (itStake != mapStakeSeenRecent.end() && itStake->second != hashThis && !mapBlockIndex.count(hashThis))
+            return error("ProcessNewBlock() : duplicate proof-of-stake (%s, %d) for block %s (first seen %s)",
+                kStake.first.ToString().c_str(), kStake.second, hashThis.ToString().c_str(), itStake->second.ToString().c_str());
+    }
 
     // NovaCoin: check proof-of-stake block signature
     if (!pblock->CheckBlockSignature())
-        return error("ProcessNewBlock() : bad proof-of-stake block signature");
+        return state.DoS(100, error("ProcessNewBlock() : bad proof-of-stake block signature"),
+            REJECT_INVALID, "bad-pos-blocksig");
 
     if (pblock->GetHash() != Params().HashGenesisBlock() && pfrom != NULL) {
         //if we get this far, check if the prev block is our prev block, if not then request sync and return false
@@ -3552,6 +3588,18 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
         CheckBlockIndex();
         if (!ret)
             return error("%s : AcceptBlock FAILED", __func__);
+
+        // Only a block that passed full validation and was stored may claim a
+        // stake key. Populating this earlier would let an attacker relay a
+        // mutated copy of an honest block, poison the cache with it, and make
+        // us drop the honest block that follows -- trading one denial of
+        // service for another. Runs under the cs_main held by this loop, and is
+        // limited to network-sourced blocks for the reindex reason noted above.
+        if (pfrom != NULL && pblock->IsProofOfStake()) {
+            if (mapStakeSeenRecent.size() > MAX_STAKE_SEEN_RECENT)
+                mapStakeSeenRecent.clear();
+            mapStakeSeenRecent[pblock->GetProofOfStake()] = pblock->GetHash();
+        }
         break;
     }
 
@@ -3681,10 +3729,6 @@ CBlockIndex* InsertBlockIndex(uint256 hash)
     if (!pindexNew)
         throw runtime_error("LoadBlockIndex() : new CBlockIndex failed");
     mi = mapBlockIndex.insert(make_pair(hash, pindexNew)).first;
-
-    //mark as PoS seen
-    if (pindexNew->IsProofOfStake())
-        setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
 
     pindexNew->phashBlock = &((*mi).first);
 
