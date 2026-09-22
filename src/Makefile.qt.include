@@ -116,20 +116,19 @@ QT_QRC = qt/bitblocks.qrc
 QT_QRC_LOCALE_CPP = qt/qrc_bitblocks_locale.cpp
 QT_QRC_LOCALE = qt/bitblocks_locale.qrc
 
-# moc has to see the configure-time defines, or it emits meta-objects for
-# slots and signals that a conditional (#ifdef) header compiled out.
-MOC_DEFS = -DHAVE_CONFIG_H
-
 # BIP70 payment requests. Off by default: the protocol is dead, the only
 # thing in the GUI that needed Qt's SSL support, and no Qt release under an
 # open licence supports the OpenSSL 3 this tree requires, so depends builds Qt
 # with -no-openssl. Enable with ./configure --enable-bip70 against a Qt that
 # has SSL.
+MOC_DEFS = -DHAVE_CONFIG_H
+
+QT_MOC_CPP += qt/moc_paymentserver.cpp
+
 if ENABLE_BIP70
 PROTOBUF_CC = qt/paymentrequest.pb.cc
 PROTOBUF_H = qt/paymentrequest.pb.h
 PROTOBUF_PROTO = qt/paymentrequest.proto
-QT_MOC_CPP += qt/moc_paymentserver.cpp
 endif
 
 BITCOIN_QT_H = \
@@ -270,13 +269,20 @@ BITCOIN_QT_CPP = \
   qt/utilitydialog.cpp \
   qt/winshutdownmonitor.cpp
 
+# paymentserver is built either way: without BIP70 it still carries the
+# bitblocks: URI handling (command line, QLocalServer IPC, URI parsing).
+# Only paymentrequestplus, which wraps the protobuf payment request, is
+# BIP70-only.
+BITCOIN_QT_H += qt/paymentserver.h
+
 if ENABLE_BIP70
-BITCOIN_QT_H += qt/paymentrequestplus.h qt/paymentserver.h
-BITCOIN_QT_CPP += qt/paymentrequestplus.cpp qt/paymentserver.cpp
+BITCOIN_QT_H += qt/paymentrequestplus.h
+BITCOIN_QT_CPP += qt/paymentrequestplus.cpp
 endif
 
 if ENABLE_WALLET
 BITCOIN_QT_CPP += \
+  qt/paymentserver.cpp \
   qt/addressbookpage.cpp \
   qt/addresstablemodel.cpp \
   qt/askpassphrasedialog.cpp \

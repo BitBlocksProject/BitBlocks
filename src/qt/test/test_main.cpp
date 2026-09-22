@@ -14,7 +14,7 @@
 #include "util.h"
 #include "uritests.h"
 
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
 #include "paymentservertests.h"
 #endif
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     URITests test1;
     if (QTest::qExec(&test1) != 0)
         fInvalid = true;
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
     PaymentServerTests test2;
     if (QTest::qExec(&test2) != 0)
         fInvalid = true;

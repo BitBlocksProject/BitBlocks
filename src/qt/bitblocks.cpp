@@ -24,9 +24,7 @@
 #include "winshutdownmonitor.h"
 
 #ifdef ENABLE_WALLET
-#ifdef ENABLE_BIP70
 #include "paymentserver.h"
-#endif
 #include "walletmodel.h"
 #endif
 #include "masternodeconfig.h"
@@ -208,9 +206,7 @@ public:
 
 #ifdef ENABLE_WALLET
     /// Create payment server
-#ifdef ENABLE_BIP70
     void createPaymentServer();
-#endif
 #endif
     /// Create options model
     void createOptionsModel();
@@ -250,9 +246,7 @@ private:
     BitcoinGUI* window;
     QTimer* pollShutdownTimer;
 #ifdef ENABLE_WALLET
-#ifdef ENABLE_BIP70
     PaymentServer* paymentServer;
-#endif
     WalletModel* walletModel;
 #endif
     int returnValue;
@@ -372,7 +366,7 @@ BitcoinApplication::~BitcoinApplication()
     optionsModel = 0;
 }
 
-#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
+#ifdef ENABLE_WALLET
 void BitcoinApplication::createPaymentServer()
 {
     paymentServer = new PaymentServer(this);
@@ -478,8 +472,10 @@ void BitcoinApplication::initializeResult(int retval)
             window->addWallet(BitcoinGUI::DEFAULT_WALLET, walletModel);
             window->setCurrentWallet(BitcoinGUI::DEFAULT_WALLET);
 
+#ifdef ENABLE_BIP70
             connect(walletModel, SIGNAL(coinsSent(CWallet*, SendCoinsRecipient, QByteArray)),
                 paymentServer, SLOT(fetchPaymentACK(CWallet*, const SendCoinsRecipient&, QByteArray)));
+#endif
         }
 #endif
 
@@ -621,9 +617,7 @@ int main(int argc, char* argv[])
     }
 #ifdef ENABLE_WALLET
     // Parse URIs on command line -- this can affect Params()
-#ifdef ENABLE_BIP70
     PaymentServer::ipcParseCommandLine(argc, argv);
-#endif
 #endif
 
     QScopedPointer<const NetworkStyle> networkStyle(NetworkStyle::instantiate(QString::fromStdString(Params().NetworkIDString())));
@@ -648,16 +642,12 @@ int main(int argc, char* argv[])
     // of the server.
     // - Do this after creating app and setting up translations, so errors are
     // translated properly.
-#ifdef ENABLE_BIP70
     if (PaymentServer::ipcSendCommandLine())
         exit(0);
-#endif
 
     // Start up the payment server early, too, so impatient users that click on
     // bitblocks: links repeatedly have their payment requests routed to this process:
-#ifdef ENABLE_BIP70
     app.createPaymentServer();
-#endif
 #endif
 
     /// 9. Main GUI initialization

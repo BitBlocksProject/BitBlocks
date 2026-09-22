@@ -223,6 +223,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
 
     // Pre-check input data for validity
     foreach (const SendCoinsRecipient& rcp, recipients) {
+#ifdef ENABLE_BIP70
         if (rcp.paymentRequest.IsInitialized()) { // PaymentRequest...
             CAmount subtotal = 0;
             const payments::PaymentDetails& details = rcp.paymentRequest.getDetails();
@@ -238,7 +239,9 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
                 return InvalidAmount;
             }
             total += subtotal;
-        } else { // User-entered bitblocks address / amount:
+        } else
+#endif
+        { // User-entered bitblocks address / amount:
             if (!validateAddress(rcp.address)) {
                 return InvalidAddress;
             }
@@ -322,12 +325,15 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction& tran
 
         // Store PaymentRequests in wtx.vOrderForm in wallet.
         foreach (const SendCoinsRecipient& rcp, recipients) {
+#ifdef ENABLE_BIP70
             if (rcp.paymentRequest.IsInitialized()) {
                 std::string key("PaymentRequest");
                 std::string value;
                 rcp.paymentRequest.SerializeToString(&value);
                 newTx->vOrderForm.push_back(make_pair(key, value));
-            } else if (!rcp.message.isEmpty()) // Message from normal bitblocks:URI (bitblocks:XyZ...?message=example)
+            } else
+#endif
+            if (!rcp.message.isEmpty()) // Message from normal bitblocks:URI (bitblocks:XyZ...?message=example)
             {
                 newTx->vOrderForm.push_back(make_pair("Message", rcp.message.toStdString()));
             }
@@ -350,7 +356,10 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction& tran
     // and emit coinsSent signal for each recipient
     foreach (const SendCoinsRecipient& rcp, transaction.getRecipients()) {
         // Don't touch the address book when we have a payment request
-        if (!rcp.paymentRequest.IsInitialized()) {
+#ifdef ENABLE_BIP70
+        if (!rcp.paymentRequest.IsInitialized())
+#endif
+        {
             std::string strAddress = rcp.address.toStdString();
             CTxDestination dest = CBitcoinAddress(strAddress).Get();
             std::string strLabel = rcp.label.toStdString();

@@ -118,9 +118,11 @@ bool SendCoinsEntry::validate()
     // Check input validity
     bool retval = true;
 
+#ifdef ENABLE_BIP70
     // Skip checks for payment request
     if (recipient.paymentRequest.IsInitialized())
         return retval;
+#endif
 
     if (!model->validateAddress(ui->payTo->text())) {
         ui->payTo->setValid(false);
@@ -148,9 +150,11 @@ bool SendCoinsEntry::validate()
 
 SendCoinsRecipient SendCoinsEntry::getValue()
 {
+#ifdef ENABLE_BIP70
     // Payment request
     if (recipient.paymentRequest.IsInitialized())
         return recipient;
+#endif
 
     // Normal payment
     recipient.address = ui->payTo->text();
@@ -176,6 +180,7 @@ void SendCoinsEntry::setValue(const SendCoinsRecipient& value)
 {
     recipient = value;
 
+#ifdef ENABLE_BIP70
     if (recipient.paymentRequest.IsInitialized()) // payment request
     {
         if (recipient.authenticatedMerchant.isEmpty()) // insecure
@@ -193,7 +198,9 @@ void SendCoinsEntry::setValue(const SendCoinsRecipient& value)
             ui->payAmount_s->setReadOnly(true);
             setCurrentWidget(ui->SendCoins_SecurePaymentRequest);
         }
-    } else // normal payment
+    } else
+#endif
+    // normal payment
     {
         // message
         ui->messageTextLabel->setText(recipient.message);

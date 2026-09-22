@@ -136,10 +136,10 @@ TESTS = $(am__EXEEXT_6) $(am__EXEEXT_5)
 @ENABLE_TESTS_TRUE@am__append_21 = $(CLEAN_BITCOIN_TEST)
 @ENABLE_QT_TRUE@am__append_22 = qt/bitblocks-qt
 @ENABLE_QT_TRUE@am__append_23 = qt/libbitcoinqt.a
-@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__append_24 = qt/moc_paymentserver.cpp
-@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__append_25 = qt/paymentrequestplus.h qt/paymentserver.h
-@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__append_26 = qt/paymentrequestplus.cpp qt/paymentserver.cpp
-@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_27 = \
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__append_24 = qt/paymentrequestplus.h
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__append_25 = qt/paymentrequestplus.cpp
+@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_26 = \
+@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/paymentserver.cpp \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/addressbookpage.cpp \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/addresstablemodel.cpp \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/askpassphrasedialog.cpp \
@@ -170,16 +170,20 @@ TESTS = $(am__EXEEXT_6) $(am__EXEEXT_5)
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/walletmodeltransaction.cpp \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/walletview.cpp
 
-@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@am__append_28 = $(BITCOIN_MM)
-@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@am__append_29 = $(BITCOIN_RC)
-@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_30 = $(LIBBITCOIN_WALLET)
-@ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@am__append_31 = $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
-@ENABLE_QT_TRUE@am__append_32 = $(CLEAN_QT)
+@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@am__append_27 = $(BITCOIN_MM)
+@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@am__append_28 = $(BITCOIN_RC)
+@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_29 = $(LIBBITCOIN_WALLET)
+@ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@am__append_30 = $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+@ENABLE_QT_TRUE@am__append_31 = $(CLEAN_QT)
+@ENABLE_QT_TESTS_TRUE@am__append_32 = qt/test/test_bitblocks-qt
 @ENABLE_QT_TESTS_TRUE@am__append_33 = qt/test/test_bitblocks-qt
-@ENABLE_QT_TESTS_TRUE@am__append_34 = qt/test/test_bitblocks-qt
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_35 = qt/test/moc_paymentservertests.cpp
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_36 = \
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@  qt/test/paymentservertests.cpp
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_34 = qt/test/moc_paymentservertests.cpp
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@am__append_35 = \
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@  qt/test/paymentrequestdata.h \
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@  qt/test/paymentservertests.h
+
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_36 = \
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@  qt/test/paymentservertests.cpp
 
 @ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_37 = $(LIBBITCOIN_WALLET)
 @ENABLE_QT_TESTS_TRUE@@ENABLE_ZMQ_TRUE@am__append_38 = $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
@@ -476,8 +480,8 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 	qt/transactionrecord.h qt/transactiontablemodel.h \
 	qt/transactionview.h qt/utilitydialog.h qt/walletframe.h \
 	qt/walletmodel.h qt/walletmodeltransaction.h qt/walletview.h \
-	qt/winshutdownmonitor.h qt/paymentrequestplus.h \
-	qt/paymentserver.h qt/forms/addressbookpage.ui \
+	qt/winshutdownmonitor.h qt/paymentserver.h \
+	qt/paymentrequestplus.h qt/forms/addressbookpage.ui \
 	qt/forms/askpassphrasedialog.ui qt/forms/bip38tooldialog.ui \
 	qt/forms/coincontroldialog.ui qt/forms/blockexplorer.ui \
 	qt/forms/obfuscationconfig.ui qt/forms/editaddressdialog.ui \
@@ -545,9 +549,9 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 	qt/res/images/walletFrame.png qt/res/images/walletFrame_bg.png \
 	qt/res/css/default.css $(wildcard \
 	$(srcdir)/qt/res/movies/spinner-*.png)
-@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__objects_3 = qt/libbitcoinqt_a-paymentrequestplus.$(OBJEXT) \
-@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@	qt/libbitcoinqt_a-paymentserver.$(OBJEXT)
-@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__objects_4 = qt/libbitcoinqt_a-addressbookpage.$(OBJEXT) \
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__objects_3 = qt/libbitcoinqt_a-paymentrequestplus.$(OBJEXT)
+@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__objects_4 = qt/libbitcoinqt_a-paymentserver.$(OBJEXT) \
+@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@	qt/libbitcoinqt_a-addressbookpage.$(OBJEXT) \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@	qt/libbitcoinqt_a-addresstablemodel.$(OBJEXT) \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@	qt/libbitcoinqt_a-askpassphrasedialog.$(OBJEXT) \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@	qt/libbitcoinqt_a-bip38tooldialog.$(OBJEXT) \
@@ -607,8 +611,7 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 @ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1) \
 @ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1) \
 @ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1)
-@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__objects_7 = qt/libbitcoinqt_a-moc_paymentserver.$(OBJEXT)
-@ENABLE_QT_TRUE@am__objects_8 = qt/libbitcoinqt_a-moc_addressbookpage.$(OBJEXT) \
+@ENABLE_QT_TRUE@am__objects_7 = qt/libbitcoinqt_a-moc_addressbookpage.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_addresstablemodel.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_askpassphrasedialog.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_bip38tooldialog.$(OBJEXT) \
@@ -655,15 +658,15 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_walletframe.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_walletmodel.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_walletview.$(OBJEXT) \
-@ENABLE_QT_TRUE@	$(am__objects_7)
-@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__objects_9 = qt/libbitcoinqt_a-paymentrequest.pb.$(OBJEXT)
-@ENABLE_QT_TRUE@am__objects_10 =  \
+@ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_paymentserver.$(OBJEXT)
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__objects_8 = qt/libbitcoinqt_a-paymentrequest.pb.$(OBJEXT)
+@ENABLE_QT_TRUE@am__objects_9 =  \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-qrc_bitblocks.$(OBJEXT)
-@ENABLE_QT_TRUE@am__objects_11 = qt/libbitcoinqt_a-qrc_bitblocks_locale.$(OBJEXT)
-@ENABLE_QT_TRUE@nodist_qt_libbitcoinqt_a_OBJECTS = $(am__objects_8) \
+@ENABLE_QT_TRUE@am__objects_10 = qt/libbitcoinqt_a-qrc_bitblocks_locale.$(OBJEXT)
+@ENABLE_QT_TRUE@nodist_qt_libbitcoinqt_a_OBJECTS = $(am__objects_7) \
+@ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_8) \
 @ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_9) \
-@ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_10) \
-@ENABLE_QT_TRUE@	$(am__objects_11)
+@ENABLE_QT_TRUE@	$(am__objects_10)
 qt_libbitcoinqt_a_OBJECTS = $(am_qt_libbitcoinqt_a_OBJECTS) \
 	$(nodist_qt_libbitcoinqt_a_OBJECTS)
 univalue_libbitcoin_univalue_a_AR = $(AR) $(ARFLAGS)
@@ -686,7 +689,7 @@ am__libbitcoinconsensus_la_SOURCES_DIST = allocators.cpp \
 	script/interpreter.cpp script/bitcoinconsensus.cpp uint256.cpp \
 	utilstrencodings.cpp compat/glibc_compat.cpp \
 	compat/glibcxx_compat.cpp
-@BUILD_BITCOIN_LIBS_TRUE@@GLIBC_BACK_COMPAT_TRUE@am__objects_12 = compat/libbitcoinconsensus_la-glibc_compat.lo \
+@BUILD_BITCOIN_LIBS_TRUE@@GLIBC_BACK_COMPAT_TRUE@am__objects_11 = compat/libbitcoinconsensus_la-glibc_compat.lo \
 @BUILD_BITCOIN_LIBS_TRUE@@GLIBC_BACK_COMPAT_TRUE@	compat/libbitcoinconsensus_la-glibcxx_compat.lo
 @BUILD_BITCOIN_LIBS_TRUE@am_libbitcoinconsensus_la_OBJECTS =  \
 @BUILD_BITCOIN_LIBS_TRUE@	libbitcoinconsensus_la-allocators.lo \
@@ -706,7 +709,7 @@ am__libbitcoinconsensus_la_SOURCES_DIST = allocators.cpp \
 @BUILD_BITCOIN_LIBS_TRUE@	script/libbitcoinconsensus_la-bitcoinconsensus.lo \
 @BUILD_BITCOIN_LIBS_TRUE@	libbitcoinconsensus_la-uint256.lo \
 @BUILD_BITCOIN_LIBS_TRUE@	libbitcoinconsensus_la-utilstrencodings.lo \
-@BUILD_BITCOIN_LIBS_TRUE@	$(am__objects_12)
+@BUILD_BITCOIN_LIBS_TRUE@	$(am__objects_11)
 libbitcoinconsensus_la_OBJECTS = $(am_libbitcoinconsensus_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -720,9 +723,9 @@ libbitcoinconsensus_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 @BUILD_BITCOIN_LIBS_TRUE@	$(libdir)
 am__bitblocks_cli_SOURCES_DIST = bitblocks-cli.cpp \
 	bitblocks-cli-res.rc
-@TARGET_WINDOWS_TRUE@am__objects_13 = bitblocks-cli-res.$(OBJEXT)
+@TARGET_WINDOWS_TRUE@am__objects_12 = bitblocks-cli-res.$(OBJEXT)
 am_bitblocks_cli_OBJECTS = bitblocks_cli-bitblocks-cli.$(OBJEXT) \
-	$(am__objects_13)
+	$(am__objects_12)
 bitblocks_cli_OBJECTS = $(am_bitblocks_cli_OBJECTS)
 bitblocks_cli_DEPENDENCIES = $(LIBBITCOIN_CLI) $(LIBBITCOIN_UTIL) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -740,9 +743,9 @@ bitblocks_tx_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(bitblocks_tx_LDFLAGS) $(LDFLAGS) -o $@
 am__bitblocksd_SOURCES_DIST = bitblocksd.cpp bitblocksd-res.rc
-@TARGET_WINDOWS_TRUE@am__objects_14 = bitblocksd-res.$(OBJEXT)
+@TARGET_WINDOWS_TRUE@am__objects_13 = bitblocksd-res.$(OBJEXT)
 am_bitblocksd_OBJECTS = bitblocksd-bitblocksd.$(OBJEXT) \
-	$(am__objects_14)
+	$(am__objects_13)
 bitblocksd_OBJECTS = $(am_bitblocksd_OBJECTS)
 am__DEPENDENCIES_2 = $(am__append_2)
 am__DEPENDENCIES_3 = $(am__append_3)
@@ -760,23 +763,23 @@ bitblocksd_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 am__qt_bitblocks_qt_SOURCES_DIST = qt/bitblocks.cpp \
 	qt/macdockiconhandler.mm qt/macnotificationhandler.mm \
 	qt/res/bitblocks-qt-res.rc
-@ENABLE_QT_TRUE@am__objects_15 =  \
+@ENABLE_QT_TRUE@am__objects_14 =  \
 @ENABLE_QT_TRUE@	qt/bitblocks_qt-macdockiconhandler.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/bitblocks_qt-macnotificationhandler.$(OBJEXT)
-@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@am__objects_16 =  \
-@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@	$(am__objects_15)
-@ENABLE_QT_TRUE@am__objects_17 = qt/res/bitblocks-qt-res.$(OBJEXT)
-@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@am__objects_18 =  \
-@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@	$(am__objects_17)
+@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@am__objects_15 =  \
+@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@	$(am__objects_14)
+@ENABLE_QT_TRUE@am__objects_16 = qt/res/bitblocks-qt-res.$(OBJEXT)
+@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@am__objects_17 =  \
+@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@	$(am__objects_16)
 @ENABLE_QT_TRUE@am_qt_bitblocks_qt_OBJECTS =  \
 @ENABLE_QT_TRUE@	qt/bitblocks_qt-bitblocks.$(OBJEXT) \
-@ENABLE_QT_TRUE@	$(am__objects_16) $(am__objects_18)
+@ENABLE_QT_TRUE@	$(am__objects_15) $(am__objects_17)
 qt_bitblocks_qt_OBJECTS = $(am_qt_bitblocks_qt_OBJECTS)
 @ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@am__DEPENDENCIES_5 =  \
 @ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@	$(LIBBITCOIN_ZMQ) \
 @ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@	$(am__DEPENDENCIES_1)
 @ENABLE_QT_TRUE@qt_bitblocks_qt_DEPENDENCIES = qt/libbitcoinqt.a \
-@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_30) \
+@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_29) \
 @ENABLE_QT_TRUE@	$(am__DEPENDENCIES_5) $(LIBBITCOIN_CLI) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_CRYPTO) $(LIBBITCOIN_UNIVALUE) \
@@ -794,11 +797,12 @@ am__qt_test_test_bitblocks_qt_SOURCES_DIST = qt/test/test_main.cpp \
 	qt/test/uritests.cpp qt/test/uritests.h \
 	qt/test/paymentrequestdata.h qt/test/paymentservertests.h \
 	qt/test/paymentservertests.cpp
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__objects_19 = qt/test/test_bitblocks_qt-paymentservertests.$(OBJEXT)
+@ENABLE_QT_TESTS_TRUE@am__objects_18 = $(am__objects_1)
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__objects_19 = qt/test/test_bitblocks_qt-paymentservertests.$(OBJEXT)
 @ENABLE_QT_TESTS_TRUE@am_qt_test_test_bitblocks_qt_OBJECTS = qt/test/test_bitblocks_qt-test_main.$(OBJEXT) \
 @ENABLE_QT_TESTS_TRUE@	qt/test/test_bitblocks_qt-uritests.$(OBJEXT) \
-@ENABLE_QT_TESTS_TRUE@	$(am__objects_1) $(am__objects_19)
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__objects_20 = qt/test/test_bitblocks_qt-moc_paymentservertests.$(OBJEXT)
+@ENABLE_QT_TESTS_TRUE@	$(am__objects_18) $(am__objects_19)
+@ENABLE_BIP70_TRUE@@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__objects_20 = qt/test/test_bitblocks_qt-moc_paymentservertests.$(OBJEXT)
 @ENABLE_QT_TESTS_TRUE@am__objects_21 = qt/test/test_bitblocks_qt-moc_uritests.$(OBJEXT) \
 @ENABLE_QT_TESTS_TRUE@	$(am__objects_20)
 @ENABLE_QT_TESTS_TRUE@nodist_qt_test_test_bitblocks_qt_OBJECTS =  \
@@ -1652,8 +1656,11 @@ MINIUPNPC_LIBS = @MINIUPNPC_LIBS@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
 
-# moc has to see the configure-time defines, or it emits meta-objects for
-# slots and signals that a conditional (#ifdef) header compiled out.
+# BIP70 payment requests. Off by default: the protocol is dead, the only
+# thing in the GUI that needed Qt's SSL support, and no Qt release under an
+# open licence supports the OpenSSL 3 this tree requires, so depends builds Qt
+# with -no-openssl. Enable with ./configure --enable-bip70 against a Qt that
+# has SSL.
 @ENABLE_QT_TRUE@MOC_DEFS = -DHAVE_CONFIG_H
 MOC_DEFS = @MOC_DEFS@
 NM = @NM@
@@ -2142,7 +2149,7 @@ CLEANFILES = leveldb/libleveldb.a leveldb/libmemenv.a *.gcda *.gcno \
 	compat/*.gcda compat/*.gcno crypto/*.gcda crypto/*.gcno \
 	primitives/*.gcda primitives/*.gcno script/*.gcda \
 	script/*.gcno univalue/*.gcda univalue/*.gcno zmq/*.gcda \
-	zmq/*.gcno $(am__append_21) $(am__append_32) $(am__append_39)
+	zmq/*.gcno $(am__append_21) $(am__append_31) $(am__append_39)
 DISTCLEANFILES = obj/build.h
 EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_TESTS_TRUE@TEST_SRCDIR = test
@@ -2301,7 +2308,7 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@	qt/moc_transactionview.cpp \
 @ENABLE_QT_TRUE@	qt/moc_utilitydialog.cpp \
 @ENABLE_QT_TRUE@	qt/moc_walletframe.cpp qt/moc_walletmodel.cpp \
-@ENABLE_QT_TRUE@	qt/moc_walletview.cpp $(am__append_24)
+@ENABLE_QT_TRUE@	qt/moc_walletview.cpp qt/moc_paymentserver.cpp
 @ENABLE_QT_TRUE@BITCOIN_MM = \
 @ENABLE_QT_TRUE@  qt/macdockiconhandler.mm \
 @ENABLE_QT_TRUE@  qt/macnotificationhandler.mm
@@ -2317,15 +2324,14 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@QT_QRC = qt/bitblocks.qrc
 @ENABLE_QT_TRUE@QT_QRC_LOCALE_CPP = qt/qrc_bitblocks_locale.cpp
 @ENABLE_QT_TRUE@QT_QRC_LOCALE = qt/bitblocks_locale.qrc
-
-# BIP70 payment requests. Off by default: the protocol is dead, the only
-# thing in the GUI that needed Qt's SSL support, and no Qt release under an
-# open licence supports the OpenSSL 3 this tree requires, so depends builds Qt
-# with -no-openssl. Enable with ./configure --enable-bip70 against a Qt that
-# has SSL.
 @ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@PROTOBUF_CC = qt/paymentrequest.pb.cc
 @ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@PROTOBUF_H = qt/paymentrequest.pb.h
 @ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@PROTOBUF_PROTO = qt/paymentrequest.proto
+
+# paymentserver is built either way: without BIP70 it still carries the
+# bitblocks: URI handling (command line, QLocalServer IPC, URI parsing).
+# Only paymentrequestplus, which wraps the protobuf payment request, is
+# BIP70-only.
 @ENABLE_QT_TRUE@BITCOIN_QT_H = qt/addressbookpage.h \
 @ENABLE_QT_TRUE@	qt/addresstablemodel.h \
 @ENABLE_QT_TRUE@	qt/askpassphrasedialog.h qt/bip38tooldialog.h \
@@ -2357,7 +2363,8 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@	qt/transactionview.h qt/utilitydialog.h \
 @ENABLE_QT_TRUE@	qt/walletframe.h qt/walletmodel.h \
 @ENABLE_QT_TRUE@	qt/walletmodeltransaction.h qt/walletview.h \
-@ENABLE_QT_TRUE@	qt/winshutdownmonitor.h $(am__append_25)
+@ENABLE_QT_TRUE@	qt/winshutdownmonitor.h qt/paymentserver.h \
+@ENABLE_QT_TRUE@	$(am__append_24)
 @ENABLE_QT_TRUE@RES_ICONS = \
 @ENABLE_QT_TRUE@  qt/res/icons/add.png \
 @ENABLE_QT_TRUE@  qt/res/icons/address-book.png \
@@ -2428,7 +2435,7 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@	qt/qvaluecombobox.cpp qt/rpcconsole.cpp \
 @ENABLE_QT_TRUE@	qt/splashscreen.cpp qt/trafficgraphwidget.cpp \
 @ENABLE_QT_TRUE@	qt/utilitydialog.cpp qt/winshutdownmonitor.cpp \
-@ENABLE_QT_TRUE@	$(am__append_26) $(am__append_27)
+@ENABLE_QT_TRUE@	$(am__append_25) $(am__append_26)
 @ENABLE_QT_TRUE@RES_IMAGES = \
 @ENABLE_QT_TRUE@  qt/res/images/about.png \
 @ENABLE_QT_TRUE@  qt/res/images/splash.png \
@@ -2470,10 +2477,10 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@  $(QT_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
 
 @ENABLE_QT_TRUE@qt_bitblocks_qt_SOURCES = qt/bitblocks.cpp \
-@ENABLE_QT_TRUE@	$(am__append_28) $(am__append_29)
+@ENABLE_QT_TRUE@	$(am__append_27) $(am__append_28)
 @ENABLE_QT_TRUE@qt_bitblocks_qt_LDADD = qt/libbitcoinqt.a \
-@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_30) \
-@ENABLE_QT_TRUE@	$(am__append_31) $(LIBBITCOIN_CLI) \
+@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_29) \
+@ENABLE_QT_TRUE@	$(am__append_30) $(LIBBITCOIN_CLI) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_CRYPTO) $(LIBBITCOIN_UNIVALUE) \
 @ENABLE_QT_TRUE@	$(LIBLEVELDB) $(LIBMEMENV) $(BOOST_LIBS) \
@@ -2488,12 +2495,8 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@QT_QM = $(QT_TS:.ts=.qm)
 @ENABLE_QT_TRUE@CLEAN_QT = $(nodist_qt_libbitcoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno
 @ENABLE_QT_TESTS_TRUE@TEST_QT_MOC_CPP = qt/test/moc_uritests.cpp \
-@ENABLE_QT_TESTS_TRUE@	$(am__append_35)
-@ENABLE_QT_TESTS_TRUE@TEST_QT_H = \
-@ENABLE_QT_TESTS_TRUE@  qt/test/uritests.h \
-@ENABLE_QT_TESTS_TRUE@  qt/test/paymentrequestdata.h \
-@ENABLE_QT_TESTS_TRUE@  qt/test/paymentservertests.h
-
+@ENABLE_QT_TESTS_TRUE@	$(am__append_34)
+@ENABLE_QT_TESTS_TRUE@TEST_QT_H = qt/test/uritests.h $(am__append_35)
 @ENABLE_QT_TESTS_TRUE@qt_test_test_bitblocks_qt_CPPFLAGS = $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
 @ENABLE_QT_TESTS_TRUE@  $(QT_INCLUDES) $(QT_TEST_INCLUDES) $(PROTOBUF_CFLAGS)
 
