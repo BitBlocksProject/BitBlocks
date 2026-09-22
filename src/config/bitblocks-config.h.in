@@ -25,6 +25,9 @@
 /* Version is release */
 #undef COPYRIGHT_YEAR
 
+/* Define if BIP70 payment request support is compiled in */
+#undef ENABLE_BIP70
+
 /* Define to 1 to enable wallet functions */
 #undef ENABLE_WALLET
 

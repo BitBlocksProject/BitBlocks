@@ -683,6 +683,8 @@ CLIENT_VERSION_BUILD
 CLIENT_VERSION_REVISION
 CLIENT_VERSION_MINOR
 CLIENT_VERSION_MAJOR
+ENABLE_BIP70_FALSE
+ENABLE_BIP70_TRUE
 USE_LIBSECP256K1_FALSE
 USE_LIBSECP256K1_TRUE
 GLIBC_BACK_COMPAT_FALSE
@@ -964,6 +966,7 @@ enable_hardening
 enable_reduce_exports
 enable_ccache
 enable_lcov
+enable_bip70
 enable_openssl_ecdsa
 enable_glibc_back_compat
 enable_zmq
@@ -1689,6 +1692,9 @@ Optional Features:
   --enable-ccache         use ccache for building (default is yes if ccache is
                           found)
   --enable-lcov           enable lcov testing (default is no)
+  --enable-bip70          enable BIP70 payment request support in the GUI
+                          (default is no; needs a Qt built with SSL and
+                          protobuf)
   --enable-openssl-ecdsa  verify consensus signatures with OpenSSL instead of
                           libsecp256k1 (default is no; for differential
                           testing and rollback only)
@@ -19920,6 +19926,15 @@ else $as_nop
 fi
 
 
+# Check whether --enable-bip70 was given.
+if test ${enable_bip70+y}
+then :
+  enableval=$enable_bip70; use_bip70=$enableval
+else $as_nop
+  use_bip70=no
+fi
+
+
 # Check whether --enable-openssl-ecdsa was given.
 if test ${enable_openssl_ecdsa+y}
 then :
@@ -30863,6 +30878,20 @@ else
 fi
 
 
+ if test x$use_bip70 = xyes; then
+  ENABLE_BIP70_TRUE=
+  ENABLE_BIP70_FALSE='#'
+else
+  ENABLE_BIP70_TRUE='#'
+  ENABLE_BIP70_FALSE=
+fi
+
+if test x$use_bip70 = xyes; then
+
+printf "%s\n" "#define ENABLE_BIP70 1" >>confdefs.h
+
+fi
+
 if test x$use_openssl_ecdsa = xyes; then
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Using OpenSSL for consensus signature verification" >&5
 printf "%s\n" "Using OpenSSL for consensus signature verification" >&6; }
@@ -31181,6 +31210,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_LIBSECP256K1_TRUE}" && test -z "${USE_LIBSECP256K1_FALSE}"; then
   as_fn_error $? "conditional \"USE_LIBSECP256K1\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_BIP70_TRUE}" && test -z "${ENABLE_BIP70_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_BIP70\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

@@ -116,6 +116,10 @@ QT_QRC = qt/bitblocks.qrc
 QT_QRC_LOCALE_CPP = qt/qrc_bitblocks_locale.cpp
 QT_QRC_LOCALE = qt/bitblocks_locale.qrc
 
+# moc has to see the configure-time defines, or it emits meta-objects for
+# slots and signals that a conditional (#ifdef) header compiled out.
+MOC_DEFS = -DHAVE_CONFIG_H
+
 # BIP70 payment requests. Off by default: the protocol is dead, the only
 # thing in the GUI that needed Qt's SSL support, and no Qt release under an
 # open licence supports the OpenSSL 3 this tree requires, so depends builds Qt
@@ -414,11 +418,11 @@ ui_%.h: %.ui
 	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(UIC) -o $@ $< || (echo "Error creating $@"; false)
 
 %.moc: %.cpp
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(MOC) $(QT_INCLUDES) $(MOC_DEFS) $< | \
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(MOC) $(DEFAULT_INCLUDES) $(QT_INCLUDES) $(MOC_DEFS) $< | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
 moc_%.cpp: %.h
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(MOC) $(QT_INCLUDES) $(MOC_DEFS) $< | \
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(MOC) $(DEFAULT_INCLUDES) $(QT_INCLUDES) $(MOC_DEFS) $< | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
 %.qm: %.ts
