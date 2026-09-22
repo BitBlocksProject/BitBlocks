@@ -155,6 +155,12 @@ AC_ARG_ENABLE([lcov],
   [use_lcov=yes],
   [use_lcov=no])
 
+AC_ARG_ENABLE([openssl-ecdsa],
+  [AS_HELP_STRING([--enable-openssl-ecdsa],
+  [verify consensus signatures with OpenSSL instead of libsecp256k1 (default is no; for differential testing and rollback only)])],
+  [use_openssl_ecdsa=$enableval],
+  [use_openssl_ecdsa=no])
+
 AC_ARG_ENABLE([glibc-back-compat],
   [AS_HELP_STRING([--enable-glibc-back-compat],
   [enable backwards compatibility with glibc and libstdc++])],
@@ -951,6 +957,15 @@ AM_CONDITIONAL([USE_COMPARISON_TOOL],[test x$use_comparison_tool != xno])
 AM_CONDITIONAL([USE_COMPARISON_TOOL_REORG_TESTS],[test x$use_comparison_tool_reorg_test != xno])
 AM_CONDITIONAL([GLIBC_BACK_COMPAT],[test x$use_glibc_compat = xyes])
 AM_CONDITIONAL([USE_LIBSECP256K1],[test x$use_libsecp256k1 = xyes])
+
+dnl Consensus signature verification: libsecp256k1 by default, with the old
+dnl OpenSSL path kept buildable for differential testing and rollback.
+dnl See doc/secp256k1-migration.md.
+if test x$use_openssl_ecdsa = xyes; then
+  AC_MSG_RESULT([Using OpenSSL for consensus signature verification])
+else
+  AC_DEFINE([USE_SECP256K1],[1],[Define this symbol to use libsecp256k1 for consensus signature verification])
+fi
 
 AC_DEFINE(CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MAJOR, [Major version])
 AC_DEFINE(CLIENT_VERSION_MINOR, _CLIENT_VERSION_MINOR, [Minor version])

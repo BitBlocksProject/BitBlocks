@@ -964,6 +964,7 @@ enable_hardening
 enable_reduce_exports
 enable_ccache
 enable_lcov
+enable_openssl_ecdsa
 enable_glibc_back_compat
 enable_zmq
 with_protoc_bindir
@@ -1688,6 +1689,9 @@ Optional Features:
   --enable-ccache         use ccache for building (default is yes if ccache is
                           found)
   --enable-lcov           enable lcov testing (default is no)
+  --enable-openssl-ecdsa  verify consensus signatures with OpenSSL instead of
+                          libsecp256k1 (default is no; for differential
+                          testing and rollback only)
   --enable-glibc-back-compat
                           enable backwards compatibility with glibc and
                           libstdc++
@@ -19916,6 +19920,15 @@ else $as_nop
 fi
 
 
+# Check whether --enable-openssl-ecdsa was given.
+if test ${enable_openssl_ecdsa+y}
+then :
+  enableval=$enable_openssl_ecdsa; use_openssl_ecdsa=$enableval
+else $as_nop
+  use_openssl_ecdsa=no
+fi
+
+
 # Check whether --enable-glibc-back-compat was given.
 if test ${enable_glibc_back_compat+y}
 then :
@@ -30849,6 +30862,15 @@ else
   USE_LIBSECP256K1_FALSE=
 fi
 
+
+if test x$use_openssl_ecdsa = xyes; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Using OpenSSL for consensus signature verification" >&5
+printf "%s\n" "Using OpenSSL for consensus signature verification" >&6; }
+else
+
+printf "%s\n" "#define USE_SECP256K1 1" >>confdefs.h
+
+fi
 
 
 printf "%s\n" "#define CLIENT_VERSION_MAJOR 1" >>confdefs.h

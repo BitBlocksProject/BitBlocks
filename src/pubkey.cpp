@@ -4,6 +4,10 @@
 
 #include "pubkey.h"
 
+#if defined(HAVE_CONFIG_H)
+#include "config/bitblocks-config.h"
+#endif
+
 #include "eccryptoverify.h"
 
 #ifdef USE_SECP256K1

@@ -894,6 +894,17 @@ bool AppInit2(boost::thread_group& threadGroup)
     // Initialize elliptic curve code before anything signs or verifies.
     ECC_Start();
 
+    // Which library validates consensus signatures is not something to infer
+    // from the build configuration: USE_SECP256K1 is an AC_DEFINE that only
+    // reaches a translation unit that includes bitblocks-config.h, and a file
+    // that forgets the include silently compiles the other branch. Say it out
+    // loud, so the running binary can be asked instead of guessed.
+#ifdef USE_SECP256K1
+    LogPrintf("Signature verification: libsecp256k1\n");
+#else
+    LogPrintf("Signature verification: OpenSSL (%s)\n", SSLeay_version(SSLEAY_VERSION));
+#endif
+
     // Sanity check
     if (!InitSanityCheck())
         return InitError(_("Initialization sanity check failed. BitBlocks Core is shutting down."));

@@ -308,6 +308,10 @@
 /* Define if QR support should be compiled in */
 #undef USE_QRCODE
 
+/* Define this symbol to use libsecp256k1 for consensus signature verification
+   */
+#undef USE_SECP256K1
+
 /* UPnP support not compiled if undefined, otherwise value (0 or 1) determines
    default state */
 #undef USE_UPNP
