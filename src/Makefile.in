@@ -111,10 +111,9 @@ TESTS = $(am__EXEEXT_6) $(am__EXEEXT_5)
 @TARGET_WINDOWS_TRUE@am__append_13 = bitblocks-cli-res.rc
 @BUILD_BITCOIN_LIBS_TRUE@@GLIBC_BACK_COMPAT_TRUE@am__append_14 = compat/glibc_compat.cpp \
 @BUILD_BITCOIN_LIBS_TRUE@@GLIBC_BACK_COMPAT_TRUE@	compat/glibcxx_compat.cpp
-@BUILD_BITCOIN_LIBS_TRUE@@USE_LIBSECP256K1_TRUE@am__append_15 = secp256k1/libsecp256k1.la
-@ENABLE_TESTS_TRUE@am__append_16 = test/test_bitblocks test/bitcoin-util-test.py
-@ENABLE_TESTS_TRUE@am__append_17 = test/test_bitblocks
-@ENABLE_TESTS_TRUE@am__append_18 = \
+@ENABLE_TESTS_TRUE@am__append_15 = test/test_bitblocks test/bitcoin-util-test.py
+@ENABLE_TESTS_TRUE@am__append_16 = test/test_bitblocks
+@ENABLE_TESTS_TRUE@am__append_17 = \
 @ENABLE_TESTS_TRUE@	test/bctest.py \
 @ENABLE_TESTS_TRUE@	test/bitcoin-util-test.py \
 @ENABLE_TESTS_TRUE@	test/data/bitcoin-util-test.json \
@@ -127,17 +126,17 @@ TESTS = $(am__EXEEXT_6) $(am__EXEEXT_5)
 @ENABLE_TESTS_TRUE@	test/data/txcreate2.hex \
 @ENABLE_TESTS_TRUE@	test/data/txcreatesign.hex
 
-@ENABLE_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_19 = \
+@ENABLE_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_18 = \
 @ENABLE_TESTS_TRUE@@ENABLE_WALLET_TRUE@  test/accounting_tests.cpp \
 @ENABLE_TESTS_TRUE@@ENABLE_WALLET_TRUE@  test/wallet_tests.cpp \
 @ENABLE_TESTS_TRUE@@ENABLE_WALLET_TRUE@  test/rpc_wallet_tests.cpp
 
-@ENABLE_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_20 = $(LIBBITCOIN_WALLET)
-@ENABLE_TESTS_TRUE@@ENABLE_ZMQ_TRUE@am__append_21 = $(ZMQ_LIBS)
-@ENABLE_TESTS_TRUE@am__append_22 = $(CLEAN_BITCOIN_TEST)
-@ENABLE_QT_TRUE@am__append_23 = qt/bitblocks-qt
-@ENABLE_QT_TRUE@am__append_24 = qt/libbitcoinqt.a
-@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_25 = \
+@ENABLE_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_19 = $(LIBBITCOIN_WALLET)
+@ENABLE_TESTS_TRUE@@ENABLE_ZMQ_TRUE@am__append_20 = $(ZMQ_LIBS)
+@ENABLE_TESTS_TRUE@am__append_21 = $(CLEAN_BITCOIN_TEST)
+@ENABLE_QT_TRUE@am__append_22 = qt/bitblocks-qt
+@ENABLE_QT_TRUE@am__append_23 = qt/libbitcoinqt.a
+@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_24 = \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/addressbookpage.cpp \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/addresstablemodel.cpp \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/askpassphrasedialog.cpp \
@@ -170,20 +169,20 @@ TESTS = $(am__EXEEXT_6) $(am__EXEEXT_5)
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/walletmodeltransaction.cpp \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@  qt/walletview.cpp
 
-@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@am__append_26 = $(BITCOIN_MM)
-@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@am__append_27 = $(BITCOIN_RC)
-@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_28 = $(LIBBITCOIN_WALLET)
-@ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@am__append_29 = $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
-@ENABLE_QT_TRUE@am__append_30 = $(CLEAN_QT)
+@ENABLE_QT_TRUE@@TARGET_DARWIN_TRUE@am__append_25 = $(BITCOIN_MM)
+@ENABLE_QT_TRUE@@TARGET_WINDOWS_TRUE@am__append_26 = $(BITCOIN_RC)
+@ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__append_27 = $(LIBBITCOIN_WALLET)
+@ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@am__append_28 = $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+@ENABLE_QT_TRUE@am__append_29 = $(CLEAN_QT)
+@ENABLE_QT_TESTS_TRUE@am__append_30 = qt/test/test_bitblocks-qt
 @ENABLE_QT_TESTS_TRUE@am__append_31 = qt/test/test_bitblocks-qt
-@ENABLE_QT_TESTS_TRUE@am__append_32 = qt/test/test_bitblocks-qt
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_33 = qt/test/moc_paymentservertests.cpp
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_34 = \
+@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_32 = qt/test/moc_paymentservertests.cpp
+@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_33 = \
 @ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@  qt/test/paymentservertests.cpp
 
-@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_35 = $(LIBBITCOIN_WALLET)
-@ENABLE_QT_TESTS_TRUE@@ENABLE_ZMQ_TRUE@am__append_36 = $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
-@ENABLE_QT_TESTS_TRUE@am__append_37 = $(CLEAN_BITCOIN_QT_TEST)
+@ENABLE_QT_TESTS_TRUE@@ENABLE_WALLET_TRUE@am__append_34 = $(LIBBITCOIN_WALLET)
+@ENABLE_QT_TESTS_TRUE@@ENABLE_ZMQ_TRUE@am__append_35 = $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+@ENABLE_QT_TESTS_TRUE@am__append_36 = $(CLEAN_BITCOIN_QT_TEST)
 subdir = src
 SUBDIRS =
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -676,7 +675,7 @@ am__DEPENDENCIES_1 =
 @BUILD_BITCOIN_LIBS_TRUE@libbitcoinconsensus_la_DEPENDENCIES =  \
 @BUILD_BITCOIN_LIBS_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_BITCOIN_LIBS_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_BITCOIN_LIBS_TRUE@	$(am__append_15)
+@BUILD_BITCOIN_LIBS_TRUE@	secp256k1/libsecp256k1.la
 am__libbitcoinconsensus_la_SOURCES_DIST = allocators.cpp \
 	primitives/transaction.cpp crypto/hmac_sha512.cpp \
 	crypto/scrypt.cpp crypto/sha1.cpp crypto/sha256.cpp \
@@ -775,7 +774,7 @@ qt_bitblocks_qt_OBJECTS = $(am_qt_bitblocks_qt_OBJECTS)
 @ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@	$(LIBBITCOIN_ZMQ) \
 @ENABLE_QT_TRUE@@ENABLE_ZMQ_TRUE@	$(am__DEPENDENCIES_1)
 @ENABLE_QT_TRUE@qt_bitblocks_qt_DEPENDENCIES = qt/libbitcoinqt.a \
-@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_28) \
+@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_27) \
 @ENABLE_QT_TRUE@	$(am__DEPENDENCIES_5) $(LIBBITCOIN_CLI) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_CRYPTO) $(LIBBITCOIN_UNIVALUE) \
@@ -810,7 +809,7 @@ qt_test_test_bitblocks_qt_OBJECTS =  \
 @ENABLE_QT_TESTS_TRUE@@ENABLE_ZMQ_TRUE@	$(am__DEPENDENCIES_1)
 @ENABLE_QT_TESTS_TRUE@qt_test_test_bitblocks_qt_DEPENDENCIES =  \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOINQT) $(LIBBITCOIN_SERVER) \
-@ENABLE_QT_TESTS_TRUE@	$(am__append_35) $(am__DEPENDENCIES_6) \
+@ENABLE_QT_TESTS_TRUE@	$(am__append_34) $(am__DEPENDENCIES_6) \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOIN_UNIVALUE) \
@@ -909,7 +908,7 @@ test_test_bitblocks_OBJECTS = $(am_test_test_bitblocks_OBJECTS) \
 @ENABLE_TESTS_TRUE@	$(LIBBITCOIN_CRYPTO) $(LIBBITCOIN_UNIVALUE) \
 @ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
 @ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@ENABLE_TESTS_TRUE@	$(LIBSECP256K1) $(am__append_20) \
+@ENABLE_TESTS_TRUE@	$(LIBSECP256K1) $(am__append_19) \
 @ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_7) $(am__DEPENDENCIES_1) \
 @ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 @ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_8)
@@ -1799,7 +1798,7 @@ LIBSECP256K1 = secp256k1/libsecp256k1.la
 EXTRA_LIBRARIES = crypto/libbitcoin_crypto.a libbitcoin_util.a \
 	libbitcoin_common.a univalue/libbitcoin_univalue.a \
 	libbitcoin_server.a libbitcoin_cli.a $(am__append_5) \
-	$(am__append_6) $(am__append_24)
+	$(am__append_6) $(am__append_23)
 @BUILD_BITCOIN_LIBS_TRUE@lib_LTLIBRARIES = libbitcoinconsensus.la
 @BUILD_BITCOIN_LIBS_FALSE@LIBBITCOIN_CONSENSUS = 
 @BUILD_BITCOIN_LIBS_TRUE@LIBBITCOIN_CONSENSUS = libbitcoinconsensus.la
@@ -2126,15 +2125,15 @@ bitblocks_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 @BUILD_BITCOIN_LIBS_TRUE@libbitcoinconsensus_la_LDFLAGS = -no-undefined $(RELDFLAGS)
 @BUILD_BITCOIN_LIBS_TRUE@libbitcoinconsensus_la_LIBADD =  \
 @BUILD_BITCOIN_LIBS_TRUE@	$(CRYPTO_LIBS) $(BOOST_LIBS) \
-@BUILD_BITCOIN_LIBS_TRUE@	$(am__append_15)
-@BUILD_BITCOIN_LIBS_TRUE@libbitcoinconsensus_la_CPPFLAGS = $(CRYPTO_CFLAGS) -I$(builddir)/obj -DBUILD_BITCOIN_INTERNAL
+@BUILD_BITCOIN_LIBS_TRUE@	secp256k1/libsecp256k1.la
+@BUILD_BITCOIN_LIBS_TRUE@libbitcoinconsensus_la_CPPFLAGS = $(CRYPTO_CFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
 CLEANFILES = leveldb/libleveldb.a leveldb/libmemenv.a *.gcda *.gcno \
 	compat/*.gcda compat/*.gcno crypto/*.gcda crypto/*.gcno \
 	primitives/*.gcda primitives/*.gcno script/*.gcda \
 	script/*.gcno univalue/*.gcda univalue/*.gcno zmq/*.gcda \
-	zmq/*.gcno $(am__append_22) $(am__append_30) $(am__append_37)
+	zmq/*.gcno $(am__append_21) $(am__append_29) $(am__append_36)
 DISTCLEANFILES = obj/build.h
-EXTRA_DIST = leveldb $(am__append_18)
+EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_TESTS_TRUE@TEST_SRCDIR = test
 @ENABLE_TESTS_TRUE@TEST_BINARY = test/test_bitblocks$(EXEEXT)
 @ENABLE_TESTS_TRUE@JSON_TEST_FILES = \
@@ -2179,7 +2178,7 @@ EXTRA_DIST = leveldb $(am__append_18)
 @ENABLE_TESTS_TRUE@	test/transaction_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/uint256_tests.cpp \
 @ENABLE_TESTS_TRUE@	test/univalue_tests.cpp test/util_tests.cpp \
-@ENABLE_TESTS_TRUE@	$(am__append_19)
+@ENABLE_TESTS_TRUE@	$(am__append_18)
 @ENABLE_TESTS_TRUE@test_test_bitblocks_SOURCES = $(BITCOIN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
 @ENABLE_TESTS_TRUE@test_test_bitblocks_CPPFLAGS = $(BITCOIN_INCLUDES) -I$(builddir)/test/ $(TESTDEFS)
 @ENABLE_TESTS_TRUE@test_test_bitblocks_LDADD = $(LIBBITCOIN_SERVER) \
@@ -2188,10 +2187,10 @@ EXTRA_DIST = leveldb $(am__append_18)
 @ENABLE_TESTS_TRUE@	$(LIBBITCOIN_UNIVALUE) $(LIBLEVELDB) \
 @ENABLE_TESTS_TRUE@	$(LIBMEMENV) $(BOOST_LIBS) \
 @ENABLE_TESTS_TRUE@	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
-@ENABLE_TESTS_TRUE@	$(LIBSECP256K1) $(am__append_20) \
+@ENABLE_TESTS_TRUE@	$(LIBSECP256K1) $(am__append_19) \
 @ENABLE_TESTS_TRUE@	$(LIBBITCOIN_CONSENSUS) $(BDB_LIBS) \
 @ENABLE_TESTS_TRUE@	$(SSL_LIBS) $(CRYPTO_LIBS) \
-@ENABLE_TESTS_TRUE@	$(MINIUPNPC_LIBS) $(am__append_21)
+@ENABLE_TESTS_TRUE@	$(MINIUPNPC_LIBS) $(am__append_20)
 @ENABLE_TESTS_TRUE@test_test_bitblocks_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 @ENABLE_TESTS_TRUE@nodist_test_test_bitblocks_SOURCES = $(GENERATED_TEST_FILES)
 @ENABLE_TESTS_TRUE@CLEAN_BITCOIN_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
@@ -2441,7 +2440,7 @@ EXTRA_DIST = leveldb $(am__append_18)
 @ENABLE_QT_TRUE@	qt/qvaluecombobox.cpp qt/rpcconsole.cpp \
 @ENABLE_QT_TRUE@	qt/splashscreen.cpp qt/trafficgraphwidget.cpp \
 @ENABLE_QT_TRUE@	qt/utilitydialog.cpp qt/winshutdownmonitor.cpp \
-@ENABLE_QT_TRUE@	$(am__append_25)
+@ENABLE_QT_TRUE@	$(am__append_24)
 @ENABLE_QT_TRUE@RES_IMAGES = \
 @ENABLE_QT_TRUE@  qt/res/images/about.png \
 @ENABLE_QT_TRUE@  qt/res/images/splash.png \
@@ -2483,10 +2482,10 @@ EXTRA_DIST = leveldb $(am__append_18)
 @ENABLE_QT_TRUE@  $(QT_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
 
 @ENABLE_QT_TRUE@qt_bitblocks_qt_SOURCES = qt/bitblocks.cpp \
-@ENABLE_QT_TRUE@	$(am__append_26) $(am__append_27)
+@ENABLE_QT_TRUE@	$(am__append_25) $(am__append_26)
 @ENABLE_QT_TRUE@qt_bitblocks_qt_LDADD = qt/libbitcoinqt.a \
-@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_28) \
-@ENABLE_QT_TRUE@	$(am__append_29) $(LIBBITCOIN_CLI) \
+@ENABLE_QT_TRUE@	$(LIBBITCOIN_SERVER) $(am__append_27) \
+@ENABLE_QT_TRUE@	$(am__append_28) $(LIBBITCOIN_CLI) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) \
 @ENABLE_QT_TRUE@	$(LIBBITCOIN_CRYPTO) $(LIBBITCOIN_UNIVALUE) \
 @ENABLE_QT_TRUE@	$(LIBLEVELDB) $(LIBMEMENV) $(BOOST_LIBS) \
@@ -2501,7 +2500,7 @@ EXTRA_DIST = leveldb $(am__append_18)
 @ENABLE_QT_TRUE@QT_QM = $(QT_TS:.ts=.qm)
 @ENABLE_QT_TRUE@CLEAN_QT = $(nodist_qt_libbitcoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno
 @ENABLE_QT_TESTS_TRUE@TEST_QT_MOC_CPP = qt/test/moc_uritests.cpp \
-@ENABLE_QT_TESTS_TRUE@	$(am__append_33)
+@ENABLE_QT_TESTS_TRUE@	$(am__append_32)
 @ENABLE_QT_TESTS_TRUE@TEST_QT_H = \
 @ENABLE_QT_TESTS_TRUE@  qt/test/uritests.h \
 @ENABLE_QT_TESTS_TRUE@  qt/test/paymentrequestdata.h \
@@ -2513,11 +2512,11 @@ EXTRA_DIST = leveldb $(am__append_18)
 @ENABLE_QT_TESTS_TRUE@qt_test_test_bitblocks_qt_SOURCES =  \
 @ENABLE_QT_TESTS_TRUE@	qt/test/test_main.cpp \
 @ENABLE_QT_TESTS_TRUE@	qt/test/uritests.cpp $(TEST_QT_H) \
-@ENABLE_QT_TESTS_TRUE@	$(am__append_34)
+@ENABLE_QT_TESTS_TRUE@	$(am__append_33)
 @ENABLE_QT_TESTS_TRUE@nodist_qt_test_test_bitblocks_qt_SOURCES = $(TEST_QT_MOC_CPP)
 @ENABLE_QT_TESTS_TRUE@qt_test_test_bitblocks_qt_LDADD =  \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOINQT) $(LIBBITCOIN_SERVER) \
-@ENABLE_QT_TESTS_TRUE@	$(am__append_35) $(am__append_36) \
+@ENABLE_QT_TESTS_TRUE@	$(am__append_34) $(am__append_35) \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) \
 @ENABLE_QT_TESTS_TRUE@	$(LIBBITCOIN_UNIVALUE) $(LIBLEVELDB) \

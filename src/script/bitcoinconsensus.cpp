@@ -9,7 +9,27 @@
 #include "script/interpreter.h"
 #include "version.h"
 
+#include <secp256k1.h>
+
 namespace {
+
+/** libbitcoinconsensus does not link key.cpp, so ECC_Start() from key.h is not
+ *  available here. secp256k1 still has to be started before VerifyScript() can
+ *  reach secp256k1_ecdsa_verify(), which would otherwise dereference a NULL
+ *  secp256k1_ecmult_consts. A function-local static gives us a thread-safe
+ *  once-on-first-use initialization with a matching stop at exit. */
+class ECCInit
+{
+public:
+    ECCInit() { secp256k1_start(SECP256K1_START_VERIFY); }
+    ~ECCInit() { secp256k1_stop(); }
+};
+
+void ECC_InitOnce()
+{
+    static ECCInit instance;
+    (void)instance;
+}
 
 /** A class that deserializes a single CTransaction one time. */
 class TxInputStream
@@ -66,6 +86,7 @@ int bitcoinconsensus_verify_script(const unsigned char *scriptPubKey, unsigned i
                                     const unsigned char *txTo        , unsigned int txToLen,
                                     unsigned int nIn, unsigned int flags, bitcoinconsensus_error* err)
 {
+    ECC_InitOnce();
     try {
         TxInputStream stream(SER_NETWORK, PROTOCOL_VERSION, txTo, txToLen);
         CTransaction tx;

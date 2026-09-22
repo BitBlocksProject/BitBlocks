@@ -16,21 +16,31 @@
 //! anonymous namespace
 namespace
 {
-class CSecp256k1Init
-{
-public:
-    CSecp256k1Init()
-    {
-        secp256k1_start(SECP256K1_START_SIGN);
-    }
-    ~CSecp256k1Init()
-    {
-        secp256k1_stop();
-    }
-};
-static CSecp256k1Init instance_of_csecp256k1;
+//! Whether secp256k1_start() has been called without a matching stop.
+bool fECCStarted = false;
 
 } // anon namespace
+
+void ECC_Start()
+{
+    if (fECCStarted)
+        return;
+    // SIGN builds the table used by secp256k1_ecdsa_sign(); VERIFY builds the
+    // one used by secp256k1_ecdsa_verify(), secp256k1_ecdsa_recover_compact()
+    // and secp256k1_ec_pubkey_tweak_add(). Without VERIFY those three
+    // dereference a NULL secp256k1_ecmult_consts in release builds, because
+    // their DEBUG_CHECK guard is compiled out.
+    secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
+    fECCStarted = true;
+}
+
+void ECC_Stop()
+{
+    if (!fECCStarted)
+        return;
+    secp256k1_stop();
+    fECCStarted = false;
+}
 
 bool CKey::Check(const unsigned char* vch)
 {
