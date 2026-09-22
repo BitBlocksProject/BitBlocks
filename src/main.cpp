@@ -3527,7 +3527,8 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
 
     // NovaCoin: check proof-of-stake block signature
     if (!pblock->CheckBlockSignature())
-        return error("ProcessNewBlock() : bad proof-of-stake block signature");
+        return state.DoS(100, error("ProcessNewBlock() : bad proof-of-stake block signature"),
+            REJECT_INVALID, "bad-pos-blocksig");
 
     if (pblock->GetHash() != Params().HashGenesisBlock() && pfrom != NULL) {
         //if we get this far, check if the prev block is our prev block, if not then request sync and return false
