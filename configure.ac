@@ -155,6 +155,12 @@ AC_ARG_ENABLE([lcov],
   [use_lcov=yes],
   [use_lcov=no])
 
+AC_ARG_ENABLE([bip70],
+  [AS_HELP_STRING([--enable-bip70],
+  [enable BIP70 payment request support in the GUI (default is no; needs a Qt built with SSL and protobuf)])],
+  [use_bip70=$enableval],
+  [use_bip70=no])
+
 AC_ARG_ENABLE([openssl-ecdsa],
   [AS_HELP_STRING([--enable-openssl-ecdsa],
   [verify consensus signatures with OpenSSL instead of libsecp256k1 (default is no; for differential testing and rollback only)])],
@@ -957,6 +963,15 @@ AM_CONDITIONAL([USE_COMPARISON_TOOL],[test x$use_comparison_tool != xno])
 AM_CONDITIONAL([USE_COMPARISON_TOOL_REORG_TESTS],[test x$use_comparison_tool_reorg_test != xno])
 AM_CONDITIONAL([GLIBC_BACK_COMPAT],[test x$use_glibc_compat = xyes])
 AM_CONDITIONAL([USE_LIBSECP256K1],[test x$use_libsecp256k1 = xyes])
+
+dnl BIP70 payment requests. Off by default: the protocol is dead, it is the
+dnl only thing in the GUI that needs Qt's SSL support, and no Qt release under
+dnl an open licence supports the OpenSSL 3 this tree requires, so depends
+dnl builds Qt with -no-openssl.
+AM_CONDITIONAL([ENABLE_BIP70],[test x$use_bip70 = xyes])
+if test x$use_bip70 = xyes; then
+  AC_DEFINE([ENABLE_BIP70],[1],[Define if BIP70 payment request support is compiled in])
+fi
 
 dnl Consensus signature verification: libsecp256k1 by default, with the old
 dnl OpenSSL path kept buildable for differential testing and rollback.

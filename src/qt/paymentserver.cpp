@@ -20,8 +20,10 @@
 
 #include <cstdlib>
 
+#ifdef ENABLE_BIP70
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
+#endif
 
 #include <QApplication>
 #include <QByteArray>
@@ -34,6 +36,7 @@
 #include <QList>
 #include <QLocalServer>
 #include <QLocalSocket>
+#ifdef ENABLE_BIP70
 #include <QNetworkAccessManager>
 #include <QNetworkProxy>
 #include <QNetworkReply>
@@ -41,6 +44,7 @@
 #include <QSslCertificate>
 #include <QSslError>
 #include <QSslSocket>
+#endif
 #include <QStringList>
 #include <QTextDocument>
 
@@ -55,6 +59,8 @@ using namespace std;
 
 const int BITCOIN_IPC_CONNECT_TIMEOUT = 1000; // milliseconds
 const QString BITCOIN_IPC_PREFIX("bitblocks:");
+
+#ifdef ENABLE_BIP70
 // BIP70 payment protocol messages
 const char* BIP70_MESSAGE_PAYMENTACK = "PaymentACK";
 const char* BIP70_MESSAGE_PAYMENTREQUEST = "PaymentRequest";
@@ -80,6 +86,7 @@ namespace // Anon namespace
 
     std::unique_ptr<X509_STORE, X509StoreDeleter> certStore;
 }
+#endif // ENABLE_BIP70
 
 //
 // Create a name that is unique for:
@@ -106,6 +113,7 @@ static QString ipcServerName()
 
 static QList<QString> savedPaymentRequests;
 
+#ifdef ENABLE_BIP70
 static void ReportInvalidCertificate(const QSslCertificate& cert)
 {
     qDebug() << "ReportInvalidCertificate : Payment server found an invalid certificate: " << cert.subjectInfo(QSslCertificate::CommonName);
@@ -178,6 +186,7 @@ void PaymentServer::LoadRootCAs(X509_STORE* _store)
     //    or use Qt's blacklist?
     //   "certificate stapling" with server-side caching is more efficient
 }
+#endif // ENABLE_BIP70
 
 //
 // Sending to the server is done synchronously, at startup.
@@ -213,7 +222,9 @@ void PaymentServer::ipcParseCommandLine(int argc, char* argv[])
                     SelectParams(CBaseChainParams::TESTNET);
                 }
             }
-        } else if (QFile::exists(arg)) // Filename
+        }
+#ifdef ENABLE_BIP70
+        else if (QFile::exists(arg)) // Filename
         {
             savedPaymentRequests.append(arg);
 
@@ -225,7 +236,9 @@ void PaymentServer::ipcParseCommandLine(int argc, char* argv[])
                     SelectParams(CBaseChainParams::TESTNET);
                 }
             }
-        } else {
+        }
+#endif
+        else {
             // Printing to debug.log is about the best we can do here, the
             // GUI hasn't started yet so we can't pop up a message box.
             qWarning() << "PaymentServer::ipcSendCommandLine : Payment request file does not exist: " << arg;
@@ -273,12 +286,16 @@ bool PaymentServer::ipcSendCommandLine()
 PaymentServer::PaymentServer(QObject* parent, bool startLocalServer) : QObject(parent),
                                                                        saveURIs(true),
                                                                        uriServer(0),
+#ifdef ENABLE_BIP70
                                                                        netManager(0),
+#endif
                                                                        optionsModel(0)
 {
+#ifdef ENABLE_BIP70
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+#endif
 
     // Install global event filter to catch QFileOpenEvents
     // on Mac: sent when you click bitblocks: links
@@ -300,14 +317,18 @@ PaymentServer::PaymentServer(QObject* parent, bool startLocalServer) : QObject(p
                 tr("Cannot start bitblocks: click-to-pay handler"));
         } else {
             connect(uriServer, SIGNAL(newConnection()), this, SLOT(handleURIConnection()));
+#ifdef ENABLE_BIP70
             connect(this, SIGNAL(receivedPaymentACK(QString)), this, SLOT(handlePaymentACK(QString)));
+#endif
         }
     }
 }
 
 PaymentServer::~PaymentServer()
 {
+#ifdef ENABLE_BIP70
     google::protobuf::ShutdownProtobufLibrary();
+#endif
 }
 
 //
@@ -330,6 +351,7 @@ bool PaymentServer::eventFilter(QObject* object, QEvent* event)
     return QObject::eventFilter(object, event);
 }
 
+#ifdef ENABLE_BIP70
 void PaymentServer::initNetManager()
 {
     if (!optionsModel)
@@ -355,10 +377,13 @@ void PaymentServer::initNetManager()
     connect(netManager, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError>&)),
         this, SLOT(reportSslErrors(QNetworkReply*, const QList<QSslError>&)));
 }
+#endif // ENABLE_BIP70
 
 void PaymentServer::uiReady()
 {
+#ifdef ENABLE_BIP70
     initNetManager();
+#endif
 
     saveURIs = false;
     foreach (const QString& s, savedPaymentRequests) {
@@ -383,6 +408,11 @@ void PaymentServer::handleURIOrFile(const QString& s)
 #endif
         if (uri.hasQueryItem("r")) // payment request URI
         {
+#ifndef ENABLE_BIP70
+            emit message(tr("URI handling"),
+                tr("Payment requests are not supported by this build."),
+                CClientUIInterface::ICON_WARNING);
+#else
             QByteArray temp;
             temp.append(uri.queryItemValue("r"));
             QString decoded = QUrl::fromPercentEncoding(temp);
@@ -397,6 +427,7 @@ void PaymentServer::handleURIOrFile(const QString& s)
                     tr("Payment request fetch URL is invalid: %1").arg(fetchUrl.toString()),
                     CClientUIInterface::ICON_WARNING);
             }
+#endif
 
             return;
         } else // normal URI
@@ -418,6 +449,7 @@ void PaymentServer::handleURIOrFile(const QString& s)
         }
     }
 
+#ifdef ENABLE_BIP70
     if (QFile::exists(s)) // payment request file
     {
         PaymentRequestPlus request;
@@ -431,6 +463,7 @@ void PaymentServer::handleURIOrFile(const QString& s)
 
         return;
     }
+#endif
 }
 
 void PaymentServer::handleURIConnection()
@@ -454,6 +487,7 @@ void PaymentServer::handleURIConnection()
     handleURIOrFile(msg);
 }
 
+#ifdef ENABLE_BIP70
 //
 // Warning: readPaymentRequestFromFile() is used in ipcSendCommandLine()
 // so don't use "emit message()", but "QMessageBox::"!
@@ -686,12 +720,14 @@ void PaymentServer::reportSslErrors(QNetworkReply* reply, const QList<QSslError>
     }
     emit message(tr("Network request error"), errString, CClientUIInterface::MSG_ERROR);
 }
+#endif // ENABLE_BIP70
 
 void PaymentServer::setOptionsModel(OptionsModel* optionsModel)
 {
     this->optionsModel = optionsModel;
 }
 
+#ifdef ENABLE_BIP70
 void PaymentServer::handlePaymentACK(const QString& paymentACKMsg)
 {
     // currently we don't futher process or store the paymentACK message
@@ -702,3 +738,4 @@ X509_STORE* PaymentServer::getCertStore()
 {
     return certStore.get();
 }
+#endif // ENABLE_BIP70

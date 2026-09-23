@@ -683,6 +683,8 @@ CLIENT_VERSION_BUILD
 CLIENT_VERSION_REVISION
 CLIENT_VERSION_MINOR
 CLIENT_VERSION_MAJOR
+ENABLE_BIP70_FALSE
+ENABLE_BIP70_TRUE
 USE_LIBSECP256K1_FALSE
 USE_LIBSECP256K1_TRUE
 GLIBC_BACK_COMPAT_FALSE
@@ -964,6 +966,7 @@ enable_hardening
 enable_reduce_exports
 enable_ccache
 enable_lcov
+enable_bip70
 enable_openssl_ecdsa
 enable_glibc_back_compat
 enable_zmq
@@ -1689,6 +1692,9 @@ Optional Features:
   --enable-ccache         use ccache for building (default is yes if ccache is
                           found)
   --enable-lcov           enable lcov testing (default is no)
+  --enable-bip70          enable BIP70 payment request support in the GUI
+                          (default is no; needs a Qt built with SSL and
+                          protobuf)
   --enable-openssl-ecdsa  verify consensus signatures with OpenSSL instead of
                           libsecp256k1 (default is no; for differential
                           testing and rollback only)
@@ -19920,6 +19926,15 @@ else $as_nop
 fi
 
 
+# Check whether --enable-bip70 was given.
+if test ${enable_bip70+y}
+then :
+  enableval=$enable_bip70; use_bip70=$enableval
+else $as_nop
+  use_bip70=no
+fi
+
+
 # Check whether --enable-openssl-ecdsa was given.
 if test ${enable_openssl_ecdsa+y}
 then :
@@ -25906,8 +25921,102 @@ printf "%s\n" "#define QT_STATICPLUGIN 1" >>confdefs.h
           QT_LIBS="$QT_LIBS -L$qt_plugin_path/accessible"
         fi
       fi
+                    for qt_bundled_lib in qtpcre2 qtpcre qtlibpng qtharfbuzz qtlibjpeg qtfreetype; do
+       as_ac_Lib=`printf "%s\n" "ac_cv_lib_$qt_bundled_lib""_main" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -l$qt_bundled_lib" >&5
+printf %s "checking for main in -l$qt_bundled_lib... " >&6; }
+if eval test \${$as_ac_Lib+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$qt_bundled_lib  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-     if test x$use_pkgconfig = xyes; then
+namespace conftest {
+  extern "C" int main ();
+}
+int
+main (void)
+{
+return conftest::main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  eval "$as_ac_Lib=yes"
+else $as_nop
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"
+then :
+  QT_LIBS="$QT_LIBS -l$qt_bundled_lib"
+fi
+
+     done
+
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lQt5EventDispatcherSupport" >&5
+printf %s "checking for main in -lQt5EventDispatcherSupport... " >&6; }
+if test ${ac_cv_lib_Qt5EventDispatcherSupport_main+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lQt5EventDispatcherSupport  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+namespace conftest {
+  extern "C" int main ();
+}
+int
+main (void)
+{
+return conftest::main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"
+then :
+  ac_cv_lib_Qt5EventDispatcherSupport_main=yes
+else $as_nop
+  ac_cv_lib_Qt5EventDispatcherSupport_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_Qt5EventDispatcherSupport_main" >&5
+printf "%s\n" "$ac_cv_lib_Qt5EventDispatcherSupport_main" >&6; }
+if test "x$ac_cv_lib_Qt5EventDispatcherSupport_main" = xyes
+then :
+  bitcoin_cv_split_platformsupport=yes
+else $as_nop
+  bitcoin_cv_split_platformsupport=no
+fi
+
+     if test x$bitcoin_cv_split_platformsupport = xyes; then
+       QT_LIBS="-lQt5EventDispatcherSupport -lQt5FontDatabaseSupport -lQt5ThemeSupport -lQt5AccessibilitySupport $QT_LIBS"
+       if test x$TARGET_OS = xwindows; then
+                           QT_LIBS="-lQt5WindowsUIAutomationSupport $QT_LIBS"
+         QT_LIBS="$QT_LIBS -luxtheme -ldwmapi -lwtsapi32 -lversion -lwinspool -ld3d11 -ldxgi -ldxguid -lnetapi32 -luserenv -lmpr"
+       elif test x$TARGET_OS = xlinux; then
+         QT_LIBS="-lQt5XcbQpa -lQt5ServiceSupport -lQt5EdidSupport -lQt5GlxSupport $QT_LIBS"
+       fi
+     else
+
+       if test x$use_pkgconfig = xyes; then
 
 pkg_failed=no
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for QTPLATFORM" >&5
@@ -25999,7 +26108,7 @@ else
 printf "%s\n" "yes" >&6; }
 	QT_LIBS="$QTPLATFORM_LIBS $QT_LIBS"
 fi
-       if test x$TARGET_OS = xlinux; then
+         if test x$TARGET_OS = xlinux; then
 
 pkg_failed=no
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for X11XCB" >&5
@@ -26091,7 +26200,7 @@ else
 printf "%s\n" "yes" >&6; }
 	QT_LIBS="$X11XCB_LIBS $QT_LIBS"
 fi
-         if ${PKG_CONFIG} --exists "Qt5Core >= 5.5" 2>/dev/null; then
+           if ${PKG_CONFIG} --exists "Qt5Core >= 5.5" 2>/dev/null; then
 
 pkg_failed=no
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for QTXCBQPA" >&5
@@ -26183,8 +26292,8 @@ else
 printf "%s\n" "yes" >&6; }
 	QT_LIBS="$QTXCBQPA_LIBS $QT_LIBS"
 fi
-         fi
-       elif test x$TARGET_OS = xdarwin; then
+           fi
+         elif test x$TARGET_OS = xdarwin; then
 
 pkg_failed=no
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for QTPRINT" >&5
@@ -26276,11 +26385,12 @@ else
 printf "%s\n" "yes" >&6; }
 	QT_LIBS="$QTPRINT_LIBS $QT_LIBS"
 fi
+         fi
+         else
+           QT_LIBS="-lQt5PlatformSupport $QT_LIBS"
        fi
-       else
-         QT_LIBS="-lQt5PlatformSupport $QT_LIBS"
-     fi
 
+     fi
   else
     if test x$qt_plugin_path != x; then
       QT_LIBS="$QT_LIBS -L$qt_plugin_path/accessible"
@@ -30863,6 +30973,20 @@ else
 fi
 
 
+ if test x$use_bip70 = xyes; then
+  ENABLE_BIP70_TRUE=
+  ENABLE_BIP70_FALSE='#'
+else
+  ENABLE_BIP70_TRUE='#'
+  ENABLE_BIP70_FALSE=
+fi
+
+if test x$use_bip70 = xyes; then
+
+printf "%s\n" "#define ENABLE_BIP70 1" >>confdefs.h
+
+fi
+
 if test x$use_openssl_ecdsa = xyes; then
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Using OpenSSL for consensus signature verification" >&5
 printf "%s\n" "Using OpenSSL for consensus signature verification" >&6; }
@@ -31181,6 +31305,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_LIBSECP256K1_TRUE}" && test -z "${USE_LIBSECP256K1_FALSE}"; then
   as_fn_error $? "conditional \"USE_LIBSECP256K1\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_BIP70_TRUE}" && test -z "${ENABLE_BIP70_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_BIP70\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
