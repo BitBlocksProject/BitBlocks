@@ -273,11 +273,13 @@ void TransactionView::chooseDate(int idx)
             QDateTime(QDate(current.year(), current.month(), 1)),
             TransactionFilterProxy::MAX_DATE);
         break;
-    case LastMonth:
+    case LastMonth: {
+        // Use addMonths() so January correctly wraps to December of last year
+        QDate startOfThisMonth(current.year(), current.month(), 1);
         transactionProxyModel->setDateRange(
-            QDateTime(QDate(current.year(), current.month() - 1, 1)),
-            QDateTime(QDate(current.year(), current.month(), 1)));
-        break;
+            QDateTime(startOfThisMonth.addMonths(-1)),
+            QDateTime(startOfThisMonth));
+    } break;
     case ThisYear:
         transactionProxyModel->setDateRange(
             QDateTime(QDate(current.year(), 1, 1)),
