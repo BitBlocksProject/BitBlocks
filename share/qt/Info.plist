@@ -17,7 +17,7 @@
   <string>APPL</string>
 
   <key>CFBundleGetInfoString</key>
-  <string>1.1.3, Copyright © 2009-2025 The Bitcoin Core developers, 2014-2025 The Dash Core developers, 2015-2025 The BitBlocks Core developers</string>
+  <string>1.1.3, Copyright © 2009-2026 The Bitcoin Core developers, 2014-2026 The Dash Core developers, 2015-2026 The BitBlocks Core developers</string>
 
   <key>CFBundleShortVersionString</key>
   <string>1.1.3</string>

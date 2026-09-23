@@ -31012,7 +31012,7 @@ printf "%s\n" "#define CLIENT_VERSION_BUILD 0" >>confdefs.h
 printf "%s\n" "#define CLIENT_VERSION_IS_RELEASE true" >>confdefs.h
 
 
-printf "%s\n" "#define COPYRIGHT_YEAR 2025" >>confdefs.h
+printf "%s\n" "#define COPYRIGHT_YEAR 2026" >>confdefs.h
 
 CLIENT_VERSION_MAJOR=1
 
@@ -31024,7 +31024,7 @@ CLIENT_VERSION_BUILD=0
 
 CLIENT_VERSION_IS_RELEASE=true
 
-COPYRIGHT_YEAR=2025
+COPYRIGHT_YEAR=2026
 
 
 
