@@ -56,6 +56,10 @@
     <qresource prefix="/css">
         <file alias="default">res/css/default.css</file>
     </qresource>
+    <qresource prefix="/fonts">
+        <file alias="Inter-Regular">res/fonts/Inter-Regular.ttf</file>
+        <file alias="Inter-Bold">res/fonts/Inter-Bold.ttf</file>
+    </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
         <file alias="bitblocks_logo_horizontal">res/images/bitblocks_logo_horizontal.png</file>

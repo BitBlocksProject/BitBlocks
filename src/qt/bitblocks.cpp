@@ -557,6 +557,7 @@ int main(int argc, char* argv[])
 #ifdef Q_OS_MAC
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
+    GUIUtil::loadFonts();
 
     // Register meta types used for QMetaObject::invokeMethod
     qRegisterMetaType<bool*>();

@@ -45,7 +45,7 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle* networkStyle) 
     QString copyrightTextBbk = QChar(0xA9) + QString(" 2018-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The BitBlocks Core developers"));
     QString titleAddText = networkStyle->getTitleAddText();
 
-    QString font = QApplication::font().toString();
+    QString font = QApplication::font().family();
 
     // load the bitmap for writing some text over it
     pixmap = networkStyle->getSplashImage();

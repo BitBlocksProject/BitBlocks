@@ -54,6 +54,8 @@
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QFont>
+#include <QDebug>
+#include <QFontDatabase>
 #include <QLineEdit>
 #include <QSettings>
 #include <QTextDocument> // for Qt::mightBeRichText
@@ -416,6 +418,31 @@ void SubstituteFonts(const QString& language)
     }
 #endif
 #endif
+}
+
+void loadFonts()
+{
+    // Use one bundled font on every platform so the wallet looks the same on
+    // Windows, macOS and Linux instead of depending on what is installed.
+    static const char* const fontFiles[] = {
+        ":/fonts/Inter-Regular",
+        ":/fonts/Inter-Bold",
+    };
+    bool fLoaded = false;
+    for (const char* fontFile : fontFiles) {
+        if (QFontDatabase::addApplicationFont(fontFile) != -1)
+            fLoaded = true;
+        else
+            qWarning() << "loadFonts: failed to load" << fontFile;
+    }
+    if (!fLoaded)
+        return;
+
+    QFont font = QApplication::font();
+    font.setFamily("Inter");
+    font.setStyleHint(QFont::SansSerif);
+    font.setHintingPreference(QFont::PreferVerticalHinting);
+    QApplication::setFont(font);
 }
 
 ToolTipToRichTextFilter::ToolTipToRichTextFilter(int size_threshold, QObject* parent) : QObject(parent),
