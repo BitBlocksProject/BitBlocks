@@ -182,9 +182,6 @@ BitcoinGUI::BitcoinGUI(const NetworkStyle* networkStyle, QWidget* parent) : QMai
     // Disable QSizeGrip to prevent overlap with status bar icons
     statusBar()->setSizeGripEnabled(false);
 
-    // Apply startup fade-in animation
-    GUIUtil::startupFadeIn(this);
-
     // Status bar notification icons
     QFrame* frameBlocks = new QFrame();
     frameBlocks->setContentsMargins(0, 0, 5, 0); // Add right margin to prevent overlap
