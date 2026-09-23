@@ -544,7 +544,8 @@ int main(int argc, char* argv[])
     Q_INIT_RESOURCE(bitblocks_locale);
     Q_INIT_RESOURCE(bitblocks);
 
-    BitcoinApplication app(argc, argv);
+    // High-DPI attributes must be set before the QApplication is created,
+    // otherwise Qt ignores them and the UI renders at the wrong scale.
 #if QT_VERSION > 0x050100
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -552,6 +553,7 @@ int main(int argc, char* argv[])
 #if QT_VERSION >= 0x050600
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
+    BitcoinApplication app(argc, argv);
 #ifdef Q_OS_MAC
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
