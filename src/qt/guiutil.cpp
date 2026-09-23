@@ -54,13 +54,12 @@
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QFont>
+#include <QDebug>
+#include <QFontDatabase>
 #include <QLineEdit>
 #include <QSettings>
 #include <QTextDocument> // for Qt::mightBeRichText
 #include <QThread>
-#include <QPropertyAnimation>
-#include <QAbstractAnimation>
-#include <QGraphicsOpacityEffect>
 
 #if QT_VERSION < 0x050000
 #include <QUrl>
@@ -419,6 +418,31 @@ void SubstituteFonts(const QString& language)
     }
 #endif
 #endif
+}
+
+void loadFonts()
+{
+    // Use one bundled font on every platform so the wallet looks the same on
+    // Windows, macOS and Linux instead of depending on what is installed.
+    static const char* const fontFiles[] = {
+        ":/fonts/Inter-Regular",
+        ":/fonts/Inter-Bold",
+    };
+    bool fLoaded = false;
+    for (const char* fontFile : fontFiles) {
+        if (QFontDatabase::addApplicationFont(fontFile) != -1)
+            fLoaded = true;
+        else
+            qWarning() << "loadFonts: failed to load" << fontFile;
+    }
+    if (!fLoaded)
+        return;
+
+    QFont font = QApplication::font();
+    font.setFamily("Inter");
+    font.setStyleHint(QFont::SansSerif);
+    font.setHintingPreference(QFont::PreferVerticalHinting);
+    QApplication::setFont(font);
 }
 
 ToolTipToRichTextFilter::ToolTipToRichTextFilter(int size_threshold, QObject* parent) : QObject(parent),
@@ -833,7 +857,7 @@ QString loadStyleSheet()
 
     QFile qFile(cssName);
     if (qFile.open(QFile::ReadOnly)) {
-        styleSheet = QLatin1String(qFile.readAll());
+        styleSheet = QString::fromUtf8(qFile.readAll());
     }
 
     return styleSheet;
@@ -919,20 +943,6 @@ QString formatServicesStr(quint64 mask)
 QString formatPingTime(double dPingTime)
 {
     return dPingTime == 0 ? QObject::tr("N/A") : QString(QObject::tr("%1 ms")).arg(QString::number((int)(dPingTime * 1000), 10));
-}
-
-void startupFadeIn(QWidget* widget)
-{
-    if (!widget)
-        return;
-        
-    widget->setWindowOpacity(0.0);
-    QPropertyAnimation* anim = new QPropertyAnimation(widget, "windowOpacity");
-    anim->setDuration(250); // 250ms fade-in
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setEasingCurve(QEasingCurve::OutQuad);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 } // namespace GUIUtil

@@ -1417,18 +1417,9 @@ bool AppInit2(boost::thread_group& threadGroup)
             CWalletDB walletdb(strWalletFile);
             CBlockLocator locator;
             if (walletdb.ReadBestBlock(locator)) {
+                // Always rescan from the wallet's best block: skipping even a few
+                // blocks can miss wallet transactions (e.g. after restoring a backup).
                 pindexRescan = FindForkInGlobalIndex(chainActive, locator);
-                
-                // OPTIMIZATION: If best block is very close to tip (< 10 blocks),
-                // no need to do full rescan
-                if (pindexRescan && chainActive.Tip()) {
-                    int nBlocksBehind = chainActive.Tip()->nHeight - pindexRescan->nHeight;
-                    if (nBlocksBehind <= 10 && nBlocksBehind >= 0) {
-                        // Very close, just update best block without rescan
-                        pindexRescan = chainActive.Tip();
-                        LogPrintf("Best block is very recent (%d blocks behind), skipping rescan\n", nBlocksBehind);
-                    }
-                }
             } else {
                 // First run - check if wallet is empty
                 if (fFirstRun && pwalletMain->mapWallet.empty()) {

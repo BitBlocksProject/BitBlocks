@@ -547,7 +547,8 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 	qt/res/images/rightArrow_small.png \
 	qt/res/images/qtreeview_selected.png \
 	qt/res/images/walletFrame.png qt/res/images/walletFrame_bg.png \
-	qt/res/css/default.css $(wildcard \
+	qt/res/css/default.css qt/res/fonts/Inter-Regular.ttf \
+	qt/res/fonts/Inter-Bold.ttf $(wildcard \
 	$(srcdir)/qt/res/movies/spinner-*.png)
 @ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__objects_3 = qt/libbitcoinqt_a-paymentrequestplus.$(OBJEXT)
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__objects_4 = qt/libbitcoinqt_a-paymentserver.$(OBJEXT) \
@@ -610,7 +611,8 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 @ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1) \
 @ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1) \
 @ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1) \
-@ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1)
+@ENABLE_QT_TRUE@	$(am__objects_1) $(am__objects_1) \
+@ENABLE_QT_TRUE@	$(am__objects_1)
 @ENABLE_QT_TRUE@am__objects_7 = qt/libbitcoinqt_a-moc_addressbookpage.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_addresstablemodel.$(OBJEXT) \
 @ENABLE_QT_TRUE@	qt/libbitcoinqt_a-moc_askpassphrasedialog.$(OBJEXT) \
@@ -2454,6 +2456,10 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@RES_CSS = \
 @ENABLE_QT_TRUE@  qt/res/css/default.css
 
+@ENABLE_QT_TRUE@RES_FONTS = \
+@ENABLE_QT_TRUE@  qt/res/fonts/Inter-Regular.ttf \
+@ENABLE_QT_TRUE@  qt/res/fonts/Inter-Bold.ttf
+
 @ENABLE_QT_TRUE@RES_MOVIES = $(wildcard $(srcdir)/qt/res/movies/spinner-*.png)
 @ENABLE_QT_TRUE@BITCOIN_RC = qt/res/bitblocks-qt-res.rc
 @ENABLE_QT_TRUE@BITCOIN_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
@@ -2463,7 +2469,7 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@  $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
 
 @ENABLE_QT_TRUE@qt_libbitcoinqt_a_SOURCES = $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(QT_FORMS_UI) \
-@ENABLE_QT_TRUE@  $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(PROTOBUF_PROTO) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_MOVIES)
+@ENABLE_QT_TRUE@  $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(PROTOBUF_PROTO) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_FONTS) $(RES_MOVIES)
 
 @ENABLE_QT_TRUE@nodist_qt_libbitcoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
 @ENABLE_QT_TRUE@  $(PROTOBUF_H) $(QT_QRC_CPP) $(QT_QRC_LOCALE_CPP)
@@ -8507,7 +8513,7 @@ clean-local:
 @ENABLE_QT_TRUE@	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name bitblocks_locale $(@D)/$(<F) | \
 @ENABLE_QT_TRUE@	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
-@ENABLE_QT_TRUE@$(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_MOVIES) $(PROTOBUF_H)
+@ENABLE_QT_TRUE@$(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_FONTS) $(RES_MOVIES) $(PROTOBUF_H)
 @ENABLE_QT_TRUE@	@test -f $(RCC)
 @ENABLE_QT_TRUE@	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name bitblocks $< | \
 @ENABLE_QT_TRUE@	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@

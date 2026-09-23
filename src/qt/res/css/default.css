@@ -3,9 +3,9 @@
 /****************************************************************************************/
 
 /* GLOBAL SETTINGS */
-* {
-    font-family: "Segoe UI", "Roboto", "Helvetica", "Arial", sans-serif;
-}
+/* The UI font (Inter) is bundled and set as the application font in
+   GUIUtil::loadFonts(). Do not set font-family on "*" here: it would override
+   the monospace font used for addresses. */
 
 WalletFrame {
     border-image: url(':/images/walletFrame_bg') 0 0 0 0 stretch stretch;
