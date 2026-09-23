@@ -830,7 +830,7 @@ QString loadStyleSheet()
 
     QFile qFile(cssName);
     if (qFile.open(QFile::ReadOnly)) {
-        styleSheet = QLatin1String(qFile.readAll());
+        styleSheet = QString::fromUtf8(qFile.readAll());
     }
 
     return styleSheet;
