@@ -1,6 +1,12 @@
 linux_CFLAGS=-pipe
 linux_CXXFLAGS=$(linux_CFLAGS)
 
+# The X11/XCB packages are shared libraries that link against each other.
+# Point the linker at the depends prefix for those indirect dependencies, or
+# configure checks silently fall back to (or fail without) the build host's
+# system copies.
+linux_LDFLAGS=-Wl,-rpath-link,$(host_prefix)/lib
+
 linux_release_CFLAGS=-O2
 linux_release_CXXFLAGS=$(linux_release_CFLAGS)
 
