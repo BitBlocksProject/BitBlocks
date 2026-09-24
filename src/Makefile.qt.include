@@ -216,16 +216,21 @@ RES_ICONS = \
   qt/res/icons/eye_plus.png \
   qt/res/icons/filesave.png \
   qt/res/icons/history.png \
+  qt/res/icons/history-v2.png \
   qt/res/icons/key.png \
   qt/res/icons/lock_closed.png \
   qt/res/icons/lock_open.png \
   qt/res/icons/masternodes.png \
+  qt/res/icons/masternodes-v2.png \
   qt/res/icons/overview.png \
+  qt/res/icons/overview-v2.png \
   qt/res/icons/qrcode.png \
   qt/res/icons/quit.png \
   qt/res/icons/receive.png \
+  qt/res/icons/receive-v2.png \
   qt/res/icons/remove.png \
   qt/res/icons/send.png \
+  qt/res/icons/send-v2.png \
   qt/res/icons/staking_active.png \
   qt/res/icons/staking_inactive.png \
   qt/res/icons/synced.png \
@@ -319,6 +324,7 @@ RES_IMAGES = \
   qt/res/images/about.png \
   qt/res/images/splash.png \
   qt/res/images/splash_testnet.png \
+  qt/res/images/splash-background-v2.png \
   qt/res/images/bitblocks_logo_horizontal.png \
   qt/res/images/downArrow.png \
   qt/res/images/downArrow_small.png \
@@ -328,7 +334,7 @@ RES_IMAGES = \
   qt/res/images/qtreeview_selected.png \
   qt/res/images/walletFrame.png \
   qt/res/images/walletFrame_bg.png \
-  qt/res/images/walletFrame_bg.png
+  qt/res/images/wallet-background-v2.png
 
 RES_CSS = \
   qt/res/css/default.css
