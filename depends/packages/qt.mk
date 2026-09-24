@@ -4,9 +4,14 @@ $(package)_download_path=https://download.qt.io/archive/qt/5.15/$($(package)_ver
 $(package)_suffix=everywhere-opensource-src-$($(package)_version).tar.xz
 $(package)_file_name=qtbase-$($(package)_suffix)
 $(package)_sha256_hash=0c42c799aa7c89e479a07c451bf5a301e291266ba789e81afc18f95049524edc
-$(package)_linux_dependencies=freetype fontconfig libxcb libX11 xproto libXext
+$(package)_linux_dependencies=freetype fontconfig libxcb libX11 xproto libXext libxkbcommon libxcb_util libxcb_util_image libxcb_util_keysyms libxcb_util_render libxcb_util_wm
 $(package)_build_subdir=qtbase
 $(package)_qt_libs=corelib network widgets gui plugins testlib
+# Only the Linux xcb platform plugin needs QtDBus. Windows and macOS configure
+# Qt with -no-dbus, where the sub-dbus target does not exist.
+ifeq ($(host_os),linux)
+$(package)_qt_libs+=dbus
+endif
 
 # Qt 5.6.1 was from 2016 and cannot be built here any more: it only knows the
 # OpenSSL 1.0 API, while src/bignum.h now requires OpenSSL 3.0. 5.15 is the
@@ -85,6 +90,7 @@ $(package)_config_opts_linux += -system-freetype
 $(package)_config_opts_linux += -fontconfig
 $(package)_config_opts_linux += -no-opengl
 $(package)_config_opts_linux += -no-feature-vulkan
+$(package)_config_opts_linux += -no-feature-gssapi
 $(package)_config_opts_linux += -dbus-runtime
 
 $(package)_config_opts_mingw32  = -no-opengl
@@ -108,11 +114,11 @@ define $(package)_extract_cmds
   echo "$($(package)_qttools_sha256_hash)  $($(package)_source_dir)/$($(package)_qttools_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   $(build_SHA256SUM) -c $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   mkdir qtbase && \
-  tar --strip-components=1 -xf $($(package)_source) -C qtbase && \
+  tar --no-same-owner --strip-components=1 -xf $($(package)_source) -C qtbase && \
   mkdir qttranslations && \
-  tar --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qttranslations_file_name) -C qttranslations && \
+  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qttranslations_file_name) -C qttranslations && \
   mkdir qttools && \
-  tar --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qttools_file_name) -C qttools
+  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qttools_file_name) -C qttools
 endef
 
 define $(package)_preprocess_cmds
@@ -133,7 +139,8 @@ define $(package)_config_cmds
 endef
 
 define $(package)_build_cmds
-  $(MAKE) -C src $(addprefix sub-,$($(package)_qt_libs)) && \
+  $(MAKE) -C src $(addprefix sub-,$(filter corelib dbus,$($(package)_qt_libs))) && \
+  $(MAKE) -C src $(addprefix sub-,$(filter-out corelib dbus,$($(package)_qt_libs))) && \
   $(MAKE) -C ../qttools/src/linguist/lrelease && \
   mkdir -p $(build_prefix)/bin && \
   cp -f ../qttools/bin/lrelease $(build_prefix)/bin/ && \
