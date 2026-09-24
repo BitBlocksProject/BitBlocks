@@ -131,7 +131,7 @@ AC_DEFUN([BITCOIN_QT_CONFIGURE],[
         _BITCOIN_QT_CHECK_STATIC_PLUGINS([Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)],[-lqwindows])
         AC_DEFINE(QT_QPA_PLATFORM_WINDOWS, 1, [Define this symbol if the qt platform is windows])
       elif test x$TARGET_OS = xlinux; then
-        _BITCOIN_QT_CHECK_STATIC_PLUGINS([Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)],[-lqxcb -lxcb-static])
+        _BITCOIN_QT_CHECK_STATIC_PLUGINS([Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)],[-lqxcb])
         AC_DEFINE(QT_QPA_PLATFORM_XCB, 1, [Define this symbol if the qt platform is xcb])
       elif test x$TARGET_OS = xdarwin; then
         AX_CHECK_LINK_FLAG([[-framework IOKit]],[QT_LIBS="$QT_LIBS -framework IOKit"],[AC_MSG_ERROR(could not iokit framework)])
@@ -351,7 +351,10 @@ AC_DEFUN([_BITCOIN_QT_FIND_STATIC_PLUGINS],[
          QT_LIBS="-lQt5WindowsUIAutomationSupport $QT_LIBS"
          QT_LIBS="$QT_LIBS -luxtheme -ldwmapi -lwtsapi32 -lversion -lwinspool -ld3d11 -ldxgi -ldxguid -lnetapi32 -luserenv -lmpr"
        elif test x$TARGET_OS = xlinux; then
-         QT_LIBS="-lQt5XcbQpa -lQt5ServiceSupport -lQt5EdidSupport -lQt5GlxSupport $QT_LIBS"
+         dnl Qt 5.15 uses the system XCB libraries rather than the old bundled
+         dnl xcb-static archive. Keep the libraries after the static Qt
+         dnl archives so --as-needed does not discard them too early.
+         QT_LIBS="-lQt5XcbQpa -lQt5ServiceSupport -lQt5ThemeSupport -lQt5FontDatabaseSupport -lQt5XkbCommonSupport -lQt5EdidSupport -lQt5DBus $QT_LIBS -lfontconfig -lfreetype -lX11-xcb -lxcb-icccm -lxcb-image -lxcb-shm -lxcb-keysyms -lxcb-randr -lxcb-render-util -lxcb-render -lxcb-shape -lxcb-sync -lxcb-xfixes -lxcb-xinerama -lxcb-xkb -lxcb -lXext -lX11 -lxkbcommon-x11 -lxkbcommon"
        fi
      else
        m4_ifdef([PKG_CHECK_MODULES],[
