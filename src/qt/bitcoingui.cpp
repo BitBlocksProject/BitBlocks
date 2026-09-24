@@ -115,7 +115,9 @@ BitcoinGUI::BitcoinGUI(const NetworkStyle* networkStyle, QWidget* parent) : QMai
     /* Open CSS when configured */
     this->setStyleSheet(GUIUtil::loadStyleSheet());
 
-    GUIUtil::restoreWindowGeometry("nWindow", QSize(850, 550), this);
+    // Comfortable on a 1366x768 desktop while leaving room for the taskbar and
+    // window decorations. GUIUtil clamps this to the available screen area.
+    GUIUtil::restoreWindowGeometry("nWindow", QSize(1180, 680), this);
 
     QString windowTitle = tr("BitBlocks Core") + " - ";
 #ifdef ENABLE_WALLET
@@ -522,6 +524,7 @@ void BitcoinGUI::createToolBars()
     if (walletFrame) {
         QToolBar* toolbar = new QToolBar(tr("Tabs toolbar"));
         toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        toolbar->setIconSize(QSize(24, 24));
         toolbar->addAction(overviewAction);
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);

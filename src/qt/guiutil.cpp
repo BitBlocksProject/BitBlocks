@@ -811,11 +811,17 @@ void restoreWindowGeometry(const QString& strSetting, const QSize& defaultSize, 
     QSettings settings;
     QPoint pos = settings.value(strSetting + "Pos").toPoint();
     QSize size = settings.value(strSetting + "Size", defaultSize).toSize();
+    const QRect available = QApplication::desktop()->availableGeometry(parent);
+    const QSize maximumSize(qMax(320, available.width() - 24), qMax(240, available.height() - 24));
+    size = size.boundedTo(maximumSize);
 
     if (!pos.x() && !pos.y()) {
-        QRect screen = QApplication::desktop()->screenGeometry();
-        pos.setX((screen.width() - size.width()) / 2);
-        pos.setY((screen.height() - size.height()) / 2);
+        pos.setX(available.left() + (available.width() - size.width()) / 2);
+        pos.setY(available.top() + (available.height() - size.height()) / 2);
+    } else {
+        // Bring saved geometry back on-screen after a monitor or resolution change.
+        pos.setX(qBound(available.left(), pos.x(), available.right() - size.width() + 1));
+        pos.setY(qBound(available.top(), pos.y(), available.bottom() - size.height() + 1));
     }
 
     parent->resize(size);
