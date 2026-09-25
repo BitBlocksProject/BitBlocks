@@ -521,12 +521,14 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 	qt/res/icons/export.png qt/res/icons/eye.png \
 	qt/res/icons/eye_minus.png qt/res/icons/eye_plus.png \
 	qt/res/icons/filesave.png qt/res/icons/history.png \
-	qt/res/icons/key.png qt/res/icons/lock_closed.png \
-	qt/res/icons/lock_open.png qt/res/icons/masternodes.png \
-	qt/res/icons/overview.png qt/res/icons/qrcode.png \
-	qt/res/icons/quit.png qt/res/icons/receive.png \
+	qt/res/icons/history-v2.png qt/res/icons/key.png \
+	qt/res/icons/lock_closed.png qt/res/icons/lock_open.png \
+	qt/res/icons/masternodes.png qt/res/icons/masternodes-v2.png \
+	qt/res/icons/overview.png qt/res/icons/overview-v2.png \
+	qt/res/icons/qrcode.png qt/res/icons/quit.png \
+	qt/res/icons/receive.png qt/res/icons/receive-v2.png \
 	qt/res/icons/remove.png qt/res/icons/send.png \
-	qt/res/icons/staking_active.png \
+	qt/res/icons/send-v2.png qt/res/icons/staking_active.png \
 	qt/res/icons/staking_inactive.png qt/res/icons/synced.png \
 	qt/res/icons/trade.png qt/res/icons/transaction0.png \
 	qt/res/icons/transaction2.png \
@@ -540,6 +542,7 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 	qt/res/icons/unit_tmbitblocks.png \
 	qt/res/icons/unit_tubitblocks.png qt/res/images/about.png \
 	qt/res/images/splash.png qt/res/images/splash_testnet.png \
+	qt/res/images/splash-background-v2.png \
 	qt/res/images/bitblocks_logo_horizontal.png \
 	qt/res/images/downArrow.png qt/res/images/downArrow_small.png \
 	qt/res/images/upArrow_small.png \
@@ -547,9 +550,9 @@ am__qt_libbitcoinqt_a_SOURCES_DIST = qt/bitcoinaddressvalidator.cpp \
 	qt/res/images/rightArrow_small.png \
 	qt/res/images/qtreeview_selected.png \
 	qt/res/images/walletFrame.png qt/res/images/walletFrame_bg.png \
-	qt/res/css/default.css qt/res/fonts/Inter-Regular.ttf \
-	qt/res/fonts/Inter-Bold.ttf $(wildcard \
-	$(srcdir)/qt/res/movies/spinner-*.png)
+	qt/res/images/wallet-background-v2.png qt/res/css/default.css \
+	qt/res/fonts/Inter-Regular.ttf qt/res/fonts/Inter-Bold.ttf \
+	$(wildcard $(srcdir)/qt/res/movies/spinner-*.png)
 @ENABLE_BIP70_TRUE@@ENABLE_QT_TRUE@am__objects_3 = qt/libbitcoinqt_a-paymentrequestplus.$(OBJEXT)
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@am__objects_4 = qt/libbitcoinqt_a-paymentserver.$(OBJEXT) \
 @ENABLE_QT_TRUE@@ENABLE_WALLET_TRUE@	qt/libbitcoinqt_a-addressbookpage.$(OBJEXT) \
@@ -2397,16 +2400,21 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@  qt/res/icons/eye_plus.png \
 @ENABLE_QT_TRUE@  qt/res/icons/filesave.png \
 @ENABLE_QT_TRUE@  qt/res/icons/history.png \
+@ENABLE_QT_TRUE@  qt/res/icons/history-v2.png \
 @ENABLE_QT_TRUE@  qt/res/icons/key.png \
 @ENABLE_QT_TRUE@  qt/res/icons/lock_closed.png \
 @ENABLE_QT_TRUE@  qt/res/icons/lock_open.png \
 @ENABLE_QT_TRUE@  qt/res/icons/masternodes.png \
+@ENABLE_QT_TRUE@  qt/res/icons/masternodes-v2.png \
 @ENABLE_QT_TRUE@  qt/res/icons/overview.png \
+@ENABLE_QT_TRUE@  qt/res/icons/overview-v2.png \
 @ENABLE_QT_TRUE@  qt/res/icons/qrcode.png \
 @ENABLE_QT_TRUE@  qt/res/icons/quit.png \
 @ENABLE_QT_TRUE@  qt/res/icons/receive.png \
+@ENABLE_QT_TRUE@  qt/res/icons/receive-v2.png \
 @ENABLE_QT_TRUE@  qt/res/icons/remove.png \
 @ENABLE_QT_TRUE@  qt/res/icons/send.png \
+@ENABLE_QT_TRUE@  qt/res/icons/send-v2.png \
 @ENABLE_QT_TRUE@  qt/res/icons/staking_active.png \
 @ENABLE_QT_TRUE@  qt/res/icons/staking_inactive.png \
 @ENABLE_QT_TRUE@  qt/res/icons/synced.png \
@@ -2442,6 +2450,7 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@  qt/res/images/about.png \
 @ENABLE_QT_TRUE@  qt/res/images/splash.png \
 @ENABLE_QT_TRUE@  qt/res/images/splash_testnet.png \
+@ENABLE_QT_TRUE@  qt/res/images/splash-background-v2.png \
 @ENABLE_QT_TRUE@  qt/res/images/bitblocks_logo_horizontal.png \
 @ENABLE_QT_TRUE@  qt/res/images/downArrow.png \
 @ENABLE_QT_TRUE@  qt/res/images/downArrow_small.png \
@@ -2451,7 +2460,7 @@ EXTRA_DIST = leveldb $(am__append_17)
 @ENABLE_QT_TRUE@  qt/res/images/qtreeview_selected.png \
 @ENABLE_QT_TRUE@  qt/res/images/walletFrame.png \
 @ENABLE_QT_TRUE@  qt/res/images/walletFrame_bg.png \
-@ENABLE_QT_TRUE@  qt/res/images/walletFrame_bg.png
+@ENABLE_QT_TRUE@  qt/res/images/wallet-background-v2.png
 
 @ENABLE_QT_TRUE@RES_CSS = \
 @ENABLE_QT_TRUE@  qt/res/css/default.css

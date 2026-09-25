@@ -1,5 +1,5 @@
 /****************************************************************************************/
-/*************** [COLOR CODES] DARK PURPLE:#3A5E60 LIGHT PURPLE:#27B0CC *****************/
+/******************** [COLOR CODES] DEEP TEAL:#3A5E60 CYAN:#27B0CC *********************/
 /****************************************************************************************/
 
 /* GLOBAL SETTINGS */
@@ -19,8 +19,8 @@ QStatusBar {
     background-color:#ffffff;
     border-top: 1px solid #eff2f5;
     color: #333333;
-    min-height: 32px; /* Increased height for better icon spacing */
-    padding: 0 5px; /* Add horizontal padding */
+    min-height: 30px;
+    padding: 0 6px;
 }
 
 QStatusBar::item {
@@ -46,8 +46,8 @@ QStatusBar QLabel[objectName="unitDisplayControl"] {
 QStatusBar QProgressBar {
     margin-left: 5px;
     margin-right: 5px;
-    min-width: 250px;
-    max-width: 400px;
+    min-width: 180px;
+    max-width: 320px;
 }
 
 /* Status Bar Icons Styling (in permanent widget) */
@@ -125,7 +125,7 @@ QMenu::item:selected {
 
 /* TOOLBAR */
 QToolBar {
-    background-color: #3A5E60; /* Dark Purple Brand Color */
+    background-color: #3A5E60;
     border:0px solid #000;
     padding:0;
     margin:0;
@@ -135,8 +135,8 @@ QToolBar {
 QToolBar > QToolButton {
     background-color: #3A5E60;
     border:0px solid #333;
-    min-height:2.5em;
-    padding: 0.5em 1em;
+    min-height:32px;
+    padding: 6px 16px;
     font-weight:bold;
     color:#fff;
     border-bottom: 3px solid transparent; /* Selection indicator */
@@ -630,10 +630,10 @@ QDialog .QTabWidget .QWidget QComboBox {
 /**************************** OVERVIEW SCREEN (CARDS) *******************************************/
 
 QWidget .QFrame#frame, QWidget .QFrame#frameObfuscation, QWidget .QFrame#frame_2 {
-    background-color: rgba(255, 255, 255, 0.8); /* 80% opacity */
-    border: 1px solid #e6e9ed;
-    border-radius: 12px; /* Card Style */
-    margin: 10px;
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid #dfe9ed;
+    border-radius: 10px;
+    margin: 6px;
 }
 
 QWidget .QFrame#frame > .QLabel {
@@ -649,7 +649,8 @@ QWidget .QFrame#frame .QLabel#label_5 { /* Wallet Label */
     color:#3A5E60;
     font-size: 18px;
     font-weight: bold;
-    margin-bottom: 15px;
+    margin-bottom: 4px;
+    min-height: 24px;
 }
 
 QWidget .QFrame#frame .QLabel#labelWalletStatus {
@@ -777,7 +778,7 @@ QWidget .QFrame#frameObfuscation .QLabel#label_2 {
     padding-right:5px;
     font-weight:bold;
     font-size:18px;
-    min-height:35px;
+    min-height:24px;
 }
 
 /* Obfuscation Buttons - Very small size */
@@ -821,8 +822,8 @@ QWidget .QFrame#frameObfuscation #formLayoutWidget .QLabel {
 /**************************** RECENT TRANSACTIONS ***************************************/
 
 QWidget .QFrame#frame_2 {
-    min-width:410px;
-    margin-right:20px;
+    min-width:360px;
+    margin-right:8px;
     margin-left:0;
     margin-top:0;
     background-repeat:none;
@@ -843,7 +844,6 @@ QWidget .QFrame#frame_2 .QLabel#label_4 {
 QWidget .QFrame#frame_2 QListView {
     font-weight:normal;
     font-size:13px;
-    max-width:369px;
     margin-top:12px;
     margin-left:0px;
     background: transparent;

@@ -122,8 +122,9 @@ OverviewPage::OverviewPage(QWidget* parent) : QWidget(parent),
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
     ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
-    // Set minimum height to show at least 5 items, but allow expanding to show more (NUM_ITEMS)
-    ui->listTransactions->setMinimumHeight(5 * (DECORATION_SIZE + 2));
+    // Four rows remain readable on 1366x768 displays while the list can still
+    // expand to show more entries on taller screens.
+    ui->listTransactions->setMinimumHeight(4 * (DECORATION_SIZE + 2));
     ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
