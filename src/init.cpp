@@ -255,6 +255,7 @@ void Shutdown()
     delete pwalletMain;
     pwalletMain = NULL;
 #endif
+    ECC_Stop();
     LogPrintf("%s: done\n", __func__);
 }
 
@@ -613,8 +614,7 @@ void ThreadImport(std::vector<boost::filesystem::path> vImportFiles)
 bool InitSanityCheck(void)
 {
     if (!ECC_InitSanityCheck()) {
-        InitError("OpenSSL appears to lack support for elliptic curve cryptography. For more "
-                  "information, visit https://en.bitcoin.it/wiki/OpenSSL_and_EC_Libraries");
+        InitError("Elliptic curve cryptography sanity check failed. The build is unusable.");
         return false;
     }
     if (!glibc_sanity_test() || !glibcxx_sanity_test())
@@ -890,6 +890,20 @@ bool AppInit2(boost::thread_group& threadGroup)
         nLocalServices |= NODE_BLOOM;
 
     // ********************************************************* Step 4: application initialization: dir lock, daemonize, pidfile, debug log
+
+    // Initialize elliptic curve code before anything signs or verifies.
+    ECC_Start();
+
+    // Which library validates consensus signatures is not something to infer
+    // from the build configuration: USE_SECP256K1 is an AC_DEFINE that only
+    // reaches a translation unit that includes bitblocks-config.h, and a file
+    // that forgets the include silently compiles the other branch. Say it out
+    // loud, so the running binary can be asked instead of guessed.
+#ifdef USE_SECP256K1
+    LogPrintf("Signature verification: libsecp256k1\n");
+#else
+    LogPrintf("Signature verification: OpenSSL (%s)\n", SSLeay_version(SSLEAY_VERSION));
+#endif
 
     // Sanity check
     if (!InitSanityCheck())
@@ -1403,18 +1417,9 @@ bool AppInit2(boost::thread_group& threadGroup)
             CWalletDB walletdb(strWalletFile);
             CBlockLocator locator;
             if (walletdb.ReadBestBlock(locator)) {
+                // Always rescan from the wallet's best block: skipping even a few
+                // blocks can miss wallet transactions (e.g. after restoring a backup).
                 pindexRescan = FindForkInGlobalIndex(chainActive, locator);
-                
-                // OPTIMIZATION: If best block is very close to tip (< 10 blocks),
-                // no need to do full rescan
-                if (pindexRescan && chainActive.Tip()) {
-                    int nBlocksBehind = chainActive.Tip()->nHeight - pindexRescan->nHeight;
-                    if (nBlocksBehind <= 10 && nBlocksBehind >= 0) {
-                        // Very close, just update best block without rescan
-                        pindexRescan = chainActive.Tip();
-                        LogPrintf("Best block is very recent (%d blocks behind), skipping rescan\n", nBlocksBehind);
-                    }
-                }
             } else {
                 // First run - check if wallet is empty
                 if (fFirstRun && pwalletMain->mapWallet.empty()) {

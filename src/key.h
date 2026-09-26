@@ -176,6 +176,12 @@ struct CExtKey {
     void SetMaster(const unsigned char* seed, unsigned int nSeedLen);
 };
 
+/** Initialize the elliptic curve support. Safe to call more than once. */
+void ECC_Start(void);
+
+/** Deinitialize the elliptic curve support. No-op if ECC_Start was not called. */
+void ECC_Stop(void);
+
 /** Check that required EC support is available at runtime */
 bool ECC_InitSanityCheck(void);
 

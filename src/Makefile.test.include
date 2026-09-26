@@ -61,11 +61,13 @@ BITCOIN_TESTS =\
   test/scriptnum_tests.cpp \
   test/serialize_tests.cpp \
   test/sighash_tests.cpp \
+  test/sigencoding_tests.cpp \
   test/sigopcount_tests.cpp \
   test/skiplist_tests.cpp \
   test/test_bitblocks.cpp \
   test/timedata_tests.cpp \
   test/transaction_tests.cpp \
+  test/verifier_scan_tests.cpp \
   test/uint256_tests.cpp \
   test/univalue_tests.cpp \
   test/util_tests.cpp

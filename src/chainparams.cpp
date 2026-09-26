@@ -3,7 +3,7 @@
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2017 The PIVX developers
 // Copyright (c) 2018 LightPayCoin developers
-// Copyright (c) 2018-2025 The BitBlocks developers
+// Copyright (c) 2018-2026 The BitBlocks developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -64,14 +64,16 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (2500000, uint256("4d13a16a6fdf9912a1ad933008c2a17dbd644c389fe5042482d932cac8488ba0"))
     (3000000, uint256("240ba7086366818c6bb3ae94576d9e452c37f4666c7bb1def429faeca8d48902"))
     (3500000, uint256("c18ae698b3c715f503cafdce96847c8deb7f22a4f29b21c0409da35f92ec4e74"))
-    (3685080, uint256("51896e4e2c945550ce3722bb5fe793fb0cc076a4d437f5dd805e97d0bc05b4e9"));
+    (3685080, uint256("51896e4e2c945550ce3722bb5fe793fb0cc076a4d437f5dd805e97d0bc05b4e9"))
+    (4000000, uint256("29fdaf42489ad9b1292bbdfcf71f343846f941c7f54283da0f87e215c4344259"))
+    (4100000, uint256("367b5e764fc8eb18896e2be92a5d739a4c8d98f981b7b832e14ca1d7246381ad"));
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1764953919, // * UNIX timestamp of last checkpoint block
-    7430917,    // * total number of transactions between genesis and last checkpoint
+    1790049912, // * UNIX timestamp of last checkpoint block
+    8267598,    // * total number of transactions between genesis and last checkpoint
                  //   (the tx=... number in the SetBestChain debug.log lines)
-    1440         // * estimated number of transactions per day after checkpoint
+    2880         // * estimated number of transactions per day after checkpoint
 };
 
 static Checkpoints::MapCheckpoints mapCheckpointsTestnet =
@@ -142,11 +144,9 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
 
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed1.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed2.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed3.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed4.bitblockscrypto.com"));
-        vSeeds.push_back(CDNSSeedData("bitblockscrypto.com", "seed5.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("seed1.bitblockscrypto.com", "seed1.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("seed2.bitblockscrypto.com", "seed2.bitblockscrypto.com"));
+        vSeeds.push_back(CDNSSeedData("seed3.bitblockscrypto.com", "seed3.bitblockscrypto.com"));
 
 	base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 25); // B
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 85); // b

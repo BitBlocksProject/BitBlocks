@@ -5,7 +5,13 @@
 #ifndef BITCOIN_QT_WALLETMODEL_H
 #define BITCOIN_QT_WALLETMODEL_H
 
+#if defined(HAVE_CONFIG_H)
+#include "config/bitblocks-config.h"
+#endif
+
+#ifdef ENABLE_BIP70
 #include "paymentrequestplus.h"
+#endif
 #include "walletmodeltransaction.h"
 
 #include "allocators.h" /* for SecureString */
@@ -54,10 +60,12 @@ public:
     // If from a payment request, this is used for storing the memo
     QString message;
 
+#ifdef ENABLE_BIP70
     // If from a payment request, paymentRequest.IsInitialized() will be true
     PaymentRequestPlus paymentRequest;
     // Empty if no authentication or invalid signature/cert/etc.
     QString authenticatedMerchant;
+#endif
 
     static const int CURRENT_VERSION = 1;
     int nVersion;
@@ -70,10 +78,15 @@ public:
         std::string sAddress = address.toStdString();
         std::string sLabel = label.toStdString();
         std::string sMessage = message.toStdString();
+        // Always serialized, so that a build without BIP70 reads and writes the
+        // same stream as one with it -- they are just left empty here.
         std::string sPaymentRequest;
+        std::string sAuthenticatedMerchant;
+#ifdef ENABLE_BIP70
         if (!ser_action.ForRead() && paymentRequest.IsInitialized())
             paymentRequest.SerializeToString(&sPaymentRequest);
-        std::string sAuthenticatedMerchant = authenticatedMerchant.toStdString();
+        sAuthenticatedMerchant = authenticatedMerchant.toStdString();
+#endif
 
         READWRITE(this->nVersion);
         nVersion = this->nVersion;
@@ -88,9 +101,11 @@ public:
             address = QString::fromStdString(sAddress);
             label = QString::fromStdString(sLabel);
             message = QString::fromStdString(sMessage);
+#ifdef ENABLE_BIP70
             if (!sPaymentRequest.empty())
                 paymentRequest.parse(QByteArray::fromRawData(sPaymentRequest.data(), sPaymentRequest.size()));
             authenticatedMerchant = QString::fromStdString(sAuthenticatedMerchant);
+#endif
         }
     }
 };

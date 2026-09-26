@@ -28,63 +28,51 @@ using namespace boost::placeholders;
 
 SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle* networkStyle) : QWidget(0, f), curAlignment(0)
 {
-    // set reference point, paddings
-    int paddingLeft = 14;
-    int paddingTop = 240;
-    int titleVersionVSpace = 17;
-    int titleCopyrightVSpace = 32;
-
-    float fontFactor = 1.0;
+    // Reference points for the wide, compact splash artwork.
+    const int paddingLeft = 24;
+    const int productBaseline = 340;
+    const int copyrightBaseline = 404;
 
     // define text to place
     QString titleText = tr("BitBlocks Core");
-    QString versionText = QString(tr("Version: 1.1.3")).arg(QString::fromStdString(FormatFullVersion()));
+    QString versionText = QString(tr("Version %1")).arg(QString::fromStdString(FormatFullVersion()));
     QString copyrightTextBtc = QChar(0xA9) + QString(tr(" 2009-2014 The Bitcoin developers"));
     QString copyrightTextDash = QChar(0xA9) + QString(tr(" 2014-2015 The Dash developers"));
     QString copyrightTextPivx = QChar(0xA9) + QString(tr(" 2015-2017 The Pivx developers"));
     QString copyrightTextBbk = QChar(0xA9) + QString(" 2018-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The BitBlocks Core developers"));
     QString titleAddText = networkStyle->getTitleAddText();
 
-    QString font = QApplication::font().toString();
+    QString font = QApplication::font().family();
 
     // load the bitmap for writing some text over it
-    pixmap = networkStyle->getSplashImage();
+    pixmap = networkStyle->getSplashImage().scaled(QSize(768, 512), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     QPainter pixPaint(&pixmap);
-    pixPaint.setPen(QColor(0, 0, 0));
+    pixPaint.setPen(QColor(58, 94, 96));
 
-    // check font size and drawing with
-    pixPaint.setFont(QFont(font, 28 * fontFactor));
-    QFontMetrics fm = pixPaint.fontMetrics();
-    int titleTextWidth = fm.width(titleText);
-    if (titleTextWidth > 160) {
-        // strange font rendering, Arial probably not found
-        fontFactor = 0.75;
-    }
+    QFont productFont(font, 16);
+    productFont.setWeight(QFont::DemiBold);
+    pixPaint.setFont(productFont);
+    pixPaint.drawText(paddingLeft, productBaseline, titleText);
 
-    pixPaint.setFont(QFont(font, 25 * fontFactor));
-    fm = pixPaint.fontMetrics();
-    //titleTextWidth = fm.width(titleText);
-    pixPaint.drawText(paddingLeft, paddingTop, titleText);
-
-    pixPaint.setFont(QFont(font, 15 * fontFactor));
-    pixPaint.drawText(paddingLeft, paddingTop + titleVersionVSpace, versionText);
+    pixPaint.setFont(QFont(font, 11));
+    pixPaint.drawText(paddingLeft, productBaseline + 20, versionText);
 
     // draw copyright stuff
-    pixPaint.setFont(QFont(font, 10 * fontFactor));
-    pixPaint.drawText(paddingLeft, paddingTop + titleCopyrightVSpace, copyrightTextBtc);
-    pixPaint.drawText(paddingLeft, paddingTop + titleCopyrightVSpace + 12, copyrightTextDash);
-    pixPaint.drawText(paddingLeft, paddingTop + titleCopyrightVSpace + 24, copyrightTextPivx);
-	pixPaint.drawText(paddingLeft, paddingTop + titleCopyrightVSpace + 36, copyrightTextBbk);
+    pixPaint.setFont(QFont(font, 8));
+    pixPaint.drawText(paddingLeft, copyrightBaseline, copyrightTextBtc);
+    pixPaint.drawText(paddingLeft, copyrightBaseline + 12, copyrightTextDash);
+    pixPaint.drawText(paddingLeft, copyrightBaseline + 24, copyrightTextPivx);
+    pixPaint.drawText(paddingLeft, copyrightBaseline + 36, copyrightTextBbk);
 
     // draw additional text if special network
     if (!titleAddText.isEmpty()) {
-        QFont boldFont = QFont(font, 10 * fontFactor);
+        QFont boldFont = QFont(font, 10);
         boldFont.setWeight(QFont::Bold);
         pixPaint.setFont(boldFont);
-        fm = pixPaint.fontMetrics();
+        QFontMetrics fm = pixPaint.fontMetrics();
         int titleAddTextWidth = fm.width(titleAddText);
-        pixPaint.drawText(pixmap.width() - titleAddTextWidth - 10, pixmap.height() - 25, titleAddText);
+        pixPaint.drawText(pixmap.width() - titleAddTextWidth - 18, 28, titleAddText);
     }
 
     pixPaint.end();

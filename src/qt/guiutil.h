@@ -115,6 +115,10 @@ void showBackups();
 // Replace invalid default fonts with known good ones
 void SubstituteFonts(const QString& language);
 
+/** Register the bundled UI font and make it the application default.
+ * Must be called after the QApplication is created. */
+void loadFonts();
+
 /** Qt event filter that intercepts ToolTipChange events, and replaces the tooltip with a rich text
       representation if needed. This assures that Qt can word-wrap long tooltip messages.
       Tooltips longer than the provided size threshold (in characters) are wrapped.
@@ -215,9 +219,6 @@ QString formatServicesStr(quint64 mask);
 
 /* Format a CNodeCombinedStats.dPingTime into a user-readable string or display N/A, if 0*/
 QString formatPingTime(double dPingTime);
-
-// Animate window opacity to fade in
-void startupFadeIn(QWidget* widget);
 
 #if defined(Q_OS_MAC) && QT_VERSION >= 0x050000
 // workaround for Qt OSX Bug:

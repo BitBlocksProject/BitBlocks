@@ -10,10 +10,11 @@
 #include "config/bitblocks-config.h"
 #endif
 
+#include "key.h"
 #include "util.h"
 #include "uritests.h"
 
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
 #include "paymentservertests.h"
 #endif
 
@@ -33,6 +34,7 @@ Q_IMPORT_PLUGIN(qkrcodecs)
 int main(int argc, char *argv[])
 {
     SetupEnvironment();
+    ECC_Start();
     bool fInvalid = false;
 
     // Don't remove this, it's needed to access
@@ -43,11 +45,12 @@ int main(int argc, char *argv[])
     URITests test1;
     if (QTest::qExec(&test1) != 0)
         fInvalid = true;
-#ifdef ENABLE_WALLET
+#if defined(ENABLE_WALLET) && defined(ENABLE_BIP70)
     PaymentServerTests test2;
     if (QTest::qExec(&test2) != 0)
         fInvalid = true;
 #endif
 
+    ECC_Stop();
     return fInvalid;
 }

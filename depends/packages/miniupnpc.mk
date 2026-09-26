@@ -5,11 +5,16 @@ $(package)_file_name=$(package)-$($(package)_version).tar.gz
 $(package)_sha256_hash=d434ceb8986efbe199c5ca53f90ed53eab290b1e6d0530b717eb6fa49d61f93b
 
 define $(package)_set_vars
-$(package)_build_opts=CC="gcc" AR="ar"
+# Use the toolchain depends selected, not whatever "gcc" happens to be on the
+# build machine: hardcoding it meant a Windows or ARM target was silently
+# compiled with the host compiler. -fPIC stays for linux, which is what the
+# hardcoding was working around. Makefile.mingw never assigns AR, so it has to
+# come through as a make variable rather than only in the environment.
+$(package)_build_opts=CC="$($(package)_cc)" AR="$($(package)_ar)"
 $(package)_build_opts_darwin=OS=Darwin LIBTOOL="$($(package)_libtool)"
 $(package)_build_opts_mingw32=-f Makefile.mingw
-$(package)_build_opts_linux=CC="gcc -fPIC"
-$(package)_build_env+=CFLAGS="-fPIC $($(package)_cflags) $($(package)_cppflags)"
+$(package)_build_opts_linux=CC="$($(package)_cc) -fPIC"
+$(package)_build_env+=CFLAGS="$($(package)_cflags) $($(package)_cppflags)"
 endef
 
 define $(package)_preprocess_cmds

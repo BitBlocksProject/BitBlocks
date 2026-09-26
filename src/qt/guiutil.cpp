@@ -54,13 +54,12 @@
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QFont>
+#include <QDebug>
+#include <QFontDatabase>
 #include <QLineEdit>
 #include <QSettings>
 #include <QTextDocument> // for Qt::mightBeRichText
 #include <QThread>
-#include <QPropertyAnimation>
-#include <QAbstractAnimation>
-#include <QGraphicsOpacityEffect>
 
 #if QT_VERSION < 0x050000
 #include <QUrl>
@@ -419,6 +418,31 @@ void SubstituteFonts(const QString& language)
     }
 #endif
 #endif
+}
+
+void loadFonts()
+{
+    // Use one bundled font on every platform so the wallet looks the same on
+    // Windows, macOS and Linux instead of depending on what is installed.
+    static const char* const fontFiles[] = {
+        ":/fonts/Inter-Regular",
+        ":/fonts/Inter-Bold",
+    };
+    bool fLoaded = false;
+    for (const char* fontFile : fontFiles) {
+        if (QFontDatabase::addApplicationFont(fontFile) != -1)
+            fLoaded = true;
+        else
+            qWarning() << "loadFonts: failed to load" << fontFile;
+    }
+    if (!fLoaded)
+        return;
+
+    QFont font = QApplication::font();
+    font.setFamily("Inter");
+    font.setStyleHint(QFont::SansSerif);
+    font.setHintingPreference(QFont::PreferVerticalHinting);
+    QApplication::setFont(font);
 }
 
 ToolTipToRichTextFilter::ToolTipToRichTextFilter(int size_threshold, QObject* parent) : QObject(parent),
@@ -787,11 +811,17 @@ void restoreWindowGeometry(const QString& strSetting, const QSize& defaultSize, 
     QSettings settings;
     QPoint pos = settings.value(strSetting + "Pos").toPoint();
     QSize size = settings.value(strSetting + "Size", defaultSize).toSize();
+    const QRect available = QApplication::desktop()->availableGeometry(parent);
+    const QSize maximumSize(qMax(320, available.width() - 24), qMax(240, available.height() - 24));
+    size = size.boundedTo(maximumSize);
 
     if (!pos.x() && !pos.y()) {
-        QRect screen = QApplication::desktop()->screenGeometry();
-        pos.setX((screen.width() - size.width()) / 2);
-        pos.setY((screen.height() - size.height()) / 2);
+        pos.setX(available.left() + (available.width() - size.width()) / 2);
+        pos.setY(available.top() + (available.height() - size.height()) / 2);
+    } else {
+        // Bring saved geometry back on-screen after a monitor or resolution change.
+        pos.setX(qBound(available.left(), pos.x(), available.right() - size.width() + 1));
+        pos.setY(qBound(available.top(), pos.y(), available.bottom() - size.height() + 1));
     }
 
     parent->resize(size);
@@ -833,7 +863,7 @@ QString loadStyleSheet()
 
     QFile qFile(cssName);
     if (qFile.open(QFile::ReadOnly)) {
-        styleSheet = QLatin1String(qFile.readAll());
+        styleSheet = QString::fromUtf8(qFile.readAll());
     }
 
     return styleSheet;
@@ -919,20 +949,6 @@ QString formatServicesStr(quint64 mask)
 QString formatPingTime(double dPingTime)
 {
     return dPingTime == 0 ? QObject::tr("N/A") : QString(QObject::tr("%1 ms")).arg(QString::number((int)(dPingTime * 1000), 10));
-}
-
-void startupFadeIn(QWidget* widget)
-{
-    if (!widget)
-        return;
-        
-    widget->setWindowOpacity(0.0);
-    QPropertyAnimation* anim = new QPropertyAnimation(widget, "windowOpacity");
-    anim->setDuration(250); // 250ms fade-in
-    anim->setStartValue(0.0);
-    anim->setEndValue(1.0);
-    anim->setEasingCurve(QEasingCurve::OutQuad);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 } // namespace GUIUtil

@@ -118,6 +118,45 @@ Output binaries
 - `src/bitblocks-tx`
 - `src/qt/bitblocks-qt` when Qt is enabled
 
+Linux release tarball
+---------------------
+
+Like PIVX's gitian/guix builds, release binaries are compiled inside a pinned
+Ubuntu 20.04 container so they only require glibc 2.31 and run on Ubuntu
+20.04+, Debian 11+ and other current distributions. Building directly on a
+newer host (for example Ubuntu 24.04) would raise that requirement to the
+host's glibc. With Docker installed, run:
+
+```bash
+./contrib/release/docker-release.sh linux
+```
+
+Without arguments the script builds both the Linux and the Windows release
+(see [build-windows.md](build-windows.md)).
+
+The script builds all pinned `depends`, compiles optimized binaries, strips
+symbols, audits runtime linkage and the maximum glibc symbol version, and
+writes `release/bitblocks-<version>-<host>.tar.gz` plus a matching `.sha256`
+file. Depends builds are cached in the `bitblocks-release-depends` Docker
+volume and downloaded sources in `depends/sources`. The version string is
+taken from git: a clean checkout of a tag produces `v<tag>`, otherwise the
+commit hash (or `MAIN` for uncommitted changes).
+
+The archive contains the daemon, command-line tools, and Qt wallet. Boost,
+Berkeley DB, OpenSSL, libevent, ZeroMQ, Qt, protobuf, QRencode and libstdc++
+are linked into the binaries. As with PIVX Linux releases, glibc and standard
+desktop libraries remain supplied by the distribution; on minimal systems the
+Qt wallet needs:
+
+```bash
+sudo apt-get install libfontconfig1 libx11-xcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0
+```
+
+`contrib/release/package.sh` does the same build directly on the current
+machine (useful for testing, but the result requires the host's glibc). Set
+`JOBS` to limit parallel compilation, `HOST` to select another target
+supported by `depends`, or `MAX_GLIBC` to change the allowed glibc version.
+
 Runtime defaults
 ----------------
 

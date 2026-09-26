@@ -4,6 +4,10 @@
 
 #include "pubkey.h"
 
+#if defined(HAVE_CONFIG_H)
+#include "config/bitblocks-config.h"
+#endif
+
 #include "eccryptoverify.h"
 
 #ifdef USE_SECP256K1
@@ -15,6 +19,8 @@
 bool CPubKey::Verify(const uint256& hash, const std::vector<unsigned char>& vchSig) const
 {
     if (!IsValid())
+        return false;
+    if (vchSig.empty())
         return false;
 #ifdef USE_SECP256K1
     if (secp256k1_ecdsa_verify((const unsigned char*)&hash, 32, &vchSig[0], vchSig.size(), begin(), size()) != 1)
@@ -56,7 +62,7 @@ bool CPubKey::IsFullyValid() const
     if (!IsValid())
         return false;
 #ifdef USE_SECP256K1
-    if (!secp256k1_ecdsa_pubkey_verify(begin(), size()))
+    if (!secp256k1_ec_pubkey_verify(begin(), size()))
         return false;
 #else
     CECKey key;
@@ -72,8 +78,13 @@ bool CPubKey::Decompress()
         return false;
 #ifdef USE_SECP256K1
     int clen = size();
-    int ret = secp256k1_ecdsa_pubkey_decompress((unsigned char*)begin(), &clen);
-    assert(ret);
+    // Not an assert: the only caller is CScriptCompressor::Decompress(), which
+    // expands a bare-pubkey output back out of the UTXO set. Nothing validates
+    // that such an output holds a point on the curve when it is created, so a
+    // failure here is attacker-reachable and has to stay a graceful false --
+    // which is what the OpenSSL path below has always returned.
+    if (!secp256k1_ec_pubkey_decompress((unsigned char*)begin(), &clen))
+        return false;
     assert(clen == (int)size());
 #else
     CECKey key;
@@ -96,7 +107,7 @@ bool CPubKey::Derive(CPubKey& pubkeyChild, unsigned char ccChild[32], unsigned i
     memcpy(ccChild, out + 32, 32);
 #ifdef USE_SECP256K1
     pubkeyChild = *this;
-    bool ret = secp256k1_ecdsa_pubkey_tweak_add((unsigned char*)pubkeyChild.begin(), pubkeyChild.size(), out);
+    bool ret = secp256k1_ec_pubkey_tweak_add((unsigned char*)pubkeyChild.begin(), pubkeyChild.size(), out);
 #else
     CECKey key;
     bool ret = key.SetPubKey(begin(), size());

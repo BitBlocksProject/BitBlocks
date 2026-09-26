@@ -54,6 +54,11 @@ static void secp256k1_ecdsa_stop(void) {
 }
 
 static int secp256k1_ecdsa_sig_parse(secp256k1_ecdsa_sig_t *r, const unsigned char *sig, int size) {
+    /* BitBlocks patch: the checks below index sig[0], sig[3] and sig[lenr+5]
+       before size is consulted, so a short buffer is read out of bounds. The
+       smallest structurally possible signature is 6 bytes. Documented in
+       doc/secp256k1-migration.md. */
+    if (size < 6) return 0;
     if (sig[0] != 0x30) return 0;
     int lenr = sig[3];
     if (5+lenr >= size) return 0;

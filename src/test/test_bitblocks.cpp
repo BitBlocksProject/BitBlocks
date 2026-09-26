@@ -4,6 +4,7 @@
 
 #define BOOST_TEST_MODULE BitBlocks Test Suite
 
+#include "key.h"
 #include "main.h"
 #include "random.h"
 #include "txdb.h"
@@ -31,6 +32,7 @@ struct TestingSetup {
 
     TestingSetup() {
         SetupEnvironment();
+        ECC_Start();
         fPrintToDebugLog = false; // don't want to write to debug.log file
         fCheckBlockIndex = true;
         SelectParams(CBaseChainParams::UNITTEST);
@@ -72,6 +74,7 @@ struct TestingSetup {
         bitdb.Flush(true);
 #endif
         boost::filesystem::remove_all(pathTemp);
+        ECC_Stop();
     }
 };
 

@@ -395,6 +395,14 @@ void WalletView::transitionTo(QWidget* widget)
         anim->setStartValue(0.0);
         anim->setEndValue(1.0);
         anim->setEasingCurve(QEasingCurve::OutQuad);
+        // Remove the effect once the fade is done. A graphics effect left on the
+        // page makes Qt paint it through an offscreen pixmap, which stops the
+        // transaction table from repainting when new rows arrive and disables
+        // subpixel font antialiasing.
+        connect(anim, &QPropertyAnimation::finished, current, [current, effect]() {
+            if (current->graphicsEffect() == effect)
+                current->setGraphicsEffect(nullptr);
+        });
         anim->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }
