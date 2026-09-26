@@ -64,6 +64,15 @@ namespace
 {
 const int MAX_OUTBOUND_CONNECTIONS = 32;
 
+//! Seconds without any outbound peer before we dial the seed nodes directly
+const int SEED_FALLBACK_DELAY = 60;
+//! Minimum seconds between two direct attempts to the same seed node
+const int SEED_FALLBACK_RETRY_INTERVAL = 60;
+//! Keep re-querying the DNS seeds while we have fewer outbound peers than this
+const int DNSSEED_MIN_OUTBOUND = 2;
+//! Minimum seconds between two DNS seed queries while under-connected
+const int DNSSEED_RETRY_INTERVAL = 5 * 60;
+
 struct ListenSocket {
     SOCKET socket;
     bool whitelisted;
@@ -98,6 +107,10 @@ limitedmap<CInv, int64_t> mapAlreadyAskedFor(MAX_INV_SZ);
 
 static deque<string> vOneShots;
 CCriticalSection cs_vOneShots;
+
+//! Addresses returned by the last DNS seed query, used as seed fallback candidates
+static vector<CAddress> vDNSSeedResults;
+static CCriticalSection cs_vDNSSeedResults;
 
 set<CNetAddr> setservAddNodeAddresses;
 CCriticalSection cs_setservAddNodeAddresses;
@@ -1088,21 +1101,21 @@ void MapPort(bool)
 #endif
 
 
-void ThreadDNSAddressSeed()
+/** Number of outbound peers that completed the version handshake, excluding one-shots. */
+static int CountSuccessfulOutbound()
 {
-    // goal: only query DNS seeds if address need is acute
-    if ((addrman.size() > 0) &&
-        (!GetBoolArg("-forcednsseed", false))) {
-        MilliSleep(11 * 1000);
+    int nOutbound = 0;
+    LOCK(cs_vNodes);
+    BOOST_FOREACH (CNode* pnode, vNodes)
+        if (!pnode->fInbound && !pnode->fOneShot && pnode->fSuccessfullyConnected)
+            nOutbound++;
+    return nOutbound;
+}
 
-        LOCK(cs_vNodes);
-        if (vNodes.size() >= 2) {
-            LogPrintf("P2P peers available. Skipped DNS seeding.\n");
-            return;
-        }
-    }
-
+static void QueryDNSSeeds()
+{
     const vector<CDNSSeedData>& vSeeds = Params().DNSSeeds();
+    vector<CAddress> vResults;
     int found = 0;
 
     LogPrintf("Loading addresses from DNS seeds (could take a while)\n");
@@ -1123,10 +1136,50 @@ void ThreadDNSAddressSeed()
                 }
             }
             addrman.Add(vAdd, CNetAddr(seed.name, true));
+            vResults.insert(vResults.end(), vAdd.begin(), vAdd.end());
         }
     }
 
+    // Keep the previous results if every lookup failed this time
+    if (!vResults.empty()) {
+        LOCK(cs_vDNSSeedResults);
+        vDNSSeedResults.swap(vResults);
+    }
+
     LogPrintf("%d addresses found from DNS seeds\n", found);
+}
+
+void ThreadDNSAddressSeed()
+{
+    // goal: only query DNS seeds if address need is acute
+    bool fQuery = true;
+    if ((addrman.size() > 0) &&
+        (!GetBoolArg("-forcednsseed", false))) {
+        MilliSleep(11 * 1000);
+
+        if (CountSuccessfulOutbound() >= DNSSEED_MIN_OUTBOUND) {
+            LogPrintf("P2P peers available. Skipped DNS seeding.\n");
+            fQuery = false;
+        }
+    }
+
+    // Unlike a one-time startup query, keep watching: a node whose peers.dat is
+    // full of dead addresses, or that lost its peers later on, re-queries the
+    // seeds instead of staying isolated until restarted.
+    int64_t nLastQuery = 0;
+    while (true) {
+        if (fQuery) {
+            QueryDNSSeeds();
+            nLastQuery = GetTime();
+        }
+
+        MilliSleep(60 * 1000);
+
+        int nOutbound = CountSuccessfulOutbound();
+        fQuery = nOutbound < DNSSEED_MIN_OUTBOUND && GetTime() - nLastQuery >= DNSSEED_RETRY_INTERVAL;
+        if (fQuery)
+            LogPrintf("Only %d outbound peers connected, querying DNS seeds again\n", nOutbound);
+    }
 }
 
 
@@ -1159,6 +1212,37 @@ void static ProcessOneShot()
     }
 }
 
+/**
+ * Pick a seed node (fixed seed or latest DNS seed result) to dial directly.
+ * Only called from ThreadOpenConnections, so mapLastTry needs no lock.
+ */
+static CAddress SelectSeedFallback()
+{
+    static map<CService, int64_t> mapLastTry;
+
+    vector<CAddress> vCandidates = Params().FixedSeeds();
+    {
+        LOCK(cs_vDNSSeedResults);
+        vCandidates.insert(vCandidates.end(), vDNSSeedResults.begin(), vDNSSeedResults.end());
+    }
+
+    // Shuffle so a dead seed does not always get the first attempt
+    for (int i = (int)vCandidates.size() - 1; i > 0; i--)
+        std::swap(vCandidates[i], vCandidates[GetRandInt(i + 1)]);
+
+    int64_t nNow = GetTime();
+    BOOST_FOREACH (const CAddress& addr, vCandidates) {
+        if (!addr.IsValid() || IsLocal(addr) || IsLimited(addr))
+            continue;
+        int64_t& nLastTry = mapLastTry[addr];
+        if (nNow - nLastTry < SEED_FALLBACK_RETRY_INTERVAL)
+            continue;
+        nLastTry = nNow;
+        return addr;
+    }
+    return CAddress();
+}
+
 void ThreadOpenConnections()
 {
     // Connect to specific addresses
@@ -1186,19 +1270,6 @@ void ThreadOpenConnections()
         CSemaphoreGrant grant(*semOutbound);
         boost::this_thread::interruption_point();
 
-        // Add seed nodes if DNS seeds are all down (an infrastructure attack?).
-        if (addrman.size() == 0 && (GetTime() - nStart > 60)) {
-            static bool done = false;
-            if (!done) {
-                LogPrintf("Adding fixed seed nodes as DNS doesn't seem to be available.\n");
-                addrman.Add(Params().FixedSeeds(), CNetAddr("127.0.0.1"));
-                done = true;
-            }
-        }
-
-        //
-        // Choose an address to connect to based on most recently seen
-        //
         CAddress addrConnect;
 
         // Only connect out to one peer per network group (/16 for IPv4).
@@ -1215,10 +1286,29 @@ void ThreadOpenConnections()
             }
         }
 
+        // No outbound peer after a minute: DNS seeds may be down (an infrastructure
+        // attack?), or addrman is non-empty but full of dead addresses. Either way,
+        // make the fixed seeds known and dial the seed nodes directly instead of
+        // waiting for addrman to randomly select them.
+        if (nOutbound == 0 && GetTime() - nStart > SEED_FALLBACK_DELAY) {
+            static bool fFixedSeedsAdded = false;
+            if (!fFixedSeedsAdded) {
+                LogPrintf("No outbound peers after %d seconds, adding fixed seed nodes.\n", SEED_FALLBACK_DELAY);
+                addrman.Add(Params().FixedSeeds(), CNetAddr("127.0.0.1"));
+                fFixedSeedsAdded = true;
+            }
+            addrConnect = SelectSeedFallback();
+            if (addrConnect.IsValid())
+                LogPrint("net", "no outbound peers, trying seed node %s\n", addrConnect.ToString());
+        }
+
+        //
+        // Choose an address to connect to based on most recently seen
+        //
         int64_t nANow = GetAdjustedTime();
 
         int nTries = 0;
-        while (true) {
+        while (!addrConnect.IsValid()) {
             CAddress addr = addrman.Select();
 
             // if we selected an invalid address, restart
