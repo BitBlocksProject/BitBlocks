@@ -65,7 +65,7 @@ using namespace std;
 
 #ifdef ENABLE_WALLET
 CWallet* pwalletMain = NULL;
-int nWalletBackups = 10;
+int nWalletBackups = 30;
 #endif
 bool fFeeEstimatesInitialized = false;
 bool fRestartRequested = false; // true: restart false: shutdown
@@ -367,7 +367,7 @@ std::string HelpMessage(HelpMessageMode mode)
 
 #ifdef ENABLE_WALLET
     strUsage += HelpMessageGroup(_("Wallet options:"));
-    strUsage += HelpMessageOpt("-createwalletbackups=<n>", _("Number of automatic wallet backups (default: 10)"));
+    strUsage += HelpMessageOpt("-createwalletbackups=<n>", _("Number of automatic wallet backups (default: 30)"));
     strUsage += HelpMessageOpt("-disablewallet", _("Do not load the wallet and disable wallet RPC calls"));
     strUsage += HelpMessageOpt("-keypool=<n>", strprintf(_("Set key pool size to <n> (default: %u)"), 100));
     if (GetBoolArg("-help-debug", false))
@@ -976,8 +976,8 @@ bool AppInit2(boost::thread_group& threadGroup)
             // Always create backup folder to not confuse the operating system's file browser
             fs::create_directories(backupDir);
         }
-        nWalletBackups = GetArg("-createwalletbackups", 10);
-        nWalletBackups = std::max(0, std::min(10, nWalletBackups));
+        nWalletBackups = GetArg("-createwalletbackups", 30);
+        nWalletBackups = std::max(0, std::min(100, nWalletBackups));
         if (nWalletBackups > 0) {
             if (fs::exists(backupDir)) {
                 // Create backup of the wallet
@@ -1004,7 +1004,7 @@ bool AppInit2(boost::thread_group& threadGroup)
                     dst << src.rdbuf();
 #endif
                 }
-                // Keep only the last 10 backups, including the new one of course
+                // Keep only the last nWalletBackups backups, including the new one of course
                 typedef std::multimap<std::time_t, boost::filesystem::path> folder_set_t;
                 folder_set_t folder_set;
                 boost::filesystem::directory_iterator end_iter;
@@ -1022,7 +1022,7 @@ bool AppInit2(boost::thread_group& threadGroup)
                         }
                     }
                 }
-                // Loop backward through backup files and keep the N newest ones (1 <= N <= 10)
+                // Loop backward through backup files and keep the N newest ones (1 <= N <= 100)
                 int counter = 0;
                 BOOST_REVERSE_FOREACH (PAIRTYPE(const std::time_t, boost::filesystem::path) file, folder_set) {
                     counter++;
