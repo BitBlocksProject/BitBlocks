@@ -241,17 +241,28 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexPrev, uint64_t& nStakeMod
 
 // The stake modifier used to hash for a stake kernel is chosen as the stake
 // modifier about a selection interval later than the coin generating the kernel
-bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifier, int& nStakeModifierHeight, int64_t& nStakeModifierTime, bool fPrintProofOfStake)
+//
+// The walk follows the chain ending at pindexPrev (the parent of the block being
+// staked or checked), not chainActive. Past a fork point the two chains carry
+// different modifiers, and walking chainActive made honest blocks of the other
+// branch fail their kernel check, so a node on a minority fork could never even
+// index the majority chain. When pindexPrev is our tip this is exactly the old
+// chainActive walk, so blocks on top of our tip get the same result as before.
+bool GetKernelStakeModifier(const CBlockIndex* pindexPrev, uint256 hashBlockFrom, uint64_t& nStakeModifier, int& nStakeModifierHeight, int64_t& nStakeModifierTime, bool fPrintProofOfStake)
 {
     nStakeModifier = 0;
+    if (pindexPrev == NULL)
+        return error("GetKernelStakeModifier() : null pindexPrev");
     if (!mapBlockIndex.count(hashBlockFrom))
         return error("GetKernelStakeModifier() : block not indexed");
     const CBlockIndex* pindexFrom = mapBlockIndex[hashBlockFrom];
+    if (pindexPrev->GetAncestor(pindexFrom->nHeight) != pindexFrom)
+        return error("GetKernelStakeModifier() : block from is not an ancestor of pindexPrev");
     nStakeModifierHeight = pindexFrom->nHeight;
     nStakeModifierTime = pindexFrom->GetBlockTime();
     int64_t nStakeModifierSelectionInterval = GetStakeModifierSelectionInterval();
     const CBlockIndex* pindex = pindexFrom;
-    CBlockIndex* pindexNext = chainActive[pindexFrom->nHeight + 1];
+    const CBlockIndex* pindexNext = pindexPrev->GetAncestor(pindexFrom->nHeight + 1);
 
     // loop to find the stake modifier later by a selection interval
     while (nStakeModifierTime < pindexFrom->GetBlockTime() + nStakeModifierSelectionInterval) {
@@ -261,7 +272,7 @@ bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifier, int
         }
 
         pindex = pindexNext;
-        pindexNext = chainActive[pindexNext->nHeight + 1];
+        pindexNext = pindexPrev->GetAncestor(pindexNext->nHeight + 1);
         if (pindex->GeneratedStakeModifier()) {
             nStakeModifierHeight = pindex->nHeight;
             nStakeModifierTime = pindex->GetBlockTime();
@@ -289,7 +300,7 @@ bool stakeTargetHit(uint256 hashProofOfStake, int64_t nValueIn, uint256 bnTarget
 }
 
 //instead of looping outside and reinitializing variables many times, we will give a nTimeTx and also search interval so that we can do all the hashing here
-bool CheckStakeKernelHash(unsigned int nBits, const CBlock blockFrom, const CTransaction txPrev, const COutPoint prevout, unsigned int& nTimeTx, unsigned int nHashDrift, bool fCheck, uint256& hashProofOfStake, bool fPrintProofOfStake)
+bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, unsigned int nBits, const CBlock blockFrom, const CTransaction txPrev, const COutPoint prevout, unsigned int& nTimeTx, unsigned int nHashDrift, bool fCheck, uint256& hashProofOfStake, bool fPrintProofOfStake)
 {
     //assign new variables to make it easier to read
     int64_t nValueIn = txPrev.vout[prevout.n].nValue;
@@ -309,7 +320,7 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock blockFrom, const CTra
     uint64_t nStakeModifier = 0;
     int nStakeModifierHeight = 0;
     int64_t nStakeModifierTime = 0;
-    if (!GetKernelStakeModifier(blockFrom.GetHash(), nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake)) {
+    if (!GetKernelStakeModifier(pindexPrev, blockFrom.GetHash(), nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake)) {
         LogPrintf("CheckStakeKernelHash(): failed to get kernel stake modifier \n");
         return false;
     }
@@ -377,12 +388,68 @@ bool CheckProofOfStake(const CBlock& block, uint256& hashProofOfStake, CBlockInd
     // IsCoinStake() above guarantees vin.size() > 0.
     const CTxIn& txin = tx.vin[0];
 
-    // First try finding the previous transaction in database
-    uint256 hashBlock;
+    if (pindexPrev == NULL)
+        return state.DoS(0, error("CheckProofOfStake() : null pindexPrev"),
+            REJECT_INVALID, "bad-prevblk");
+
+    uint256 hashBlock = 0;
     CTransaction txPrev;
-    if (!GetTransaction(txin.prevout.hash, txPrev, hashBlock, true))
-        return state.DoS(0, error("CheckProofOfStake() : INFO: read txPrev failed"),
-            REJECT_INVALID, "bad-pos-prevout-missing");
+    bool fFoundPrev = false;
+
+    // A block that does not build on our tip comes from a fork. Past the split,
+    // the txindex and chainActive describe our branch, not the one this block
+    // builds on, so the stake input has to be checked against the forked branch
+    // itself: it must not be spent there, and if it was created there, that is
+    // where its source block is. All rejections here are DoS 0 and happen
+    // before the block reaches the index: they depend on our view of the fork.
+    const bool fFork = pindexPrev != chainActive.Tip();
+    const CBlockIndex* pindexFork = fFork ? chainActive.FindFork(pindexPrev) : pindexPrev;
+    if (fFork) {
+        // Same bound as the reorg depth limit in ContextualCheckBlockHeader (its
+        // first block past the split would already be too deep). It also bounds
+        // the walk below on our side of the split.
+        if (pindexFork == NULL || chainActive.Height() - pindexFork->nHeight > Params().MaxReorganizationDepth())
+            return state.DoS(0, error("CheckProofOfStake() : fork for block %s is deeper than max reorganization depth", block.GetHash().ToString().c_str()),
+                REJECT_INVALID, "bad-pos-fork-depth");
+
+        for (const CBlockIndex* pindexWalk = pindexPrev; pindexWalk != pindexFork; pindexWalk = pindexWalk->pprev) {
+            CBlock blockFork;
+            if (!(pindexWalk->nStatus & BLOCK_HAVE_DATA) || !ReadBlockFromDisk(blockFork, pindexWalk))
+                return state.DoS(0, error("CheckProofOfStake() : failed to read fork block %s", pindexWalk->GetBlockHash().ToString().c_str()),
+                    REJECT_INVALID, "bad-pos-fork-read");
+
+            BOOST_FOREACH (const CTransaction& txFork, blockFork.vtx) {
+                BOOST_FOREACH (const CTxIn& txinFork, txFork.vin) {
+                    if (txinFork.prevout == txin.prevout)
+                        return state.DoS(0, error("CheckProofOfStake() : stake input %s already spent on the fork in block %s",
+                                                txin.prevout.ToString().c_str(), pindexWalk->GetBlockHash().ToString().c_str()),
+                            REJECT_INVALID, "bad-pos-fork-spent");
+                }
+                if (!fFoundPrev && txFork.GetHash() == txin.prevout.hash) {
+                    txPrev = txFork;
+                    hashBlock = pindexWalk->GetBlockHash();
+                    fFoundPrev = true;
+                }
+            }
+        }
+    }
+
+    // Otherwise find the previous transaction in database
+    if (!fFoundPrev) {
+        if (!GetTransaction(txin.prevout.hash, txPrev, hashBlock, true))
+            return state.DoS(0, error("CheckProofOfStake() : INFO: read txPrev failed"),
+                REJECT_INVALID, "bad-pos-prevout-missing");
+
+        // The txindex follows chainActive. On a fork, the block it points at is
+        // only shared with the forked branch if it is at or below the split.
+        if (fFork) {
+            BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
+            if (mi == mapBlockIndex.end() || pindexFork->GetAncestor(mi->second->nHeight) != mi->second)
+                return state.DoS(0, error("CheckProofOfStake() : stake input %s is not in the chain of block %s",
+                                        txin.prevout.ToString().c_str(), block.GetHash().ToString().c_str()),
+                    REJECT_INVALID, "bad-pos-fork-blockfrom");
+        }
+    }
 
     // The prevout index is attacker controlled: reject it before it is ever
     // used to index into txPrev.vout, here and inside CheckStakeKernelHash.
@@ -412,12 +479,12 @@ bool CheckProofOfStake(const CBlock& block, uint256& hashProofOfStake, CBlockInd
 
     unsigned int nInterval = 0;
     unsigned int nTime = block.nTime;
-    if (!CheckStakeKernelHash(block.nBits, blockprev, txPrev, txin.prevout, nTime, nInterval, true, hashProofOfStake, fDebug)) {
+    if (!CheckStakeKernelHash(pindexPrev, block.nBits, blockprev, txPrev, txin.prevout, nTime, nInterval, true, hashProofOfStake, fDebug)) {
         // The kernel hash depends on the stake modifier, which depends on our
         // view of the chain. Only punish when our view is authoritative: fully
         // synced and building directly on our current tip. Otherwise this can
         // fail for an entirely honest block.
-        int nDoS = (!IsInitialBlockDownload() && pindexPrev != NULL && chainActive.Tip() == pindexPrev) ? 100 : 0;
+        int nDoS = (!IsInitialBlockDownload() && !fFork) ? 100 : 0;
         return state.DoS(nDoS, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s, hashProof=%s \n", tx.GetHash().ToString().c_str(), hashProofOfStake.ToString().c_str()),
             REJECT_INVALID, "bad-pos-kernel"); // may occur during initial download or if behind on block chain sync
     }
