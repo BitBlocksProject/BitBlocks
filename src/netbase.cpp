@@ -376,7 +376,7 @@ bool static Socks5(string strDest, int port, SOCKET& hSocket)
             CloseSocket(hSocket);
             return error("Error reading from proxy");
         }
-        int nRecv = pchRet3[0];
+        int nRecv = (uint8_t)pchRet3[0];
         ret = InterruptibleRecv(pchRet3, nRecv, SOCKS5_RECV_TIMEOUT, hSocket);
         break;
     }
