@@ -459,7 +459,7 @@ bool CheckProofOfStake(const CBlock& block, uint256& hashProofOfStake, CBlockInd
             REJECT_INVALID, "bad-pos-prevout-index");
 
     //verify signature and script
-    if (!VerifyScript(txin.scriptSig, txPrev.vout[txin.prevout.n].scriptPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&tx, 0)))
+    if (!VerifyScript(txin.scriptSig, txPrev.vout[txin.prevout.n].scriptPubKey, STAKE_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&tx, 0)))
         return state.DoS(100, error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString().c_str()),
             REJECT_INVALID, "bad-pos-scriptsig");
 
