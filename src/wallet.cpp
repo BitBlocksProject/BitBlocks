@@ -2359,15 +2359,29 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         return false;
 
     // presstab HyperStake - Initialize as static and don't update the set on every run of CreateCoinStake() in order to lighten resource use
+    //
+    // The set is rebuilt whenever the chain tip changes, so coins spent by a
+    // block (including our own previous stake) drop out at the next block, and
+    // at least every nStakeSetUpdateTime seconds so coins that reach the minimum
+    // age are picked up even if no block arrives. Coins spent or locked in
+    // between are skipped by the check in the kernel loop below.
     static std::set<pair<const CWalletTx*, unsigned int> > setStakeCoins;
-    static int nLastStakeSetUpdate = 0;
+    static int64_t nLastStakeSetUpdate = 0;
+    static uint256 hashStakeSetTip = 0;
 
-    if (GetTime() - nLastStakeSetUpdate > nStakeSetUpdateTime) {
+    uint256 hashTip;
+    {
+        LOCK(cs_main);
+        hashTip = chainActive.Tip()->GetBlockHash();
+    }
+
+    if (hashTip != hashStakeSetTip || GetTime() - nLastStakeSetUpdate > nStakeSetUpdateTime) {
         setStakeCoins.clear();
         if (!SelectStakeCoins(setStakeCoins, nBalance - nReserveBalance))
             return false;
 
         nLastStakeSetUpdate = GetTime();
+        hashStakeSetTip = hashTip;
     }
 
     if (setStakeCoins.empty())
@@ -2383,6 +2397,17 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         MilliSleep(10000);
 
     BOOST_FOREACH (PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setStakeCoins) {
+        // The set may be older than the latest wallet changes. Skip coins that
+        // have since been spent (by a block or by a transaction in the mempool)
+        // or locked, e.g. a masternode collateral: staking them would build an
+        // invalid block or turn a pending payment into a conflict.
+        {
+            LOCK2(cs_main, cs_wallet);
+            const uint256 hashCoin = pcoin.first->GetHash();
+            if (IsSpent(hashCoin, pcoin.second) || IsLockedCoin(hashCoin, pcoin.second))
+                continue;
+        }
+
         //make sure that enough time has elapsed between
         CBlockIndex* pindex = NULL;
         BlockMap::iterator it = mapBlockIndex.find(pcoin.first->hashBlock);
