@@ -4926,6 +4926,12 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         uint256 hashStop;
         vRecv >> locator >> hashStop;
 
+        if (locator.vHave.size() > MAX_LOCATOR_SZ) {
+            LogPrint("net", "getblocks locator size %u > %u, disconnect peer=%d\n", locator.vHave.size(), MAX_LOCATOR_SZ, pfrom->id);
+            pfrom->fDisconnect = true;
+            return true;
+        }
+
         LOCK(cs_main);
 
         // Find the last block the caller has in the main chain
@@ -4935,7 +4941,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (pindex)
             pindex = chainActive.Next(pindex);
         int nLimit = 500;
-        LogPrintf("getblocks %d to %s limit %d from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop == uint256(0) ? "end" : hashStop.ToString(), nLimit, pfrom->id);
+        LogPrint("net", "getblocks %d to %s limit %d from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop == uint256(0) ? "end" : hashStop.ToString(), nLimit, pfrom->id);
         for (; pindex; pindex = chainActive.Next(pindex)) {
             if (pindex->GetBlockHash() == hashStop) {
                 LogPrint("net", "  getblocks stopping at %d %s\n", pindex->nHeight, pindex->GetBlockHash().ToString());
@@ -4957,6 +4963,12 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         CBlockLocator locator;
         uint256 hashStop;
         vRecv >> locator >> hashStop;
+
+        if (locator.vHave.size() > MAX_LOCATOR_SZ) {
+            LogPrint("net", "headers locator size %u > %u, disconnect peer=%d\n", locator.vHave.size(), MAX_LOCATOR_SZ, pfrom->id);
+            pfrom->fDisconnect = true;
+            return true;
+        }
 
         LOCK(cs_main);
 
