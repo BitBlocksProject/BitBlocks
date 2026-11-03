@@ -16,6 +16,7 @@ class ClientModel;
 class OptionsModel;
 class SendCoinsEntry;
 class SendCoinsRecipient;
+class WalletModelTransaction;
 
 namespace Ui
 {
@@ -60,6 +61,8 @@ private:
     WalletModel* model;
     bool fNewRecipientAllowed;
     void send(QList<SendCoinsRecipient> recipients, QString strFee, QStringList formatted);
+    //! Ask whether to pay a fee now when the coins cannot be sent for free yet; true to go ahead
+    bool askPayFeeInsteadOfWaiting(WalletModelTransaction& transaction);
     bool fFeeMinimized;
 
     // Process WalletModel::SendCoinsReturn and generate a pair consisting

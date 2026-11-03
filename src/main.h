@@ -57,11 +57,15 @@ struct CNodeStateStats;
 static const unsigned int DEFAULT_BLOCK_MAX_SIZE = 7500000;
 static const unsigned int DEFAULT_BLOCK_MIN_SIZE = 0;
 /** Default for -blockprioritysize, maximum space for zero/low-fee transactions **/
-static const unsigned int DEFAULT_BLOCK_PRIORITY_SIZE = 50000;
+static const unsigned int DEFAULT_BLOCK_PRIORITY_SIZE = 250000;
+/** Largest transaction (in bytes) that may be relayed without paying the relay fee */
+static const unsigned int MAX_FREE_TX_RELAY_SIZE = 49000;
+/** Default for -limitfreerelay, rate limit for relaying free transactions in thousands of bytes per minute */
+static const unsigned int DEFAULT_LIMITFREERELAY = 500;
 /** Default for accepting alerts from the P2P network. */
 static const bool DEFAULT_ALERTS = true;
 /** The maximum size for transactions we're willing to relay/mine */
-static const unsigned int MAX_STANDARD_TX_SIZE = 1000000;
+static const unsigned int MAX_STANDARD_TX_SIZE = 100000;
 /** The maximum allowed number of signature check operations in a block (network rule) */
 static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE / 50;
 /** Maximum number of signature check operations in an IsStandard() P2SH script */
@@ -70,6 +74,12 @@ static const unsigned int MAX_P2SH_SIGOPS = 15;
 static const unsigned int MAX_TX_SIGOPS = MAX_BLOCK_SIGOPS / 5;
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */
 static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 30;
+/** Default for -maxmempool, maximum total size of mempool transactions in megabytes */
+static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 100;
+/** Share of -maxmempool (in percent) that free transactions may occupy */
+static const unsigned int MEMPOOL_FREE_TX_SHARE_PERCENT = 50;
+/** Default for -mempoolexpiry, hours after which unconfirmed transactions are dropped from the mempool */
+static const unsigned int DEFAULT_MEMPOOL_EXPIRY = 24;
 /** The maximum size of a blk?????.dat file (since 0.8) */
 static const unsigned int MAX_BLOCKFILE_SIZE = 0x8000000; // 128 MiB
 /** The pre-allocation chunk size for blk?????.dat files (since 0.8) */

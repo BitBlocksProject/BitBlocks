@@ -20,12 +20,14 @@
 #include "walletmodel.h"
 
 #include "base58.h"
+#include "chainparams.h"
 #include "coincontrol.h"
 #include "ui_interface.h"
 #include "utilmoneystr.h"
 #include "wallet.h"
 
 #include <QMessageBox>
+#include <QPushButton>
 #include <QScrollBar>
 #include <QSettings>
 #include <QTextDocument>
@@ -292,6 +294,48 @@ void SendCoinsDialog::on_sendButton_clicked()
     send(recipients, strFee, formatted);
 }
 
+bool SendCoinsDialog::askPayFeeInsteadOfWaiting(WalletModelTransaction& transaction)
+{
+    const CFreeTxInfo& info = transaction.getFreeTxInfo();
+    if (!info.fFeeDueToPriority)
+        return true;
+
+    QString strReason;
+    if (info.fTooLarge) {
+        strReason = tr("This transaction is too large to be sent for free. Sending fewer coins at once, or coins in fewer pieces, can make it free.");
+    } else if (info.fHasUnconfirmedInputs) {
+        strReason = tr("It spends coins that are not confirmed yet. It can be sent for free once they have been confirmed.");
+    } else if (info.nBlocksUntilFree > 0) {
+        int64_t nMinutes = std::max((int64_t)1, (int64_t)info.nBlocksUntilFree * Params().TargetSpacing() / 60);
+        QString strWait;
+        if (nMinutes < 120)
+            strWait = tr("%n minute(s)", "", nMinutes);
+        else if (nMinutes < 48 * 60)
+            strWait = tr("%n hour(s)", "", (nMinutes + 59) / 60);
+        else
+            strWait = tr("%n day(s)", "", (nMinutes + 24 * 60 - 1) / (24 * 60));
+        strReason = tr("Coins become eligible for free sending as they age. These coins can be sent for free in about %1.").arg(strWait);
+    }
+
+    QString strText = tr("These coins cannot be sent for free yet.");
+    if (!strReason.isEmpty())
+        strText += "<br /><br />" + strReason;
+    strText += "<br /><br />" + tr("Pay a fee of %1 to send now, or wait and send for free later?")
+                                    .arg(BitcoinUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), transaction.getTransactionFee()));
+
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(tr("Free sending not available yet"));
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setText(strText);
+    QPushButton* payButton = msgBox.addButton(tr("Pay fee and send"), QMessageBox::AcceptRole);
+    QPushButton* waitButton = msgBox.addButton(tr("Wait (cancel)"), QMessageBox::RejectRole);
+    msgBox.setDefaultButton(waitButton);
+    msgBox.exec();
+
+    return msgBox.clickedButton() == payButton;
+}
+
 void SendCoinsDialog::send(QList<SendCoinsRecipient> recipients, QString strFee, QStringList formatted)
 {
     // prepare transaction for getting txFee earlier
@@ -312,6 +356,14 @@ void SendCoinsDialog::send(QList<SendCoinsRecipient> recipients, QString strFee,
     }
 
     CAmount txFee = currentTransaction.getTransactionFee();
+
+    // Transactions are normally free. If these coins cannot be sent for free
+    // yet, let the user choose between waiting and paying the minimum fee.
+    if (txFee > 0 && !askPayFeeInsteadOfWaiting(currentTransaction)) {
+        fNewRecipientAllowed = true;
+        return;
+    }
+
     QString questionString = tr("Are you sure you want to send?");
     questionString.append("<br /><br />%1");
 
