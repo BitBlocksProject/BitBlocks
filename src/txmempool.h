@@ -17,9 +17,12 @@ class CAutoFile;
 
 /**
  * Priority a transaction needs to be relayed and mined without a fee.
- * Priority is sum(input value * input confirmations) / size, so this asks a
- * 250 byte transaction to spend 5760 BBK-blocks of coin age (for example
- * 100 BBK held for about an hour, or 1000 BBK for about 6 minutes).
+ * Priority is sum(input value * input confirmations) / modified size, where
+ * the modified size leaves out most of each input (see
+ * CTransaction::CalculateModifiedSize). A typical payment with one input and
+ * two outputs (226 bytes, 78 bytes modified) needs about 1800 BBK-blocks of
+ * coin age: 1000 BBK held for about 2 minutes, 100 BBK for about 18 minutes,
+ * or 1 BBK for about 30 hours.
  * Bitcoin uses 576 with 10 minute blocks; BitBlocks blocks come every
  * 60 seconds, so the factor of 10 keeps the same waiting time.
  */

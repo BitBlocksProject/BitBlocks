@@ -20,11 +20,13 @@ A transaction is free when it pays less than the relay fee
 only if:
 
 - it reaches the free priority threshold. Priority is
-  `sum(input value * input confirmations) / size`; a typical 250 byte
-  transaction needs 5760 BBK-blocks of coin age, for example 1000 BBK held for
-  about 6 minutes, 100 BBK for about an hour or 1 BBK for about four days.
+  `sum(input value * input confirmations) / modified size`, where the
+  modified size leaves out most of each input. A typical payment (one input,
+  two outputs) needs about 1800 BBK-blocks of coin age: 1000 BBK held for
+  about 2 minutes, 100 BBK for about 18 minutes, or 1 BBK for about 30 hours.
   Spending coins uses their age up, so sending many free transactions requires
-  holding a lot of coins for a long time.
+  holding a lot of coins for a long time: keeping up 200 free transactions a
+  minute takes roughly 200,000 BBK.
   (The threshold is ten times the Bitcoin value because BitBlocks blocks come
   every 60 seconds instead of every 10 minutes.)
 - it spends only confirmed outputs (no chains of unconfirmed free
