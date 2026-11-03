@@ -1086,10 +1086,10 @@ CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool fAllowF
 
     if (fAllowFree) {
         // There is a free transaction area in blocks created by most miners,
-        // * If we are relaying we allow transactions up to DEFAULT_BLOCK_PRIORITY_SIZE - 1000
+        // * If we are relaying we allow transactions up to MAX_FREE_TX_RELAY_SIZE
         //   to be considered to fall into this category. We don't want to encourage sending
         //   multiple transactions instead of one big transaction to avoid fees.
-        if (nBytes < (DEFAULT_BLOCK_PRIORITY_SIZE - 1000))
+        if (nBytes < MAX_FREE_TX_RELAY_SIZE)
             nMinFee = 0;
     }
 
@@ -1243,6 +1243,54 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
             return error("AcceptToMemoryPool: : insane fees %s, %d > %d",
                 hash.ToString(),
                 nFees, ::minRelayTxFee.GetFee(nSize) * 10000);
+
+        // BitBlocks keeps transactions free of fees, so instead of a fee a free
+        // transaction (paying less than the relay fee) has to spend coins old
+        // and large enough to reach the free priority threshold. Coin age is
+        // used up by spending it, which makes flooding the network expensive.
+        if (!ignoreFees) {
+            CAmount txMinFee = GetMinRelayFee(tx, nSize, true);
+            if (fLimitFree && nFees < txMinFee)
+                return state.DoS(0, error("AcceptToMemoryPool : not enough fees %s, %d < %d",
+                                        hash.ToString(), nFees, txMinFee),
+                    REJECT_INSUFFICIENTFEE, "insufficient fee");
+
+            if (nFees < ::minRelayTxFee.GetFee(nSize)) {
+                // Require that free transactions have sufficient priority to be mined in the next block.
+                if (GetBoolArg("-relaypriority", true) && !AllowFree(view.GetPriority(tx, chainActive.Height() + 1)))
+                    return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "insufficient priority");
+
+                // Unconfirmed outputs have no coin age; spending them for free
+                // would allow long chains of free transactions.
+                BOOST_FOREACH (const CTxIn& txin, tx.vin) {
+                    if (pool.exists(txin.prevout.hash))
+                        return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "free-tx-unconfirmed-input");
+                }
+
+                // Continuously rate-limit free transactions relayed to us.
+                // This mitigates 'penny-flooding' -- sending thousands of free
+                // transactions just to be annoying or make others' transactions
+                // take longer to confirm.
+                if (fLimitFree) {
+                    static CCriticalSection csFreeLimiter;
+                    static double dFreeCount;
+                    static int64_t nLastTime;
+                    int64_t nNow = GetTime();
+
+                    LOCK(csFreeLimiter);
+
+                    // Use an exponentially decaying ~10-minute window:
+                    dFreeCount *= pow(1.0 - 1.0 / 600.0, (double)(nNow - nLastTime));
+                    nLastTime = nNow;
+                    // -limitfreerelay unit is thousand-bytes-per-minute
+                    if (dFreeCount >= GetArg("-limitfreerelay", DEFAULT_LIMITFREERELAY) * 10 * 1000)
+                        return state.DoS(0, error("AcceptToMemoryPool : free transaction rejected by rate limiter"),
+                            REJECT_INSUFFICIENTFEE, "rate limited free transaction");
+                    LogPrint("mempool", "Rate limit dFreeCount: %g => %g\n", dFreeCount, dFreeCount + nSize);
+                    dFreeCount += nSize;
+                }
+            }
+        }
 
         // Keep the mempool bounded. Transactions relayed to us are refused once
         // the pool is full, and free transactions may only fill part of it so
@@ -5033,7 +5081,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         CTransaction tx;
 
         //masternode signed transaction
-        bool ignoreFees = true;
+        bool ignoreFees = false;
         CTxIn vin;
         vector<unsigned char> vchSig;
         int64_t sigTime;

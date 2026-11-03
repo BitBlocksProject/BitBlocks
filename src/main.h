@@ -58,6 +58,10 @@ static const unsigned int DEFAULT_BLOCK_MAX_SIZE = 7500000;
 static const unsigned int DEFAULT_BLOCK_MIN_SIZE = 0;
 /** Default for -blockprioritysize, maximum space for zero/low-fee transactions **/
 static const unsigned int DEFAULT_BLOCK_PRIORITY_SIZE = 50000;
+/** Largest transaction (in bytes) that may be relayed without paying the relay fee */
+static const unsigned int MAX_FREE_TX_RELAY_SIZE = 49000;
+/** Default for -limitfreerelay, rate limit for relaying free transactions in thousands of bytes per minute */
+static const unsigned int DEFAULT_LIMITFREERELAY = 500;
 /** Default for accepting alerts from the P2P network. */
 static const bool DEFAULT_ALERTS = true;
 /** The maximum size for transactions we're willing to relay/mine */
