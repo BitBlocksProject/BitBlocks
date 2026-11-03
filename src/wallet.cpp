@@ -39,7 +39,7 @@ CFeeRate payTxFee(DEFAULT_TRANSACTION_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 unsigned int nTxConfirmTarget = 1;
 bool bSpendZeroConfChange = true;
-bool fSendFreeTransactions = false;
+bool fSendFreeTransactions = true;
 bool fPayAtLeastCustomFee = true;
 
 /** 
@@ -2108,9 +2108,12 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
     const CCoinControl* coinControl,
     AvailableCoinsType coin_type,
     bool useIX,
-    CAmount nFeePay)
+    CAmount nFeePay,
+    CFreeTxInfo* pFreeInfo)
 {
     if (useIX && nFeePay < CENT) nFeePay = CENT;
+    if (pFreeInfo)
+        *pFreeInfo = CFreeTxInfo();
 
     CAmount nValue = 0;
 
@@ -2142,6 +2145,7 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
 
                 CAmount nTotalValue = nValue + nFeeRet;
                 double dPriority = 0;
+                bool fAllInputsConfirmed = true;
 
                 // vouts to the payees
                 if (coinControl && !coinControl->fSplitBlock) {
@@ -2206,6 +2210,8 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
                     int age = pcoin.first->GetDepthInMainChain();
                     if (age != 0)
                         age += 1;
+                    else
+                        fAllInputsConfirmed = false;
                     dPriority += (double)nCredit * age;
                 }
 
@@ -2285,26 +2291,29 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
                 }
                 dPriority = wtxNew.ComputePriority(dPriority, nBytes);
 
-                // Can we complete this as a free transaction?
-                if (fSendFreeTransactions && nBytes <= MAX_FREE_TRANSACTION_CREATE_SIZE) {
-                    // Not enough fee: enough priority?
-                    double dPriorityNeeded = mempool.estimatePriority(nTxConfirmTarget);
-                    // Not enough mempool history to estimate: use hard-coded AllowFree.
-                    if (dPriorityNeeded <= 0 && AllowFree(dPriority))
+                // Can we complete this as a free transaction? Nodes relay and
+                // mine free transactions only when they are small, spend no
+                // unconfirmed outputs and reach the AllowFree priority, so use
+                // exactly those rules here.
+                bool fWantFree = fSendFreeTransactions && nFeePay == 0 && coin_type != ONLY_DENOMINATED;
+                if (fWantFree) {
+                    bool fTooLarge = nBytes > MAX_FREE_TRANSACTION_CREATE_SIZE;
+                    if (!fTooLarge && fAllInputsConfirmed && AllowFree(dPriority))
                         break;
 
-                    // Small enough, and priority high enough, to send for free
-                    if (dPriorityNeeded > 0 && dPriority >= dPriorityNeeded)
-                        break;
+                    if (pFreeInfo) {
+                        pFreeInfo->fFeeDueToPriority = true;
+                        pFreeInfo->fHasUnconfirmedInputs = !fAllInputsConfirmed;
+                        pFreeInfo->fTooLarge = fTooLarge;
+                        pFreeInfo->nBlocksUntilFree = -1;
+                        // Every block adds nValueIn of coin age to the inputs
+                        double dPriorityPerBlock = wtxNew.ComputePriority((double)nValueIn, nBytes);
+                        if (!fTooLarge && fAllInputsConfirmed && dPriorityPerBlock > 0)
+                            pFreeInfo->nBlocksUntilFree = (int)((AllowFreeThreshold() - dPriority) / dPriorityPerBlock) + 1;
+                    }
                 }
 
                 CAmount nFeeNeeded = max(nFeePay, GetMinimumFee(nBytes, nTxConfirmTarget, mempool));
-
-                // If we made it here and we aren't even able to meet the relay fee on the next pass, give up
-                // because we must be at the maximum allowed fee.
-                if (nFeeNeeded < ::minRelayTxFee.GetFee(nBytes)) {
-                   
-                }
 
                 if (nFeeRet >= nFeeNeeded) // Done, enough fee included
                     break;

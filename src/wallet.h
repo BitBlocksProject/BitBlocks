@@ -47,13 +47,28 @@ extern bool fPayAtLeastCustomFee;
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
 //! -paytxfee will warn if called with a higher fee than this amount (in satoshis) per KB
-static const CAmount nHighTransactionFeeWarning = 0 * COIN;
-//! -maxtxfee default
-static const CAmount DEFAULT_TRANSACTION_MAXFEE = 0 * COIN;
+static const CAmount nHighTransactionFeeWarning = 0.1 * COIN;
+//! -maxtxfee default. Transactions are normally free; this only caps the
+//! fee paid when coins lack the priority to be sent for free.
+static const CAmount DEFAULT_TRANSACTION_MAXFEE = 1 * COIN;
 //! -maxtxfee will warn if called with a higher fee than this amount (in satoshis)
 static const CAmount nHighTransactionMaxFeeWarning = 100 * nHighTransactionFeeWarning;
 //! Largest (in bytes) free transaction we're willing to create
 static const unsigned int MAX_FREE_TRANSACTION_CREATE_SIZE = 10000;
+
+/** Why a transaction built by CreateTransaction could not be sent for free */
+struct CFreeTxInfo {
+    //! The wallet tried to send it for free but had to add a fee
+    bool fFeeDueToPriority;
+    //! Some selected inputs are unconfirmed (they have no coin age yet)
+    bool fHasUnconfirmedInputs;
+    //! Larger than MAX_FREE_TRANSACTION_CREATE_SIZE, so waiting does not help
+    bool fTooLarge;
+    //! Estimated blocks until the inputs reach free priority, -1 if unknown
+    int nBlocksUntilFree;
+
+    CFreeTxInfo() : fFeeDueToPriority(false), fHasUnconfirmedInputs(false), fTooLarge(false), nBlocksUntilFree(-1) {}
+};
 
 class CAccountingEntry;
 class CCoinControl;
@@ -404,7 +419,8 @@ public:
         const CCoinControl* coinControl = NULL,
         AvailableCoinsType coin_type = ALL_COINS,
         bool useIX = false,
-        CAmount nFeePay = 0);
+        CAmount nFeePay = 0,
+        CFreeTxInfo* pFreeInfo = NULL);
     bool CreateTransaction(CScript scriptPubKey, const CAmount& nValue, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, std::string& strFailReason, const CCoinControl* coinControl = NULL, AvailableCoinsType coin_type = ALL_COINS, bool useIX = false, CAmount nFeePay = 0);
     bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, std::string strCommand = "tx");
     std::string PrepareObfuscationDenominate(int minRounds, int maxRounds);
