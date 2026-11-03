@@ -356,7 +356,9 @@ public:
 
 
 CTxMemPool::CTxMemPool(const CFeeRate& _minRelayFee) : nTransactionsUpdated(0),
-                                                       minRelayFee(_minRelayFee)
+                                                       minRelayFee(_minRelayFee),
+                                                       totalTxSize(0),
+                                                       totalFreeTxSize(0)
 {
     // Sanity checks off by default for performance, because otherwise
     // accepting transactions becomes O(N^2) where N is the number
@@ -415,6 +417,8 @@ bool CTxMemPool::addUnchecked(const uint256& hash, const CTxMemPoolEntry& entry)
             mapNextTx[tx.vin[i].prevout] = CInPoint(&tx, i);
         nTransactionsUpdated++;
         totalTxSize += entry.GetTxSize();
+        if (IsFreeTx(entry.GetFee(), entry.GetTxSize()))
+            totalFreeTxSize += entry.GetTxSize();
     }
     return true;
 }
@@ -457,7 +461,10 @@ void CTxMemPool::remove(const CTransaction& origTx, std::list<CTransaction>& rem
                 mapNextTx.erase(txin.prevout);
 
             removed.push_back(tx);
-            totalTxSize -= mapTx[hash].GetTxSize();
+            const CTxMemPoolEntry& entry = mapTx[hash];
+            totalTxSize -= entry.GetTxSize();
+            if (IsFreeTx(entry.GetFee(), entry.GetTxSize()))
+                totalFreeTxSize -= entry.GetTxSize();
             mapTx.erase(hash);
             nTransactionsUpdated++;
         }
@@ -533,6 +540,7 @@ void CTxMemPool::clear()
     mapTx.clear();
     mapNextTx.clear();
     totalTxSize = 0;
+    totalFreeTxSize = 0;
     ++nTransactionsUpdated;
 }
 
@@ -544,6 +552,7 @@ void CTxMemPool::check(const CCoinsViewCache* pcoins) const
     LogPrint("mempool", "Checking mempool with %u transactions and %u inputs\n", (unsigned int)mapTx.size(), (unsigned int)mapNextTx.size());
 
     uint64_t checkTotal = 0;
+    uint64_t checkFreeTotal = 0;
 
     CCoinsViewCache mempoolDuplicate(const_cast<CCoinsViewCache*>(pcoins));
 
@@ -552,6 +561,8 @@ void CTxMemPool::check(const CCoinsViewCache* pcoins) const
     for (std::map<uint256, CTxMemPoolEntry>::const_iterator it = mapTx.begin(); it != mapTx.end(); it++) {
         unsigned int i = 0;
         checkTotal += it->second.GetTxSize();
+        if (IsFreeTx(it->second.GetFee(), it->second.GetTxSize()))
+            checkFreeTotal += it->second.GetTxSize();
         const CTransaction& tx = it->second.GetTx();
         bool fDependsWait = false;
         BOOST_FOREACH (const CTxIn& txin, tx.vin) {
@@ -608,6 +619,7 @@ void CTxMemPool::check(const CCoinsViewCache* pcoins) const
     }
 
     assert(totalTxSize == checkTotal);
+    assert(totalFreeTxSize == checkFreeTotal);
 }
 
 void CTxMemPool::queryHashes(vector<uint256>& vtxid)

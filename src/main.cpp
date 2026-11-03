@@ -1223,6 +1223,20 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
                 hash.ToString(),
                 nFees, ::minRelayTxFee.GetFee(nSize) * 10000);
 
+        // Keep the mempool bounded. Transactions relayed to us are refused once
+        // the pool is full, and free transactions may only fill part of it so
+        // that a flood of them cannot lock out fee-paying transactions.
+        if (fLimitFree && !ignoreFees) {
+            uint64_t nMaxMempool = (uint64_t)std::max((int64_t)0, GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE)) * 1000000;
+            if (pool.GetTotalTxSize() + nSize > nMaxMempool)
+                return state.DoS(0, error("AcceptToMemoryPool : mempool full, rejecting %s", hash.ToString()),
+                    REJECT_INSUFFICIENTFEE, "mempool-full");
+            if (pool.IsFreeTx(nFees, nSize) &&
+                pool.GetTotalFreeTxSize() + nSize > nMaxMempool / 100 * MEMPOOL_FREE_TX_SHARE_PERCENT)
+                return state.DoS(0, error("AcceptToMemoryPool : free transaction space in mempool full, rejecting %s", hash.ToString()),
+                    REJECT_INSUFFICIENTFEE, "mempool-full-free");
+        }
+
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
         if (!CheckInputs(tx, state, view, true, STANDARD_SCRIPT_VERIFY_FLAGS, true)) {

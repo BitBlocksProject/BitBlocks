@@ -100,6 +100,7 @@ private:
 
     CFeeRate minRelayFee; //! Passed to constructor to avoid dependency on main
     uint64_t totalTxSize; //! sum of all mempool tx' byte sizes
+    uint64_t totalFreeTxSize; //! sum of byte sizes of mempool txs paying less than minRelayFee
 
 public:
     mutable CCriticalSection cs;
@@ -144,6 +145,17 @@ public:
     {
         LOCK(cs);
         return totalTxSize;
+    }
+    uint64_t GetTotalFreeTxSize()
+    {
+        LOCK(cs);
+        return totalFreeTxSize;
+    }
+
+    /** True if a transaction with this fee and size counts as free (pays less than the relay fee) */
+    bool IsFreeTx(const CAmount& nFee, size_t nTxSize) const
+    {
+        return nFee < minRelayFee.GetFee(nTxSize);
     }
 
     bool exists(uint256 hash)

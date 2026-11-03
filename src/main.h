@@ -70,6 +70,10 @@ static const unsigned int MAX_P2SH_SIGOPS = 15;
 static const unsigned int MAX_TX_SIGOPS = MAX_BLOCK_SIGOPS / 5;
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */
 static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 30;
+/** Default for -maxmempool, maximum total size of mempool transactions in megabytes */
+static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 100;
+/** Share of -maxmempool (in percent) that free transactions may occupy */
+static const unsigned int MEMPOOL_FREE_TX_SHARE_PERCENT = 50;
 /** The maximum size of a blk?????.dat file (since 0.8) */
 static const unsigned int MAX_BLOCKFILE_SIZE = 0x8000000; // 128 MiB
 /** The pre-allocation chunk size for blk?????.dat files (since 0.8) */
