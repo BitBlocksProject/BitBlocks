@@ -2203,15 +2203,15 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
 
                 BOOST_FOREACH (PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins) {
                     CAmount nCredit = pcoin.first->vout[pcoin.second].nValue;
-                    //The coin age after the next block (depth+1) is used instead of the current,
-                    //reflecting an assumption the user would accept a bit more delay for
-                    //a chance at a free transaction.
-                    //But mempool inputs might still be in the mempool, so their age stays 0
+                    //Use the same coin age as the relay check in AcceptToMemoryPool
+                    //(the depth, i.e. the age in the next block), otherwise the
+                    //node would refuse a free transaction the wallet just built.
+                    //Mempool inputs have no age.
                     int age = pcoin.first->GetDepthInMainChain();
-                    if (age != 0)
-                        age += 1;
-                    else
+                    if (age <= 0) {
+                        age = 0;
                         fAllInputsConfirmed = false;
+                    }
                     dPriority += (double)nCredit * age;
                 }
 
