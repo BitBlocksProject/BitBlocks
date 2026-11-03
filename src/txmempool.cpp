@@ -534,6 +534,22 @@ void CTxMemPool::removeForBlock(const std::vector<CTransaction>& vtx, unsigned i
 }
 
 
+int CTxMemPool::Expire(int64_t nTime)
+{
+    LOCK(cs);
+    std::vector<CTransaction> vExpired;
+    for (std::map<uint256, CTxMemPoolEntry>::const_iterator it = mapTx.begin(); it != mapTx.end(); it++) {
+        if (it->second.GetTime() < nTime)
+            vExpired.push_back(it->second.GetTx());
+    }
+    std::list<CTransaction> removed;
+    BOOST_FOREACH (const CTransaction& tx, vExpired) {
+        remove(tx, removed, true);
+    }
+    return removed.size();
+}
+
+
 void CTxMemPool::clear()
 {
     LOCK(cs);

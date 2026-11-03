@@ -1099,9 +1099,30 @@ CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool fAllowF
 }
 
 
+/**
+ * Drop transactions that have been waiting in the mempool for longer than
+ * -mempoolexpiry hours. Scanning the whole pool is linear, so unless fForce
+ * is set this runs at most once a minute.
+ */
+static void ExpireMempool(CTxMemPool& pool, bool fForce)
+{
+    static int64_t nLastExpire = 0;
+    int64_t nNow = GetTime();
+    if (!fForce && nNow - nLastExpire < 60)
+        return;
+    nLastExpire = nNow;
+
+    int64_t nExpiry = std::max((int64_t)1, GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY)) * 60 * 60;
+    int nExpired = pool.Expire(nNow - nExpiry);
+    if (nExpired > 0)
+        LogPrint("mempool", "Expired %i transactions from the memory pool\n", nExpired);
+}
+
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransaction& tx, bool fLimitFree, bool* pfMissingInputs, bool fRejectInsaneFee, bool ignoreFees)
 {
     AssertLockHeld(cs_main);
+
+    ExpireMempool(pool, false);
     if (pfMissingInputs)
         *pfMissingInputs = false;
 
@@ -2545,6 +2566,7 @@ bool static ConnectTip(CValidationState& state, CBlockIndex* pindexNew, CBlock* 
     // Remove conflicting transactions from the mempool.
     list<CTransaction> txConflicted;
     mempool.removeForBlock(pblock->vtx, pindexNew->nHeight, txConflicted);
+    ExpireMempool(mempool, true);
     mempool.check(pcoinsTip);
     // Update chainActive & related variables.
     UpdateTip(pindexNew);

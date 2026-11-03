@@ -74,6 +74,8 @@ static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 30;
 static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 100;
 /** Share of -maxmempool (in percent) that free transactions may occupy */
 static const unsigned int MEMPOOL_FREE_TX_SHARE_PERCENT = 50;
+/** Default for -mempoolexpiry, hours after which unconfirmed transactions are dropped from the mempool */
+static const unsigned int DEFAULT_MEMPOOL_EXPIRY = 24;
 /** The maximum size of a blk?????.dat file (since 0.8) */
 static const unsigned int MAX_BLOCKFILE_SIZE = 0x8000000; // 128 MiB
 /** The pre-allocation chunk size for blk?????.dat files (since 0.8) */

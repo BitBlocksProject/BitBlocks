@@ -1200,7 +1200,7 @@ void CWallet::ResendWalletTransactions()
     // Rebroadcast any of our txes that aren't in a block yet
     LogPrintf("ResendWalletTransactions()\n");
     {
-        LOCK(cs_wallet);
+        LOCK2(cs_main, cs_wallet);
         // Sort them in chronological order
         multimap<unsigned int, CWalletTx*> mapSorted;
         BOOST_FOREACH (PAIRTYPE(const uint256, CWalletTx) & item, mapWallet) {
@@ -1212,6 +1212,12 @@ void CWallet::ResendWalletTransactions()
         }
         BOOST_FOREACH (PAIRTYPE(const unsigned int, CWalletTx*) & item, mapSorted) {
             CWalletTx& wtx = *item.second;
+            // Our transaction may have expired from the mempool (-mempoolexpiry);
+            // put it back before announcing it again, and skip it if it no
+            // longer fits the mempool policy.
+            if (!wtx.IsCoinBase() && !wtx.IsCoinStake() && wtx.GetDepthInMainChain() == 0 &&
+                !mempool.exists(wtx.GetHash()) && !wtx.AcceptToMemoryPool(false))
+                continue;
             wtx.RelayWalletTransaction();
         }
     }
