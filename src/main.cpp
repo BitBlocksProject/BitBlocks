@@ -3171,26 +3171,14 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
     }
 
     // ----------- swiftTX transaction scanning -----------
-
-    if (IsSporkActive(SPORK_3_SWIFTTX_BLOCK_FILTERING)) {
-        BOOST_FOREACH (const CTransaction& tx, block.vtx) {
-            if (!tx.IsCoinBase()) {
-                //only reject blocks when it's based on complete consensus
-                BOOST_FOREACH (const CTxIn& in, tx.vin) {
-                    if (mapLockedInputs.count(in.prevout)) {
-                        if (mapLockedInputs[in.prevout] != tx.GetHash()) {
-                            mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
-                            LogPrintf("CheckBlock() : found conflicting transaction with transaction lock %s %s\n", mapLockedInputs[in.prevout].ToString(), tx.GetHash().ToString());
-                            return state.DoS(0, error("CheckBlock() : found conflicting transaction with transaction lock"),
-                                REJECT_INVALID, "conflicting-tx-ix");
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        LogPrintf("CheckBlock() : skipping transaction locking checks\n");
-    }
+    //
+    // Block filtering against SwiftTX locks (SPORK_3_SWIFTTX_BLOCK_FILTERING) is
+    // deliberately disabled, whatever the spork says. The lock map is local,
+    // unconfirmed state: two honest nodes can disagree on it, and a rejection
+    // here marks the block BLOCK_FAILED_VALID for good, leaving the node stuck
+    // on its own branch. The only way back was SPORK_12_RECONSIDER_BLOCKS, and
+    // the spork key is no longer available. Locks still protect the mempool.
+    // Not a consensus change: no node ever had to reject these blocks.
 
 
     // ----------- masternode payments / budgets -----------
