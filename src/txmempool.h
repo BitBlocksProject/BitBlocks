@@ -15,9 +15,17 @@
 
 class CAutoFile;
 
+/**
+ * Priority a transaction needs to be relayed and mined without a fee.
+ * Priority is sum(input value * input confirmations) / size, so this asks a
+ * 250 byte transaction to spend 5760 BBK-blocks of coin age (for example
+ * 100 BBK held for about an hour, or 1000 BBK for about 6 minutes).
+ * Bitcoin uses 576 with 10 minute blocks; BitBlocks blocks come every
+ * 60 seconds, so the factor of 10 keeps the same waiting time.
+ */
 inline double AllowFreeThreshold()
 {
-    return COIN * 576 / 250;
+    return COIN * 5760 / 250;
 }
 
 inline bool AllowFree(double dPriority)
