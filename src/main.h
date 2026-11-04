@@ -63,7 +63,7 @@ static const unsigned int MAX_FREE_TX_RELAY_SIZE = 49000;
 /** Default for -limitfreerelay, rate limit for relaying free transactions in thousands of bytes per minute */
 static const unsigned int DEFAULT_LIMITFREERELAY = 500;
 /** Default for accepting alerts from the P2P network. */
-static const bool DEFAULT_ALERTS = true;
+static const bool DEFAULT_ALERTS = false;
 /** The maximum size for transactions we're willing to relay/mine */
 static const unsigned int MAX_STANDARD_TX_SIZE = 100000;
 /** The maximum allowed number of signature check operations in a block (network rule) */
