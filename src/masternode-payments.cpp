@@ -196,30 +196,22 @@ bool IsBlockValueValid(const CBlock& block, CAmount nExpectedValue, CAmount nMin
     if (!masternodeSync.IsSynced()) { //there is no budget data to use to check anything
         //super blocks will always be on these blocks, max 100 per budgeting
         if (nHeight % GetBudgetPaymentCycleBlocks() < 100) {
-            return true;
-        } else {
-            if (nMinted > nExpectedValue) {
-                return false;
+            if (Params().NetworkID() == CBaseChainParams::TESTNET) {
+                return true;
             }
+            // Without budget data we cannot tell which of these blocks is a
+            // superblock, so allow at most the full budget on top of the
+            // regular reward instead of skipping the check entirely.
+            nExpectedValue += budget.GetTotalBudget(nHeight);
         }
     } else { // we're synced and have data so check the budget schedule
-
-        //are these blocks even enabled
-        if (!IsSporkActive(SPORK_13_ENABLE_SUPERBLOCKS)) {
-            return nMinted <= nExpectedValue;
-        }
-
-        if (budget.IsBudgetPaymentBlock(nHeight)) {
-            //the value of the block is evaluated in CheckBlock
-            return true;
-        } else {
-            if (nMinted > nExpectedValue) {
-                return false;
-            }
+        if (IsSporkActive(SPORK_13_ENABLE_SUPERBLOCKS) && budget.IsBudgetPaymentBlock(nHeight)) {
+            // the budget payees are checked in IsBlockPayeeValid; the amount is capped here
+            nExpectedValue += budget.GetTotalBudget(nHeight);
         }
     }
 
-    return true;
+    return nMinted <= nExpectedValue;
 }
 
 bool IsBlockPayeeValid(const CBlock& block, int nBlockHeight)
