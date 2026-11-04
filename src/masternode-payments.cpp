@@ -229,7 +229,11 @@ bool IsBlockPayeeValid(const CBlock& block, int nBlockHeight)
         return true;
     }
 
-    const CTransaction& txNew = (nBlockHeight > Params().LAST_POW_BLOCK() ? block.vtx[1] : block.vtx[0]);
+    // BitBlocks
+    // Pick the payment tx by block type, not by height: a PoW block past
+    // LAST_POW_BLOCK may hold only the coinbase, so vtx[1] would be out of
+    // bounds. IsProofOfStake() guarantees vtx.size() > 1.
+    const CTransaction& txNew = (block.IsProofOfStake() ? block.vtx[1] : block.vtx[0]);
 
     //check if it's a budget block
     if (IsSporkActive(SPORK_13_ENABLE_SUPERBLOCKS)) {

@@ -3279,6 +3279,21 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
         }
 
         // BitBlocks
+        // Enforce the PoW/PoS switch here as well as in ConnectBlock: this is
+        // the first check a received block goes through, and the payee check
+        // below picks the payment tx by block type. Rejecting mismatched blocks
+        // early keeps cheap powLimit PoW blocks from reaching it (or the disk).
+        if (nHeight != 0) {
+            if (nHeight <= Params().LAST_POW_BLOCK() && block.IsProofOfStake())
+                return state.DoS(100, error("CheckBlock() : PoS period not active"),
+                    REJECT_INVALID, "PoS-early");
+
+            if (nHeight > Params().LAST_POW_BLOCK() && block.IsProofOfWork())
+                return state.DoS(100, error("CheckBlock() : PoW period ended"),
+                    REJECT_INVALID, "PoW-ended");
+        }
+
+        // BitBlocks
         // It is entierly possible that we don't have enough data and this could fail
         // (i.e. the block could indeed be valid). Store the block for later consideration
         // but issue an initial reject message.
