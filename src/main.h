@@ -110,6 +110,12 @@ static const unsigned int MAX_LOCATOR_SZ = 101;
 static const unsigned int BLOCK_DOWNLOAD_WINDOW = 1024;
 /** Time to wait (in seconds) between writing blockchain state to disk. */
 static const unsigned int DATABASE_WRITE_INTERVAL = 3600;
+/** Minimum time (in seconds) before answering another orphan block from the
+ *  same peer with a getblocks while our tip has not moved. */
+static const int64_t ORPHAN_GETBLOCKS_INTERVAL = 30;
+/** Maximum number of block hashes remembered per peer as requested through an
+ *  orphan getblocks (CNode::vBlockRequested); the oldest are dropped first. */
+static const unsigned int MAX_BLOCKS_REQUESTED_PER_PEER = 2000;
 /** Maximum length of reject messages. */
 static const unsigned int MAX_REJECT_MESSAGE_LENGTH = 111;
 

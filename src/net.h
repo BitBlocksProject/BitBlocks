@@ -300,6 +300,11 @@ public:
     CCriticalSection cs_inventory;
     std::multimap<int64_t, CInv> mapAskFor;
     std::vector<uint256> vBlockRequested;
+    // Our tip and the time when we last answered an orphan block from this
+    // peer with a getblocks, so a stream of orphans can't make us build and
+    // send a full locator for every one of them.
+    uint256 hashLastOrphanGetBlocksTip;
+    int64_t nLastOrphanGetBlocksTime;
 
     // Ping time measurement:
     // The pong reply we're expecting, or 0 if no pong expected.

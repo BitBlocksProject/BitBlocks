@@ -3610,10 +3610,51 @@ void CBlockIndex::BuildSkip()
         pskip = pprev->GetAncestor(GetSkipHeight(nHeight));
 }
 
+// An orphan block (unknown parent) from a peer is answered with a getblocks
+// built from our tip. Allow that at most once per peer per tip within
+// ORPHAN_GETBLOCKS_INTERVAL: a reply to the previous one is still on the way,
+// and another full locator would only feed an orphan flood. Returns true, and
+// records the attempt, when a getblocks may be sent.
+static bool AllowOrphanGetBlocks(CNode* pfrom)
+{
+    const uint256 hashTip = chainActive.Tip() ? chainActive.Tip()->GetBlockHash() : uint256(0);
+    const int64_t nNow = GetTime();
+    if (pfrom->hashLastOrphanGetBlocksTip == hashTip &&
+        nNow - pfrom->nLastOrphanGetBlocksTime < ORPHAN_GETBLOCKS_INTERVAL)
+        return false;
+    pfrom->hashLastOrphanGetBlocksTip = hashTip;
+    pfrom->nLastOrphanGetBlocksTime = nNow;
+    return true;
+}
+
+// Ask pfrom for the blocks leading up to hashStop and remember that we did, so
+// that block is treated as solicited when it arrives. The list is capped,
+// dropping the oldest entries: a backward walk only ever looks for the hash it
+// added last, so trimming old ones can't break it.
+static void PushOrphanGetBlocks(CNode* pfrom, const uint256& hashStop)
+{
+    pfrom->PushMessage("getblocks", chainActive.GetLocator(), hashStop);
+    pfrom->vBlockRequested.push_back(hashStop);
+    if (pfrom->vBlockRequested.size() > MAX_BLOCKS_REQUESTED_PER_PEER)
+        pfrom->vBlockRequested.erase(pfrom->vBlockRequested.begin(),
+            pfrom->vBlockRequested.end() - MAX_BLOCKS_REQUESTED_PER_PEER);
+}
+
 bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDiskBlockPos* dbp)
 {
     // Preliminary checks
-    bool checked = CheckBlock(*pblock, state);
+    // A block that fails CheckBlock is rejected here, before the orphan path
+    // below: otherwise an invalid block with an unknown parent would be
+    // answered with a getblocks and no penalty, letting a peer make us run
+    // CheckBlock and build locators for free. The DoS score CheckBlock put in
+    // state is kept for the caller (0 for failures an honest peer can cause,
+    // e.g. bad-cb-payee), and the block is marked received as before so it
+    // isn't left in flight.
+    if (!CheckBlock(*pblock, state)) {
+        LOCK(cs_main);
+        MarkBlockAsReceived(pblock->GetHash());
+        return error("%s : CheckBlock FAILED", __func__);
+    }
 
     // ppcoin: check proof-of-stake
     // Limited duplicity on stake: prevents block flood attack.
@@ -3649,7 +3690,11 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
         //if we get this far, check if the prev block is our prev block, if not then request sync and return false
         BlockMap::iterator mi = mapBlockIndex.find(pblock->hashPrevBlock);
         if (mi == mapBlockIndex.end()) {
-            pfrom->PushMessage("getblocks", chainActive.GetLocator(), uint256(0));
+            // The "block" handler answers orphans before calling us, so this
+            // is only reached on a race with its (unlocked) parent lookup;
+            // share its throttle.
+            if (AllowOrphanGetBlocks(pfrom))
+                pfrom->PushMessage("getblocks", chainActive.GetLocator(), uint256(0));
             return false;
         }
     }
@@ -3662,9 +3707,6 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
         }
 
         MarkBlockAsReceived(pblock->GetHash());
-        if (!checked) {
-            return error("%s : CheckBlock FAILED", __func__);
-        }
 
         // Store to disk
         CBlockIndex* pindex = NULL;
@@ -5308,14 +5350,37 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         //sometimes we will be sent their most recent block and its not the one we want, in that case tell where we are
         if (!mapBlockIndex.count(block.hashPrevBlock)) {
-            if (find(pfrom->vBlockRequested.begin(), pfrom->vBlockRequested.end(), hashBlock) != pfrom->vBlockRequested.end()) {
+            // Run the context-free checks before spending a locator on the
+            // block, so a peer can't loop garbage orphans at us for free. With
+            // an unknown parent CheckBlock skips the masternode payee check
+            // (no height), so this is the structural, PoW, merkle and
+            // transaction checks ProcessNewBlock would run anyway, plus the
+            // PoS block signature. Failures CheckBlock scores 0 because they
+            // can be honest (e.g. time-too-new) are rejected without penalty.
+            LOCK(cs_main);
+            CValidationState state;
+            if (CheckBlock(block, state) && !block.CheckBlockSignature())
+                state.DoS(100, error("%s : bad proof-of-stake block signature on orphan block %s", __func__, hashBlock.ToString()),
+                    REJECT_INVALID, "bad-pos-blocksig");
+            int nDoS = 0;
+            if (state.IsInvalid(nDoS)) {
+                pfrom->PushMessage("reject", strCommand, state.GetRejectCode(),
+                    state.GetRejectReason().substr(0, MAX_REJECT_MESSAGE_LENGTH), inv.hash);
+                if (nDoS > 0)
+                    Misbehaving(pfrom->GetId(), nDoS);
+                return true;
+            }
+
+            vector<uint256>::iterator itRequested = find(pfrom->vBlockRequested.begin(), pfrom->vBlockRequested.end(), hashBlock);
+            if (itRequested != pfrom->vBlockRequested.end()) {
                 //we already asked for this block, so lets work backwards and ask for the previous block
-                pfrom->PushMessage("getblocks", chainActive.GetLocator(), block.hashPrevBlock);
-                pfrom->vBlockRequested.push_back(block.hashPrevBlock);
-            } else {
+                // Not throttled, we asked for it; but consume the entry so a
+                // replay of the same block can't buy another getblocks.
+                pfrom->vBlockRequested.erase(itRequested);
+                PushOrphanGetBlocks(pfrom, block.hashPrevBlock);
+            } else if (AllowOrphanGetBlocks(pfrom)) {
                 //ask to sync to this block
-                pfrom->PushMessage("getblocks", chainActive.GetLocator(), hashBlock);
-                pfrom->vBlockRequested.push_back(hashBlock);
+                PushOrphanGetBlocks(pfrom, hashBlock);
             }
         } else {
             pfrom->AddInventoryKnown(inv);
