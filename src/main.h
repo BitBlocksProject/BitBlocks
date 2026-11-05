@@ -76,6 +76,8 @@ static const unsigned int MAX_TX_SIGOPS = MAX_BLOCK_SIGOPS / 5;
 static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 30;
 /** Default for -maxmempool, maximum total size of mempool transactions in megabytes */
 static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 100;
+/** Most blocks a startup rewind to a checkpoint disconnects; deeper forks are offered a resync */
+static const int DEFAULT_MAX_CHECKPOINT_REWIND = 50000;
 /** Share of -maxmempool (in percent) that free transactions may occupy */
 static const unsigned int MEMPOOL_FREE_TX_SHARE_PERCENT = 50;
 /** Default for -mempoolexpiry, hours after which unconfirmed transactions are dropped from the mempool */
@@ -613,10 +615,26 @@ public:
 CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& locator);
 
 /** Mark a block as invalid. */
-bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex);
+bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex, bool fBare = false);
 
 /** Remove invalidity status from a block and its descendants. */
 bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex);
+
+enum CheckpointRewindResult {
+    REWIND_NONE,        //! our chain agrees with every checkpoint it reaches
+    REWIND_DONE,        //! we were on a fork and are back at the split
+    REWIND_INTERRUPTED, //! shutdown requested while rewinding; the next start resumes
+    REWIND_TOO_DEEP,    //! fork deeper than nMaxDepth, nothing was done
+    REWIND_FAILED,
+};
+
+/**
+ * On startup: if our chain disagrees with a checkpoint it reaches, disconnect
+ * it back to the block below that checkpoint, so that the checkpointed chain
+ * can be synced again despite the reorganization depth limit. Does nothing if
+ * the fork is deeper than nMaxDepth blocks.
+ */
+CheckpointRewindResult RewindToCheckpoints(int nMaxDepth, int& nForkHeight, int& nDepth);
 
 /** The currently-connected chain of blocks. */
 extern CChain chainActive;

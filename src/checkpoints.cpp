@@ -84,6 +84,29 @@ int GetTotalBlocksEstimate()
     return checkpoints.rbegin()->first;
 }
 
+bool FindCheckpointMismatch(const CChain& chain, int& nHeight, uint256& hashExpected)
+{
+    if (!fEnabled)
+        return false;
+
+    const MapCheckpoints& checkpoints = *Params().Checkpoints().mapCheckpoints;
+
+    BOOST_FOREACH (const MapCheckpoints::value_type& i, checkpoints) {
+        // The genesis block is checked on its own (testnet and regtest list a
+        // placeholder hash at height 0).
+        if (i.first == 0)
+            continue;
+        if (i.first > chain.Height())
+            break;
+        if (chain[i.first]->GetBlockHash() != i.second) {
+            nHeight = i.first;
+            hashExpected = i.second;
+            return true;
+        }
+    }
+    return false;
+}
+
 CBlockIndex* GetLastCheckpoint()
 {
     if (!fEnabled)

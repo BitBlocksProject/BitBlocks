@@ -26,6 +26,7 @@
 #include "masternodeman.h"
 #include "miner.h"
 #include "net.h"
+#include "noui.h"
 #include "rpcserver.h"
 #include "script/standard.h"
 #include "spork.h"
@@ -326,6 +327,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), "bitblocksd.pid"));
 #endif
     strUsage += HelpMessageOpt("-reindex", _("Rebuild block chain index from current blk000??.dat files") + " " + _("on startup"));
+    strUsage += HelpMessageOpt("-checkpointrewind", strprintf(_("If the block chain left a checkpointed one, undo it back to the split on startup (default: %u)"), 1));
     strUsage += HelpMessageOpt("-resync", _("Delete the local block chain and download it again from the network on startup (the wallet is kept). Use once, not in the config file"));
 #if !defined(WIN32)
     strUsage += HelpMessageOpt("-sysperms", _("Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)"));
@@ -1273,6 +1275,7 @@ bool AppInit2(boost::thread_group& threadGroup)
     while (!fLoaded) {
         bool fReset = fReindex;
         std::string strLoadError;
+        int nTooDeepForkHeight = -1, nTooDeepForkDepth = 0;
 
         uiInterface.InitMessage(_("Loading block index..."));
 
@@ -1333,6 +1336,22 @@ bool AppInit2(boost::thread_group& threadGroup)
                     strLoadError = _("Corrupted block database detected");
                     break;
                 }
+
+                // A chain that left a checkpointed one can't return to it on
+                // its own when the fork is deeper than the reorganization
+                // limit: undo the fork back to the split, then sync as usual.
+                if (!fReindex && GetBoolArg("-checkpointrewind", true)) {
+                    int nForkHeight = -1, nDepth = 0;
+                    CheckpointRewindResult result = RewindToCheckpoints(DEFAULT_MAX_CHECKPOINT_REWIND, nForkHeight, nDepth);
+                    if (result == REWIND_FAILED) {
+                        strLoadError = _("Error returning to the correct block chain");
+                        break;
+                    }
+                    if (result == REWIND_TOO_DEEP) {
+                        nTooDeepForkHeight = nForkHeight;
+                        nTooDeepForkDepth = nDepth;
+                    }
+                }
             } catch (std::exception& e) {
                 if (fDebug) LogPrintf("%s\n", e.what());
                 strLoadError = _("Error opening block database");
@@ -1341,6 +1360,23 @@ bool AppInit2(boost::thread_group& threadGroup)
 
             fLoaded = true;
         } while (false);
+
+        if (fLoaded && nTooDeepForkHeight >= 0) {
+            std::string strFork = strprintf(_("This block chain does not match the checkpoint at block %d and has %d blocks past it, too many to undo automatically."),
+                nTooDeepForkHeight, nTooDeepForkDepth);
+            if (fNoUI)
+                return InitError(strFork + " " + _("Restart with -resync to download the block chain again; the wallet is kept."));
+            bool fRet = uiInterface.ThreadSafeMessageBox(
+                strFork + "\n\n" + _("Download the block chain again now? Your wallet is kept."),
+                "", CClientUIInterface::MSG_WARNING | CClientUIInterface::BTN_ABORT);
+            if (fRet) {
+                fResync = true;
+                fLoaded = false;
+                continue;
+            }
+            LogPrintf("Resync declined, staying on the forked chain\n");
+            strMiscWarning = strFork + " " + _("Use Resync in the wallet repair tab, or restart with -resync.");
+        }
 
         if (!fLoaded) {
             // first suggest a reindex
