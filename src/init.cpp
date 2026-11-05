@@ -326,6 +326,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), "bitblocksd.pid"));
 #endif
     strUsage += HelpMessageOpt("-reindex", _("Rebuild block chain index from current blk000??.dat files") + " " + _("on startup"));
+    strUsage += HelpMessageOpt("-resync", _("Delete the local block chain and download it again from the network on startup (the wallet is kept). Use once, not in the config file"));
 #if !defined(WIN32)
     strUsage += HelpMessageOpt("-sysperms", _("Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)"));
 #endif
@@ -625,6 +626,30 @@ bool InitSanityCheck(void)
     return true;
 }
 
+
+/**
+ * Delete the downloaded block chain (blocks/, which also holds the block
+ * index, and chainstate/) so that it is downloaded again from scratch. Nothing
+ * else in the data directory is touched: the wallet, its backups, peers.dat and
+ * the masternode caches stay. The block and coin databases must be closed.
+ */
+static bool DeleteBlockchainData()
+{
+    const fs::path vPaths[] = {GetDataDir() / "blocks", GetDataDir() / "chainstate"};
+    try {
+        for (const fs::path& path : vPaths) {
+            if (!fs::exists(path))
+                continue;
+            uintmax_t nRemoved = fs::remove_all(path);
+            LogPrintf("Resync: deleted %s (%u entries)\n", path.string(), (unsigned int)nRemoved);
+        }
+        fs::create_directories(GetDataDir() / "blocks");
+    } catch (const fs::filesystem_error& e) {
+        LogPrintf("Resync: unable to delete the block chain: %s\n", e.what());
+        return false;
+    }
+    return true;
+}
 
 /** Initialize bitblocks.
  *  @pre Parameters should be parsed and config file should be read.
@@ -1196,6 +1221,15 @@ bool AppInit2(boost::thread_group& threadGroup)
 
     fReindex = GetBoolArg("-reindex", false);
 
+    // -resync: throw the local block chain away and download it again. This is
+    // the way out of a fork too deep to reorganize from, and it supersedes
+    // -reindex, which would only rebuild the same chain from the same files.
+    // The deletion itself happens in the loading loop below, once the block
+    // and coin databases are closed.
+    bool fResync = GetBoolArg("-resync", false);
+    if (fResync)
+        fReindex = false;
+
     // Upgrading to 0.8; hard-link the old blknnnn.dat files into /blocks/
     fs::path blocksDir = GetDataDir() / "blocks";
     if (!fs::exists(blocksDir)) {
@@ -1250,6 +1284,18 @@ bool AppInit2(boost::thread_group& threadGroup)
                 delete pcoinsdbview;
                 delete pcoinscatcher;
                 delete pblocktree;
+                pcoinsTip = NULL;
+                pcoinsdbview = NULL;
+                pcoinscatcher = NULL;
+                pblocktree = NULL;
+
+                if (fResync) {
+                    uiInterface.InitMessage(_("Preparing for resync..."));
+                    LogPrintf("Resync: deleting the block chain\n");
+                    if (!DeleteBlockchainData())
+                        return InitError(_("Unable to delete the block chain for -resync. Close every program using the data directory, or delete the blocks and chainstate folders by hand."));
+                    fResync = false;
+                }
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex);
