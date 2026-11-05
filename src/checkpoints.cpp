@@ -29,6 +29,14 @@ static const double SIGCHECK_VERIFICATION_FACTOR = 5.0;
 
 bool fEnabled = true;
 
+//! Checkpoints given with -testcheckpoint, on regtest only
+static MapCheckpoints mapTestCheckpoints;
+
+void AddTestCheckpoint(int nHeight, const uint256& hash)
+{
+    mapTestCheckpoints[nHeight] = hash;
+}
+
 bool CheckBlock(int nHeight, const uint256& hash)
 {
     if (!fEnabled)
@@ -37,8 +45,12 @@ bool CheckBlock(int nHeight, const uint256& hash)
     const MapCheckpoints& checkpoints = *Params().Checkpoints().mapCheckpoints;
 
     MapCheckpoints::const_iterator i = checkpoints.find(nHeight);
-    if (i == checkpoints.end()) return true;
-    return hash == i->second;
+    if (i != checkpoints.end() && hash != i->second)
+        return false;
+    i = mapTestCheckpoints.find(nHeight);
+    if (i != mapTestCheckpoints.end() && hash != i->second)
+        return false;
+    return true;
 }
 
 //! Guess how far we are in the verification process at the given block index
@@ -89,7 +101,8 @@ bool FindCheckpointMismatch(const CChain& chain, int& nHeight, uint256& hashExpe
     if (!fEnabled)
         return false;
 
-    const MapCheckpoints& checkpoints = *Params().Checkpoints().mapCheckpoints;
+    MapCheckpoints checkpoints = *Params().Checkpoints().mapCheckpoints;
+    checkpoints.insert(mapTestCheckpoints.begin(), mapTestCheckpoints.end());
 
     BOOST_FOREACH (const MapCheckpoints::value_type& i, checkpoints) {
         // The genesis block is checked on its own (testnet and regtest list a

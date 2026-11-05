@@ -27,6 +27,9 @@ struct CCheckpointData {
     double fTransactionsPerDay;
 };
 
+//! Add a checkpoint on top of the built-in ones (regtest only, -testcheckpoint)
+void AddTestCheckpoint(int nHeight, const uint256& hash);
+
 //! Returns true if block passes checkpoint checks
 bool CheckBlock(int nHeight, const uint256& hash);
 

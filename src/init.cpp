@@ -410,6 +410,8 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-checkblockindex", strprintf("Do a full consistency check for mapBlockIndex, setBlockIndexCandidates, chainActive and mapBlocksUnlinked occasionally. Also sets -checkmempool (default: %u)", Params(CBaseChainParams::MAIN).DefaultConsistencyChecks()));
         strUsage += HelpMessageOpt("-checkmempool=<n>", strprintf("Run checks every <n> transactions (default: %u)", Params(CBaseChainParams::MAIN).DefaultConsistencyChecks()));
         strUsage += HelpMessageOpt("-checkpoints", strprintf(_("Only accept block chain matching built-in checkpoints (default: %u)"), 1));
+        strUsage += HelpMessageOpt("-testcheckpoint=<height>:<hash>", "Add a checkpoint, regtest only (repeatable)");
+        strUsage += HelpMessageOpt("-maxcheckpointrewind=<n>", strprintf("Most blocks undone on startup to return to a checkpoint, regtest only (default: %u)", DEFAULT_MAX_CHECKPOINT_REWIND));
         strUsage += HelpMessageOpt("-dblogsize=<n>", strprintf(_("Flush database activity from memory pool to disk log every <n> megabytes (default: %u)"), 100));
         strUsage += HelpMessageOpt("-disablesafemode", strprintf(_("Disable safemode, override a real safe mode event (default: %u)"), 0));
         strUsage += HelpMessageOpt("-testsafemode", strprintf(_("Force safe mode (default: %u)"), 0));
@@ -1232,6 +1234,20 @@ bool AppInit2(boost::thread_group& threadGroup)
     if (fResync)
         fReindex = false;
 
+    // Test hooks for the checkpoint rewind, never honored outside regtest.
+    int nMaxCheckpointRewind = DEFAULT_MAX_CHECKPOINT_REWIND;
+    if (Params().NetworkID() == CBaseChainParams::REGTEST) {
+        BOOST_FOREACH (const std::string& strCheckpoint, mapMultiArgs["-testcheckpoint"]) {
+            size_t nColon = strCheckpoint.find(':');
+            std::string strHash = nColon == std::string::npos ? "" : strCheckpoint.substr(nColon + 1);
+            int nHeight = nColon == std::string::npos ? -1 : atoi(strCheckpoint.substr(0, nColon));
+            if (nHeight <= 0 || strHash.size() != 64 || !IsHex(strHash))
+                return InitError(strprintf("Invalid -testcheckpoint '%s', expected <height>:<hash>", strCheckpoint));
+            Checkpoints::AddTestCheckpoint(nHeight, uint256(strHash));
+        }
+        nMaxCheckpointRewind = GetArg("-maxcheckpointrewind", DEFAULT_MAX_CHECKPOINT_REWIND);
+    }
+
     // Upgrading to 0.8; hard-link the old blknnnn.dat files into /blocks/
     fs::path blocksDir = GetDataDir() / "blocks";
     if (!fs::exists(blocksDir)) {
@@ -1342,7 +1358,7 @@ bool AppInit2(boost::thread_group& threadGroup)
                 // limit: undo the fork back to the split, then sync as usual.
                 if (!fReindex && GetBoolArg("-checkpointrewind", true)) {
                     int nForkHeight = -1, nDepth = 0;
-                    CheckpointRewindResult result = RewindToCheckpoints(DEFAULT_MAX_CHECKPOINT_REWIND, nForkHeight, nDepth);
+                    CheckpointRewindResult result = RewindToCheckpoints(nMaxCheckpointRewind, nForkHeight, nDepth);
                     if (result == REWIND_FAILED) {
                         strLoadError = _("Error returning to the correct block chain");
                         break;
