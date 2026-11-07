@@ -10,6 +10,7 @@
 #include <map>
 
 class CBlockIndex;
+class CChain;
 
 /** 
  * Block-chain checkpoints are compiled-in sanity checks.
@@ -26,11 +27,21 @@ struct CCheckpointData {
     double fTransactionsPerDay;
 };
 
+//! Add a checkpoint on top of the built-in ones (regtest only, -testcheckpoint)
+void AddTestCheckpoint(int nHeight, const uint256& hash);
+
 //! Returns true if block passes checkpoint checks
 bool CheckBlock(int nHeight, const uint256& hash);
 
 //! Return conservative estimate of total number of blocks, 0 if unknown
 int GetTotalBlocksEstimate();
+
+/**
+ * Find the lowest checkpoint that the given chain reaches with a different
+ * block, i.e. the chain left the checkpointed one below that height. Returns
+ * false if the chain agrees with every checkpoint it reaches.
+ */
+bool FindCheckpointMismatch(const CChain& chain, int& nHeight, uint256& hashExpected);
 
 //! Returns last CBlockIndex* in mapBlockIndex that is a checkpoint
 CBlockIndex* GetLastCheckpoint();

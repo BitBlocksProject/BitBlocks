@@ -39,7 +39,7 @@ CFeeRate payTxFee(DEFAULT_TRANSACTION_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 unsigned int nTxConfirmTarget = 1;
 bool bSpendZeroConfChange = true;
-bool fSendFreeTransactions = false;
+bool fSendFreeTransactions = true;
 bool fPayAtLeastCustomFee = true;
 
 /** 
@@ -214,23 +214,16 @@ bool CWallet::LoadWatchOnly(const CScript& dest)
 
 bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool anonymizeOnly)
 {
-    SecureString strWalletPassphraseFinal;
-
-    if (!IsLocked()) {
-        fWalletUnlockAnonymizeOnly = anonymizeOnly;
-        return true;
-    }
-
-    strWalletPassphraseFinal = strWalletPassphrase;
-    
-
+    // Always check the passphrase, even when the wallet is already unlocked:
+    // otherwise any passphrase would turn an unlock for staking only into a
+    // full unlock.
     CCrypter crypter;
     CKeyingMaterial vMasterKey;
 
     {
         LOCK(cs_wallet);
         BOOST_FOREACH (const MasterKeyMap::value_type& pMasterKey, mapMasterKeys) {
-            if (!crypter.SetKeyFromPassphrase(strWalletPassphraseFinal, pMasterKey.second.vchSalt, pMasterKey.second.nDeriveIterations, pMasterKey.second.nDerivationMethod))
+            if (!crypter.SetKeyFromPassphrase(strWalletPassphrase, pMasterKey.second.vchSalt, pMasterKey.second.nDeriveIterations, pMasterKey.second.nDerivationMethod))
                 return false;
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, vMasterKey))
                 continue; // try another master key
@@ -1200,7 +1193,7 @@ void CWallet::ResendWalletTransactions()
     // Rebroadcast any of our txes that aren't in a block yet
     LogPrintf("ResendWalletTransactions()\n");
     {
-        LOCK(cs_wallet);
+        LOCK2(cs_main, cs_wallet);
         // Sort them in chronological order
         multimap<unsigned int, CWalletTx*> mapSorted;
         BOOST_FOREACH (PAIRTYPE(const uint256, CWalletTx) & item, mapWallet) {
@@ -1212,6 +1205,12 @@ void CWallet::ResendWalletTransactions()
         }
         BOOST_FOREACH (PAIRTYPE(const unsigned int, CWalletTx*) & item, mapSorted) {
             CWalletTx& wtx = *item.second;
+            // Our transaction may have expired from the mempool (-mempoolexpiry);
+            // put it back before announcing it again, and skip it if it no
+            // longer fits the mempool policy.
+            if (!wtx.IsCoinBase() && !wtx.IsCoinStake() && wtx.GetDepthInMainChain() == 0 &&
+                !mempool.exists(wtx.GetHash()) && !wtx.AcceptToMemoryPool(false))
+                continue;
             wtx.RelayWalletTransaction();
         }
     }
@@ -2102,9 +2101,12 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
     const CCoinControl* coinControl,
     AvailableCoinsType coin_type,
     bool useIX,
-    CAmount nFeePay)
+    CAmount nFeePay,
+    CFreeTxInfo* pFreeInfo)
 {
     if (useIX && nFeePay < CENT) nFeePay = CENT;
+    if (pFreeInfo)
+        *pFreeInfo = CFreeTxInfo();
 
     CAmount nValue = 0;
 
@@ -2136,6 +2138,7 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
 
                 CAmount nTotalValue = nValue + nFeeRet;
                 double dPriority = 0;
+                bool fAllInputsConfirmed = true;
 
                 // vouts to the payees
                 if (coinControl && !coinControl->fSplitBlock) {
@@ -2193,13 +2196,15 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
 
                 BOOST_FOREACH (PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins) {
                     CAmount nCredit = pcoin.first->vout[pcoin.second].nValue;
-                    //The coin age after the next block (depth+1) is used instead of the current,
-                    //reflecting an assumption the user would accept a bit more delay for
-                    //a chance at a free transaction.
-                    //But mempool inputs might still be in the mempool, so their age stays 0
+                    //Use the same coin age as the relay check in AcceptToMemoryPool
+                    //(the depth, i.e. the age in the next block), otherwise the
+                    //node would refuse a free transaction the wallet just built.
+                    //Mempool inputs have no age.
                     int age = pcoin.first->GetDepthInMainChain();
-                    if (age != 0)
-                        age += 1;
+                    if (age <= 0) {
+                        age = 0;
+                        fAllInputsConfirmed = false;
+                    }
                     dPriority += (double)nCredit * age;
                 }
 
@@ -2279,26 +2284,29 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, CAmount> >& vecSend,
                 }
                 dPriority = wtxNew.ComputePriority(dPriority, nBytes);
 
-                // Can we complete this as a free transaction?
-                if (fSendFreeTransactions && nBytes <= MAX_FREE_TRANSACTION_CREATE_SIZE) {
-                    // Not enough fee: enough priority?
-                    double dPriorityNeeded = mempool.estimatePriority(nTxConfirmTarget);
-                    // Not enough mempool history to estimate: use hard-coded AllowFree.
-                    if (dPriorityNeeded <= 0 && AllowFree(dPriority))
+                // Can we complete this as a free transaction? Nodes relay and
+                // mine free transactions only when they are small, spend no
+                // unconfirmed outputs and reach the AllowFree priority, so use
+                // exactly those rules here.
+                bool fWantFree = fSendFreeTransactions && nFeePay == 0 && coin_type != ONLY_DENOMINATED;
+                if (fWantFree) {
+                    bool fTooLarge = nBytes > MAX_FREE_TRANSACTION_CREATE_SIZE;
+                    if (!fTooLarge && fAllInputsConfirmed && AllowFree(dPriority))
                         break;
 
-                    // Small enough, and priority high enough, to send for free
-                    if (dPriorityNeeded > 0 && dPriority >= dPriorityNeeded)
-                        break;
+                    if (pFreeInfo) {
+                        pFreeInfo->fFeeDueToPriority = true;
+                        pFreeInfo->fHasUnconfirmedInputs = !fAllInputsConfirmed;
+                        pFreeInfo->fTooLarge = fTooLarge;
+                        pFreeInfo->nBlocksUntilFree = -1;
+                        // Every block adds nValueIn of coin age to the inputs
+                        double dPriorityPerBlock = wtxNew.ComputePriority((double)nValueIn, nBytes);
+                        if (!fTooLarge && fAllInputsConfirmed && dPriorityPerBlock > 0)
+                            pFreeInfo->nBlocksUntilFree = (int)((AllowFreeThreshold() - dPriority) / dPriorityPerBlock) + 1;
+                    }
                 }
 
                 CAmount nFeeNeeded = max(nFeePay, GetMinimumFee(nBytes, nTxConfirmTarget, mempool));
-
-                // If we made it here and we aren't even able to meet the relay fee on the next pass, give up
-                // because we must be at the maximum allowed fee.
-                if (nFeeNeeded < ::minRelayTxFee.GetFee(nBytes)) {
-                   
-                }
 
                 if (nFeeRet >= nFeeNeeded) // Done, enough fee included
                     break;
@@ -2344,15 +2352,29 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         return false;
 
     // presstab HyperStake - Initialize as static and don't update the set on every run of CreateCoinStake() in order to lighten resource use
+    //
+    // The set is rebuilt whenever the chain tip changes, so coins spent by a
+    // block (including our own previous stake) drop out at the next block, and
+    // at least every nStakeSetUpdateTime seconds so coins that reach the minimum
+    // age are picked up even if no block arrives. Coins spent or locked in
+    // between are skipped by the check in the kernel loop below.
     static std::set<pair<const CWalletTx*, unsigned int> > setStakeCoins;
-    static int nLastStakeSetUpdate = 0;
+    static int64_t nLastStakeSetUpdate = 0;
+    static uint256 hashStakeSetTip = 0;
 
-    if (GetTime() - nLastStakeSetUpdate > nStakeSetUpdateTime) {
+    uint256 hashTip;
+    {
+        LOCK(cs_main);
+        hashTip = chainActive.Tip()->GetBlockHash();
+    }
+
+    if (hashTip != hashStakeSetTip || GetTime() - nLastStakeSetUpdate > nStakeSetUpdateTime) {
         setStakeCoins.clear();
         if (!SelectStakeCoins(setStakeCoins, nBalance - nReserveBalance))
             return false;
 
         nLastStakeSetUpdate = GetTime();
+        hashStakeSetTip = hashTip;
     }
 
     if (setStakeCoins.empty())
@@ -2368,6 +2390,17 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         MilliSleep(10000);
 
     BOOST_FOREACH (PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setStakeCoins) {
+        // The set may be older than the latest wallet changes. Skip coins that
+        // have since been spent (by a block or by a transaction in the mempool)
+        // or locked, e.g. a masternode collateral: staking them would build an
+        // invalid block or turn a pending payment into a conflict.
+        {
+            LOCK2(cs_main, cs_wallet);
+            const uint256 hashCoin = pcoin.first->GetHash();
+            if (IsSpent(hashCoin, pcoin.second) || IsLockedCoin(hashCoin, pcoin.second))
+                continue;
+        }
+
         //make sure that enough time has elapsed between
         CBlockIndex* pindex = NULL;
         BlockMap::iterator it = mapBlockIndex.find(pcoin.first->hashBlock);
@@ -2388,7 +2421,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         nTxNewTime = GetAdjustedTime();
 
         //iterates each utxo inside of CheckStakeKernelHash()
-        if (CheckStakeKernelHash(nBits, block, *pcoin.first, prevoutStake, nTxNewTime, nHashDrift, false, hashProofOfStake, true)) {
+        if (CheckStakeKernelHash(chainActive.Tip(), nBits, block, *pcoin.first, prevoutStake, nTxNewTime, nHashDrift, false, hashProofOfStake, true)) {
             //Double check that this will pass time requirements
             if (nTxNewTime <= chainActive.Tip()->GetMedianTimePast()) {
                 LogPrintf("CreateCoinStake() : kernel found, but it is too far in the past \n");

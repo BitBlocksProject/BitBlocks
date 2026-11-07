@@ -13,6 +13,7 @@
 // included here rather than arrive by accident through whatever else
 // walletmodel.h happens to pull in.
 #include "amount.h"
+#include "wallet.h"
 #include "walletmodel.h"
 
 #include <QObject>
@@ -38,6 +39,9 @@ public:
     void setTransactionFee(const CAmount& newFee);
     CAmount getTransactionFee();
 
+    //! Why the wallet had to add a fee instead of sending the transaction for free
+    CFreeTxInfo& getFreeTxInfo() { return freeTxInfo; }
+
     CAmount getTotalTransactionAmount();
 
     void newPossibleKeyChange(CWallet* wallet);
@@ -48,6 +52,7 @@ private:
     CWalletTx* walletTransaction;
     CReserveKey* keyChange;
     CAmount fee;
+    CFreeTxInfo freeTxInfo;
 };
 
 #endif // BITCOIN_QT_WALLETMODELTRANSACTION_H

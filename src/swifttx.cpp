@@ -96,11 +96,12 @@ void ProcessMessageSwiftTX(CNode* pfrom, std::string& strCommand, CDataStream& v
                 pfrom->addr.ToString().c_str(), pfrom->cleanSubVer.c_str(),
                 tx.GetHash().ToString().c_str());
 
-            BOOST_FOREACH (const CTxIn& in, tx.vin) {
-                if (!mapLockedInputs.count(in.prevout)) {
-                    mapLockedInputs.insert(make_pair(in.prevout, tx.GetHash()));
-                }
-            }
+            // Do NOT lock the inputs of a rejected request here. A rejected ix
+            // carries no masternode signatures, so any peer could otherwise
+            // send a double-spend of a mempool or confirmed transaction and
+            // make us treat the honest spend as conflicting with a "lock" --
+            // rejecting it from the mempool and, through CheckBlock, rejecting
+            // honest blocks. Inputs are only locked once a complete lock exists.
 
             // resolve conflicts
             std::map<uint256, CTransactionLock>::iterator i = mapTxLocks.find(tx.GetHash());
@@ -109,6 +110,12 @@ void ProcessMessageSwiftTX(CNode* pfrom, std::string& strCommand, CDataStream& v
                 if ((*i).second.CountSignatures() >= SWIFTTX_SIGNATURES_REQUIRED) {
                     if (!CheckForConflictingLocks(tx)) {
                         LogPrintf("ProcessMessageSwiftTX::ix - Found Existing Complete IX Lock\n");
+
+                        BOOST_FOREACH (const CTxIn& in, tx.vin) {
+                            if (!mapLockedInputs.count(in.prevout)) {
+                                mapLockedInputs.insert(make_pair(in.prevout, tx.GetHash()));
+                            }
+                        }
 
                         //reprocess the last 15 blocks
                         ReprocessBlocks(15);

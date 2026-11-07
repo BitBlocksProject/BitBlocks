@@ -15,9 +15,20 @@
 
 class CAutoFile;
 
+/**
+ * Priority a transaction needs to be relayed and mined without a fee.
+ * Priority is sum(input value * input confirmations) / modified size, where
+ * the modified size leaves out most of each input (see
+ * CTransaction::CalculateModifiedSize). A typical payment with one input and
+ * two outputs (226 bytes, 78 bytes modified) needs about 1800 BBK-blocks of
+ * coin age: 1000 BBK held for about 2 minutes, 100 BBK for about 18 minutes,
+ * or 1 BBK for about 30 hours.
+ * Bitcoin uses 576 with 10 minute blocks; BitBlocks blocks come every
+ * 60 seconds, so the factor of 10 keeps the same waiting time.
+ */
 inline double AllowFreeThreshold()
 {
-    return COIN * 576 / 250;
+    return COIN * 5760 / 250;
 }
 
 inline bool AllowFree(double dPriority)
@@ -100,6 +111,7 @@ private:
 
     CFeeRate minRelayFee; //! Passed to constructor to avoid dependency on main
     uint64_t totalTxSize; //! sum of all mempool tx' byte sizes
+    uint64_t totalFreeTxSize; //! sum of byte sizes of mempool txs paying less than minRelayFee
 
 public:
     mutable CCriticalSection cs;
@@ -124,6 +136,8 @@ public:
     void removeCoinbaseSpends(const CCoinsViewCache* pcoins, unsigned int nMemPoolHeight);
     void removeConflicts(const CTransaction& tx, std::list<CTransaction>& removed);
     void removeForBlock(const std::vector<CTransaction>& vtx, unsigned int nBlockHeight, std::list<CTransaction>& conflicts);
+    /** Remove transactions that entered the pool before nTime, and everything spending them. Returns the number removed. */
+    int Expire(int64_t nTime);
     void clear();
     void queryHashes(std::vector<uint256>& vtxid);
     void pruneSpent(const uint256& hash, CCoins& coins);
@@ -144,6 +158,17 @@ public:
     {
         LOCK(cs);
         return totalTxSize;
+    }
+    uint64_t GetTotalFreeTxSize()
+    {
+        LOCK(cs);
+        return totalFreeTxSize;
+    }
+
+    /** True if a transaction with this fee and size counts as free (pays less than the relay fee) */
+    bool IsFreeTx(const CAmount& nFee, size_t nTxSize) const
+    {
+        return nFee < minRelayFee.GetFee(nTxSize);
     }
 
     bool exists(uint256 hash)

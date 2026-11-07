@@ -57,11 +57,15 @@ struct CNodeStateStats;
 static const unsigned int DEFAULT_BLOCK_MAX_SIZE = 7500000;
 static const unsigned int DEFAULT_BLOCK_MIN_SIZE = 0;
 /** Default for -blockprioritysize, maximum space for zero/low-fee transactions **/
-static const unsigned int DEFAULT_BLOCK_PRIORITY_SIZE = 50000;
+static const unsigned int DEFAULT_BLOCK_PRIORITY_SIZE = 250000;
+/** Largest transaction (in bytes) that may be relayed without paying the relay fee */
+static const unsigned int MAX_FREE_TX_RELAY_SIZE = 49000;
+/** Default for -limitfreerelay, rate limit for relaying free transactions in thousands of bytes per minute */
+static const unsigned int DEFAULT_LIMITFREERELAY = 500;
 /** Default for accepting alerts from the P2P network. */
-static const bool DEFAULT_ALERTS = true;
+static const bool DEFAULT_ALERTS = false;
 /** The maximum size for transactions we're willing to relay/mine */
-static const unsigned int MAX_STANDARD_TX_SIZE = 1000000;
+static const unsigned int MAX_STANDARD_TX_SIZE = 100000;
 /** The maximum allowed number of signature check operations in a block (network rule) */
 static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE / 50;
 /** Maximum number of signature check operations in an IsStandard() P2SH script */
@@ -70,6 +74,14 @@ static const unsigned int MAX_P2SH_SIGOPS = 15;
 static const unsigned int MAX_TX_SIGOPS = MAX_BLOCK_SIGOPS / 5;
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */
 static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 30;
+/** Default for -maxmempool, maximum total size of mempool transactions in megabytes */
+static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 100;
+/** Most blocks a startup rewind to a checkpoint disconnects; deeper forks are offered a resync */
+static const int DEFAULT_MAX_CHECKPOINT_REWIND = 50000;
+/** Share of -maxmempool (in percent) that free transactions may occupy */
+static const unsigned int MEMPOOL_FREE_TX_SHARE_PERCENT = 50;
+/** Default for -mempoolexpiry, hours after which unconfirmed transactions are dropped from the mempool */
+static const unsigned int DEFAULT_MEMPOOL_EXPIRY = 24;
 /** The maximum size of a blk?????.dat file (since 0.8) */
 static const unsigned int MAX_BLOCKFILE_SIZE = 0x8000000; // 128 MiB
 /** The pre-allocation chunk size for blk?????.dat files (since 0.8) */
@@ -91,6 +103,8 @@ static const unsigned int BLOCK_STALLING_TIMEOUT = 2;
 /** Number of headers sent in one getheaders result. We rely on the assumption that if a peer sends
  *  less than this number, we reached their tip. Changing this value is a protocol upgrade. */
 static const unsigned int MAX_HEADERS_RESULTS = 2000;
+/** Maximum number of hashes accepted in a block locator. */
+static const unsigned int MAX_LOCATOR_SZ = 101;
 /** Size of the "block download window": how far ahead of our current height do we fetch?
  *  Larger windows tolerate larger download speed differences between peer, but increase the potential
  *  degree of disordering of blocks on disk (which make reindexing and in the future perhaps pruning
@@ -98,6 +112,12 @@ static const unsigned int MAX_HEADERS_RESULTS = 2000;
 static const unsigned int BLOCK_DOWNLOAD_WINDOW = 1024;
 /** Time to wait (in seconds) between writing blockchain state to disk. */
 static const unsigned int DATABASE_WRITE_INTERVAL = 3600;
+/** Minimum time (in seconds) before answering another orphan block from the
+ *  same peer with a getblocks while our tip has not moved. */
+static const int64_t ORPHAN_GETBLOCKS_INTERVAL = 30;
+/** Maximum number of block hashes remembered per peer as requested through an
+ *  orphan getblocks (CNode::vBlockRequested); the oldest are dropped first. */
+static const unsigned int MAX_BLOCKS_REQUESTED_PER_PEER = 2000;
 /** Maximum length of reject messages. */
 static const unsigned int MAX_REJECT_MESSAGE_LENGTH = 111;
 
@@ -428,6 +448,11 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex);
  *  of problems. Note that in any case, coins may be modified. */
 bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& coins, bool* pfClean = NULL);
 
+/** Restore one spent output from its undo data, including the coinbase/coinstake
+ *  flags, height and version when it was the last output of its transaction.
+ *  Returns false if the undo data did not match the current coins. */
+bool ApplyTxInUndo(const CTxInUndo& undo, CCoinsViewCache& view, const COutPoint& out);
+
 /** Reprocess a number of blocks to try and get on the correct chain again **/
 bool DisconnectBlocksAndReprocess(int blocks);
 
@@ -595,10 +620,26 @@ public:
 CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& locator);
 
 /** Mark a block as invalid. */
-bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex);
+bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex, bool fBare = false);
 
 /** Remove invalidity status from a block and its descendants. */
 bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex);
+
+enum CheckpointRewindResult {
+    REWIND_NONE,        //! our chain agrees with every checkpoint it reaches
+    REWIND_DONE,        //! we were on a fork and are back at the split
+    REWIND_INTERRUPTED, //! shutdown requested while rewinding; the next start resumes
+    REWIND_TOO_DEEP,    //! fork deeper than nMaxDepth, nothing was done
+    REWIND_FAILED,
+};
+
+/**
+ * On startup: if our chain disagrees with a checkpoint it reaches, disconnect
+ * it back to the block below that checkpoint, so that the checkpointed chain
+ * can be synced again despite the reorganization depth limit. Does nothing if
+ * the fork is deeper than nMaxDepth blocks.
+ */
+CheckpointRewindResult RewindToCheckpoints(int nMaxDepth, int& nForkHeight, int& nDepth);
 
 /** The currently-connected chain of blocks. */
 extern CChain chainActive;

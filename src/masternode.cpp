@@ -738,21 +738,21 @@ bool CMasternodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled)
                 return false;
             }
 
-            BlockMap::iterator mi = mapBlockIndex.find(blockHash);
-            if (mi != mapBlockIndex.end() && (*mi).second) {
-                if ((*mi).second->nHeight < chainActive.Height() - 24) {
-                    LogPrintf("CMasternodePing::CheckAndUpdate - Masternode %s block hash %s is too old\n", vin.prevout.hash.ToString(), blockHash.ToString());
-                    // Do nothing here (no Masternode update, no mnping relay)
-                    // Let this node to be visible but fail to accept mnping
-
+            // The ping must reference a recent block of our active chain: a block
+            // from a fork would keep masternodes running on that fork enabled here.
+            // No nDos on failure: older peers still relay such pings, and we may be
+            // the ones behind or on a fork. Just don't update or relay the ping.
+            {
+                LOCK(cs_main);
+                BlockMap::iterator mi = mapBlockIndex.find(blockHash);
+                if (mi == mapBlockIndex.end() || !(*mi).second) {
+                    LogPrint("masternode", "CMasternodePing::CheckAndUpdate - Masternode %s block hash %s is unknown\n", vin.prevout.hash.ToString(), blockHash.ToString());
                     return false;
                 }
-            } else {
-                if (fDebug) LogPrintf("CMasternodePing::CheckAndUpdate - Masternode %s block hash %s is unknown\n", vin.prevout.hash.ToString(), blockHash.ToString());
-                // maybe we stuck so we shouldn't ban this node, just fail to accept it
-                // TODO: or should we also request this block?
-
-                return false;
+                if (!chainActive.Contains((*mi).second) || (*mi).second->nHeight < chainActive.Height() - 24) {
+                    LogPrint("masternode", "CMasternodePing::CheckAndUpdate - Masternode %s block hash %s is too old or not in the active chain\n", vin.prevout.hash.ToString(), blockHash.ToString());
+                    return false;
+                }
             }
 
             pmn->lastPing = *this;
