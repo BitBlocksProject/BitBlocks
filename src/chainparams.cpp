@@ -65,14 +65,18 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (3000000, uint256("240ba7086366818c6bb3ae94576d9e452c37f4666c7bb1def429faeca8d48902"))
     (3500000, uint256("c18ae698b3c715f503cafdce96847c8deb7f22a4f29b21c0409da35f92ec4e74"))
     (3685080, uint256("51896e4e2c945550ce3722bb5fe793fb0cc076a4d437f5dd805e97d0bc05b4e9"))
+    (3814154, uint256("64780d5c7fc998f019b5f2519318907b6dc90659845adbae960ded8e6964b086")) // first block after a fork at 3814153
     (4000000, uint256("29fdaf42489ad9b1292bbdfcf71f343846f941c7f54283da0f87e215c4344259"))
-    (4100000, uint256("367b5e764fc8eb18896e2be92a5d739a4c8d98f981b7b832e14ca1d7246381ad"));
+    (4100000, uint256("367b5e764fc8eb18896e2be92a5d739a4c8d98f981b7b832e14ca1d7246381ad"))
+    (4143878, uint256("74b9fa1633021073895003fb28e61b35a2abd43cf091265a7d5ab2aa4d540866")) // first block after a fork at 4143877
+    (4159094, uint256("2e2e9295a988faa5eff3d1901dd2e202546d94de5cbdac8033c3d6a26bc51504")); // first block after a fork at 4159093
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1790049912, // * UNIX timestamp of last checkpoint block
-    8267598,    // * total number of transactions between genesis and last checkpoint
-                 //   (the tx=... number in the SetBestChain debug.log lines)
+    1793636262, // * UNIX timestamp of last checkpoint block
+    8385786,    // * total number of transactions between genesis and last checkpoint
+                 //   (estimated: block 4100000's tx=... count plus a coinbase and a
+                 //   coinstake per block since; only used for the progress estimate)
     2880         // * estimated number of transactions per day after checkpoint
 };
 

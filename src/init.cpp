@@ -26,6 +26,7 @@
 #include "masternodeman.h"
 #include "miner.h"
 #include "net.h"
+#include "noui.h"
 #include "rpcserver.h"
 #include "script/standard.h"
 #include "spork.h"
@@ -326,6 +327,8 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), "bitblocksd.pid"));
 #endif
     strUsage += HelpMessageOpt("-reindex", _("Rebuild block chain index from current blk000??.dat files") + " " + _("on startup"));
+    strUsage += HelpMessageOpt("-checkpointrewind", strprintf(_("If the block chain left a checkpointed one, undo it back to the split on startup (default: %u)"), 1));
+    strUsage += HelpMessageOpt("-resync", _("Delete the local block chain and download it again from the network on startup (the wallet is kept). Use once, not in the config file"));
 #if !defined(WIN32)
     strUsage += HelpMessageOpt("-sysperms", _("Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)"));
 #endif
@@ -407,6 +410,8 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-checkblockindex", strprintf("Do a full consistency check for mapBlockIndex, setBlockIndexCandidates, chainActive and mapBlocksUnlinked occasionally. Also sets -checkmempool (default: %u)", Params(CBaseChainParams::MAIN).DefaultConsistencyChecks()));
         strUsage += HelpMessageOpt("-checkmempool=<n>", strprintf("Run checks every <n> transactions (default: %u)", Params(CBaseChainParams::MAIN).DefaultConsistencyChecks()));
         strUsage += HelpMessageOpt("-checkpoints", strprintf(_("Only accept block chain matching built-in checkpoints (default: %u)"), 1));
+        strUsage += HelpMessageOpt("-testcheckpoint=<height>:<hash>", "Add a checkpoint, regtest only (repeatable)");
+        strUsage += HelpMessageOpt("-maxcheckpointrewind=<n>", strprintf("Most blocks undone on startup to return to a checkpoint, regtest only (default: %u)", DEFAULT_MAX_CHECKPOINT_REWIND));
         strUsage += HelpMessageOpt("-dblogsize=<n>", strprintf(_("Flush database activity from memory pool to disk log every <n> megabytes (default: %u)"), 100));
         strUsage += HelpMessageOpt("-disablesafemode", strprintf(_("Disable safemode, override a real safe mode event (default: %u)"), 0));
         strUsage += HelpMessageOpt("-testsafemode", strprintf(_("Force safe mode (default: %u)"), 0));
@@ -625,6 +630,30 @@ bool InitSanityCheck(void)
     return true;
 }
 
+
+/**
+ * Delete the downloaded block chain (blocks/, which also holds the block
+ * index, and chainstate/) so that it is downloaded again from scratch. Nothing
+ * else in the data directory is touched: the wallet, its backups, peers.dat and
+ * the masternode caches stay. The block and coin databases must be closed.
+ */
+static bool DeleteBlockchainData()
+{
+    const fs::path vPaths[] = {GetDataDir() / "blocks", GetDataDir() / "chainstate"};
+    try {
+        for (const fs::path& path : vPaths) {
+            if (!fs::exists(path))
+                continue;
+            uintmax_t nRemoved = fs::remove_all(path);
+            LogPrintf("Resync: deleted %s (%u entries)\n", path.string(), (unsigned int)nRemoved);
+        }
+        fs::create_directories(GetDataDir() / "blocks");
+    } catch (const fs::filesystem_error& e) {
+        LogPrintf("Resync: unable to delete the block chain: %s\n", e.what());
+        return false;
+    }
+    return true;
+}
 
 /** Initialize bitblocks.
  *  @pre Parameters should be parsed and config file should be read.
@@ -1196,6 +1225,29 @@ bool AppInit2(boost::thread_group& threadGroup)
 
     fReindex = GetBoolArg("-reindex", false);
 
+    // -resync: throw the local block chain away and download it again. This is
+    // the way out of a fork too deep to reorganize from, and it supersedes
+    // -reindex, which would only rebuild the same chain from the same files.
+    // The deletion itself happens in the loading loop below, once the block
+    // and coin databases are closed.
+    bool fResync = GetBoolArg("-resync", false);
+    if (fResync)
+        fReindex = false;
+
+    // Test hooks for the checkpoint rewind, never honored outside regtest.
+    int nMaxCheckpointRewind = DEFAULT_MAX_CHECKPOINT_REWIND;
+    if (Params().NetworkID() == CBaseChainParams::REGTEST) {
+        BOOST_FOREACH (const std::string& strCheckpoint, mapMultiArgs["-testcheckpoint"]) {
+            size_t nColon = strCheckpoint.find(':');
+            std::string strHash = nColon == std::string::npos ? "" : strCheckpoint.substr(nColon + 1);
+            int nHeight = nColon == std::string::npos ? -1 : atoi(strCheckpoint.substr(0, nColon));
+            if (nHeight <= 0 || strHash.size() != 64 || !IsHex(strHash))
+                return InitError(strprintf("Invalid -testcheckpoint '%s', expected <height>:<hash>", strCheckpoint));
+            Checkpoints::AddTestCheckpoint(nHeight, uint256(strHash));
+        }
+        nMaxCheckpointRewind = GetArg("-maxcheckpointrewind", DEFAULT_MAX_CHECKPOINT_REWIND);
+    }
+
     // Upgrading to 0.8; hard-link the old blknnnn.dat files into /blocks/
     fs::path blocksDir = GetDataDir() / "blocks";
     if (!fs::exists(blocksDir)) {
@@ -1239,6 +1291,7 @@ bool AppInit2(boost::thread_group& threadGroup)
     while (!fLoaded) {
         bool fReset = fReindex;
         std::string strLoadError;
+        int nTooDeepForkHeight = -1, nTooDeepForkDepth = 0;
 
         uiInterface.InitMessage(_("Loading block index..."));
 
@@ -1250,6 +1303,18 @@ bool AppInit2(boost::thread_group& threadGroup)
                 delete pcoinsdbview;
                 delete pcoinscatcher;
                 delete pblocktree;
+                pcoinsTip = NULL;
+                pcoinsdbview = NULL;
+                pcoinscatcher = NULL;
+                pblocktree = NULL;
+
+                if (fResync) {
+                    uiInterface.InitMessage(_("Preparing for resync..."));
+                    LogPrintf("Resync: deleting the block chain\n");
+                    if (!DeleteBlockchainData())
+                        return InitError(_("Unable to delete the block chain for -resync. Close every program using the data directory, or delete the blocks and chainstate folders by hand."));
+                    fResync = false;
+                }
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex);
@@ -1287,6 +1352,22 @@ bool AppInit2(boost::thread_group& threadGroup)
                     strLoadError = _("Corrupted block database detected");
                     break;
                 }
+
+                // A chain that left a checkpointed one can't return to it on
+                // its own when the fork is deeper than the reorganization
+                // limit: undo the fork back to the split, then sync as usual.
+                if (!fReindex && GetBoolArg("-checkpointrewind", true)) {
+                    int nForkHeight = -1, nDepth = 0;
+                    CheckpointRewindResult result = RewindToCheckpoints(nMaxCheckpointRewind, nForkHeight, nDepth);
+                    if (result == REWIND_FAILED) {
+                        strLoadError = _("Error returning to the correct block chain");
+                        break;
+                    }
+                    if (result == REWIND_TOO_DEEP) {
+                        nTooDeepForkHeight = nForkHeight;
+                        nTooDeepForkDepth = nDepth;
+                    }
+                }
             } catch (std::exception& e) {
                 if (fDebug) LogPrintf("%s\n", e.what());
                 strLoadError = _("Error opening block database");
@@ -1295,6 +1376,23 @@ bool AppInit2(boost::thread_group& threadGroup)
 
             fLoaded = true;
         } while (false);
+
+        if (fLoaded && nTooDeepForkHeight >= 0) {
+            std::string strFork = strprintf(_("This block chain does not match the checkpoint at block %d and has %d blocks past it, too many to undo automatically."),
+                nTooDeepForkHeight, nTooDeepForkDepth);
+            if (fNoUI)
+                return InitError(strFork + " " + _("Restart with -resync to download the block chain again; the wallet is kept."));
+            bool fRet = uiInterface.ThreadSafeMessageBox(
+                strFork + "\n\n" + _("Download the block chain again now? Your wallet is kept."),
+                "", CClientUIInterface::MSG_WARNING | CClientUIInterface::BTN_ABORT);
+            if (fRet) {
+                fResync = true;
+                fLoaded = false;
+                continue;
+            }
+            LogPrintf("Resync declined, staying on the forked chain\n");
+            strMiscWarning = strFork + " " + _("Use Resync in the wallet repair tab, or restart with -resync.");
+        }
 
         if (!fLoaded) {
             // first suggest a reindex

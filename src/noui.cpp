@@ -48,8 +48,11 @@ static void noui_InitMessage(const std::string& message)
     LogPrintf("init message: %s\n", message);
 }
 
+bool fNoUI = false;
+
 void noui_connect()
 {
+    fNoUI = true;
     // Connect bitblocksd signal handlers
     uiInterface.ThreadSafeMessageBox.connect(noui_ThreadSafeMessageBox);
     uiInterface.InitMessage.connect(noui_InitMessage);

@@ -5,6 +5,9 @@
 #ifndef BITCOIN_NOUI_H
 #define BITCOIN_NOUI_H
 
+/** Whether the node runs without a GUI (bitblocksd): no one can answer questions at startup. */
+extern bool fNoUI;
+
 extern void noui_connect();
 
 #endif // BITCOIN_NOUI_H

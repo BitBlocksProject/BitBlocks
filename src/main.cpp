@@ -2512,7 +2512,13 @@ void static UpdateTip(CBlockIndex* pindexNew)
 }
 
 /** Disconnect chainActive's tip. */
-bool static DisconnectTip(CValidationState& state)
+/**
+ * Disconnect chainActive.Tip(). A bare disconnect is for rewinding many blocks
+ * at once (a rewind to a checkpoint on startup): it doesn't return the block's
+ * transactions to the mempool and only flushes the chain state to disk
+ * periodically, where a normal one writes it after every block.
+ */
+bool static DisconnectTip(CValidationState& state, bool fBare = false)
 {
     CBlockIndex* pindexDelete = chainActive.Tip();
     assert(pindexDelete);
@@ -2531,18 +2537,20 @@ bool static DisconnectTip(CValidationState& state)
     }
     LogPrint("bench", "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * 0.001);
     // Write the chain state to disk, if necessary.
-    if (!FlushStateToDisk(state, FLUSH_STATE_ALWAYS))
+    if (!FlushStateToDisk(state, fBare ? FLUSH_STATE_PERIODIC : FLUSH_STATE_ALWAYS))
         return false;
-    // Resurrect mempool transactions from the disconnected block.
-    BOOST_FOREACH (const CTransaction& tx, block.vtx) {
-        // ignore validation errors in resurrected transactions
-        list<CTransaction> removed;
-        CValidationState stateDummy;
-        if (tx.IsCoinBase() || tx.IsCoinStake() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL))
-            mempool.remove(tx, removed, true);
+    if (!fBare) {
+        // Resurrect mempool transactions from the disconnected block.
+        BOOST_FOREACH (const CTransaction& tx, block.vtx) {
+            // ignore validation errors in resurrected transactions
+            list<CTransaction> removed;
+            CValidationState stateDummy;
+            if (tx.IsCoinBase() || tx.IsCoinStake() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL))
+                mempool.remove(tx, removed, true);
+        }
+        mempool.removeCoinbaseSpends(pcoinsTip, pindexDelete->nHeight);
+        mempool.check(pcoinsTip);
     }
-    mempool.removeCoinbaseSpends(pcoinsTip, pindexDelete->nHeight);
-    mempool.check(pcoinsTip);
     // Update chainActive and related variables.
     UpdateTip(pindexDelete->pprev);
     // Let wallets know transactions went from 1-confirmed to
@@ -2921,7 +2929,7 @@ bool ActivateBestChain(CValidationState& state, CBlock* pblock)
     return true;
 }
 
-bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex)
+bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex, bool fBare)
 {
     AssertLockHeld(cs_main);
 
@@ -2930,6 +2938,8 @@ bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex)
     setDirtyBlockIndex.insert(pindex);
     setBlockIndexCandidates.erase(pindex);
 
+    const int nTotal = chainActive.Height() - pindex->nHeight + 1;
+    int nDone = 0;
     while (chainActive.Contains(pindex)) {
         CBlockIndex* pindexWalk = chainActive.Tip();
         pindexWalk->nStatus |= BLOCK_FAILED_CHILD;
@@ -2937,9 +2947,24 @@ bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex)
         setBlockIndexCandidates.erase(pindexWalk);
         // ActivateBestChain considers blocks already in chainActive
         // unconditionally valid already, so force disconnect away from it.
-        if (!DisconnectTip(state)) {
+        if (!DisconnectTip(state, fBare)) {
             return false;
         }
+        if (fBare) {
+            // A long rewind runs during startup: report progress, and stop
+            // cleanly if asked to. What is done so far is consistent on disk,
+            // and the next start finds the same fork and carries on.
+            if (++nDone % 1000 == 0) {
+                uiInterface.InitMessage(strprintf(_("Returning to the correct block chain... (%d%%)"), nDone * 100 / nTotal));
+                if (ShutdownRequested())
+                    break;
+            }
+        }
+    }
+
+    if (fBare) {
+        if (!FlushStateToDisk(state, FLUSH_STATE_ALWAYS))
+            return false;
     }
 
     // The resulting new best tip may not be in setBlockIndexCandidates anymore, so
@@ -2952,7 +2977,10 @@ bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex)
         it++;
     }
 
-    InvalidChainFound(pindex);
+    // InvalidChainFound() would raise the "invalid chain longer than ours"
+    // warning for a fork we left on purpose.
+    if (!fBare)
+        InvalidChainFound(pindex);
     return true;
 }
 
@@ -2988,6 +3016,48 @@ bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex)
         pindex = pindex->pprev;
     }
     return true;
+}
+
+CheckpointRewindResult RewindToCheckpoints(int nMaxDepth, int& nForkHeight, int& nDepth)
+{
+    LOCK(cs_main);
+
+    uint256 hashCheckpoint;
+    if (!Checkpoints::FindCheckpointMismatch(chainActive, nForkHeight, hashCheckpoint))
+        return REWIND_NONE;
+
+    // chainActive[nForkHeight] is not the checkpointed block: our chain left
+    // the checkpointed one at nForkHeight - 1 at the latest. Disconnecting
+    // back to there puts us below the reorganization depth limit again, so the
+    // checkpointed chain is downloaded and connected like any other.
+    CBlockIndex* pindexFork = chainActive[nForkHeight];
+    nDepth = chainActive.Height() - nForkHeight + 1;
+    LogPrintf("RewindToCheckpoints: block %d is %s, the checkpoint is %s; %d blocks to disconnect\n",
+        nForkHeight, pindexFork->GetBlockHash().ToString(), hashCheckpoint.ToString(), nDepth);
+    if (nDepth > nMaxDepth)
+        return REWIND_TOO_DEEP;
+
+    uiInterface.InitMessage(_("Returning to the correct block chain..."));
+    int64_t nStart = GetTimeMillis();
+    CValidationState state;
+    if (!InvalidateBlock(state, pindexFork, true)) {
+        error("RewindToCheckpoints: disconnecting the fork failed: %s", state.GetRejectReason());
+        return REWIND_FAILED;
+    }
+
+    // An older version may have rejected the checkpointed block (a SwiftTX
+    // lock conflict, for one) and marked it invalid for good: clear that, or
+    // it would be refused again once it is downloaded.
+    BlockMap::iterator it = mapBlockIndex.find(hashCheckpoint);
+    if (it != mapBlockIndex.end())
+        ReconsiderBlock(state, it->second);
+
+    if (!FlushStateToDisk(state, FLUSH_STATE_ALWAYS))
+        return REWIND_FAILED;
+
+    LogPrintf("RewindToCheckpoints: back at block %d %s in %dms\n",
+        chainActive.Height(), chainActive.Tip()->GetBlockHash().ToString(), GetTimeMillis() - nStart);
+    return chainActive.Contains(pindexFork) ? REWIND_INTERRUPTED : REWIND_DONE;
 }
 
 CBlockIndex* AddToBlockIndex(const CBlock& block)
@@ -4143,6 +4213,16 @@ void UnloadBlockIndex()
     setBlockIndexCandidates.clear();
     chainActive.SetTip(NULL);
     pindexBestInvalid = NULL;
+    // The block files may be gone too (a resync offered during startup loads
+    // the chain a second time from empty databases): forget what we knew of
+    // them, or new blocks would be appended at the old files' offsets.
+    pindexBestHeader = NULL;
+    mapBlocksUnlinked.clear();
+    vinfoBlockFile.clear();
+    nLastBlockFile = 0;
+    setDirtyBlockIndex.clear();
+    setDirtyFileInfo.clear();
+    mapStakeSeenRecent.clear();
 }
 
 bool LoadBlockIndex()
