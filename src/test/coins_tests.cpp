@@ -2,9 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "clientversion.h"
 #include "coins.h"
+#include "main.h"
 #include "random.h"
+#include "streams.h"
 #include "uint256.h"
+#include "undo.h"
 
 #include <vector>
 #include <map>
@@ -173,6 +177,81 @@ BOOST_AUTO_TEST_CASE(coins_cache_simulation_test)
     BOOST_CHECK(updated_an_entry);
     BOOST_CHECK(found_an_entry);
     BOOST_CHECK(missed_an_entry);
+}
+
+// Spend every output of tx, then undo the spends the way DisconnectBlock does
+// (reverse order, through ApplyTxInUndo) and check the coins come back intact,
+// including the coinbase/coinstake flags that only travel in the last undo.
+static void CheckSpendAndUndoRoundTrip(const CTransaction& tx, int nHeight)
+{
+    CCoinsView base;
+    CCoinsViewCache cache(&base);
+    const uint256 txid = tx.GetHash();
+    const CCoins coinsOrig(tx, nHeight);
+    BOOST_CHECK_EQUAL(coinsOrig.IsCoinStake(), tx.IsCoinStake());
+    BOOST_CHECK_EQUAL(coinsOrig.IsCoinBase(), tx.IsCoinBase());
+    {
+        CCoinsModifier coins = cache.ModifyCoins(txid);
+        *coins = coinsOrig;
+    }
+
+    std::vector<std::pair<COutPoint, CTxInUndo> > vUndo;
+    for (unsigned int n = 0; n < tx.vout.size(); n++) {
+        const COutPoint out(txid, n);
+        CTxInUndo undo;
+        {
+            CCoinsModifier coins = cache.ModifyCoins(txid);
+            BOOST_REQUIRE(coins->Spend(out, undo));
+        }
+        // Round-trip through the on-disk format, as the undo would be read back.
+        CDataStream ss(SER_DISK, CLIENT_VERSION);
+        ss << undo;
+        CTxInUndo undoRead;
+        ss >> undoRead;
+        vUndo.push_back(std::make_pair(out, undoRead));
+    }
+
+    const CCoins* spent = cache.AccessCoins(txid);
+    BOOST_CHECK(spent == NULL || spent->IsPruned());
+    const CTxInUndo& last = vUndo.back().second;
+    BOOST_CHECK_EQUAL(last.nHeight, (unsigned int)nHeight);
+    BOOST_CHECK_EQUAL(last.fCoinBase, tx.IsCoinBase());
+    BOOST_CHECK_EQUAL(last.fCoinStake, tx.IsCoinStake());
+
+    for (std::vector<std::pair<COutPoint, CTxInUndo> >::reverse_iterator it = vUndo.rbegin(); it != vUndo.rend(); ++it)
+        BOOST_CHECK(ApplyTxInUndo(it->second, cache, it->first));
+
+    const CCoins* restored = cache.AccessCoins(txid);
+    BOOST_REQUIRE(restored != NULL);
+    BOOST_CHECK_EQUAL(restored->IsCoinStake(), tx.IsCoinStake());
+    BOOST_CHECK_EQUAL(restored->IsCoinBase(), tx.IsCoinBase());
+    BOOST_CHECK_EQUAL(restored->nHeight, nHeight);
+    BOOST_CHECK_EQUAL(restored->nVersion, tx.nVersion);
+    BOOST_CHECK(*restored == coinsOrig);
+}
+
+BOOST_AUTO_TEST_CASE(coinstake_undo_restores_flag)
+{
+    // Coinstake: real prevout, empty marker output, then the stake outputs.
+    CMutableTransaction stake;
+    stake.vin.resize(1);
+    stake.vin[0].prevout = COutPoint(GetRandHash(), 1);
+    stake.vout.resize(3);
+    stake.vout[0].SetEmpty();
+    stake.vout[1] = CTxOut(600 * COIN, CScript() << OP_TRUE);
+    stake.vout[2] = CTxOut(605 * COIN, CScript() << OP_TRUE);
+    BOOST_REQUIRE(CTransaction(stake).IsCoinStake());
+    CheckSpendAndUndoRoundTrip(stake, 1000);
+
+    // Coinbase: same path, must keep working.
+    CMutableTransaction coinbase;
+    coinbase.vin.resize(1);
+    coinbase.vin[0].prevout.SetNull();
+    coinbase.vin[0].scriptSig = CScript() << 1000 << OP_0;
+    coinbase.vout.resize(1);
+    coinbase.vout[0] = CTxOut(10 * COIN, CScript() << OP_TRUE);
+    BOOST_REQUIRE(CTransaction(coinbase).IsCoinBase());
+    CheckSpendAndUndoRoundTrip(coinbase, 1000);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
