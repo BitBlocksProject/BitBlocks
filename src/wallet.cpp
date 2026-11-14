@@ -3356,8 +3356,14 @@ void CWallet::AutoCombineDust()
         vCoins = it->second;
 
         //find masternode rewards that need to be combined
-        CCoinControl* coinControl = new CCoinControl();
+        CCoinControl coinControlObj;
+        CCoinControl* coinControl = &coinControlObj;
         CAmount nTotalRewardsValue = 0;
+        // Combine only as many inputs as fit in a standard transaction; the
+        // rest is picked up on the following blocks. Without a cap, an address
+        // with many small outputs builds a transaction that is too large and
+        // fails on every block.
+        unsigned int nTxSizeEstimate = 200; // version, locktime, counts and one output, with margin
         BOOST_FOREACH (const COutput& out, vCoins) {
             //no coins should get this far if they dont have proper maturity, this is double checking
             if (out.tx->IsCoinStake() && out.tx->GetDepthInMainChain() < COINBASE_MATURITY + 1)
@@ -3365,6 +3371,11 @@ void CWallet::AutoCombineDust()
 
             if (out.Value() > nAutoCombineThreshold * COIN)
                 continue;
+
+            // An input spending a P2PKH output takes up to 180 bytes; use 190 to be safe.
+            if (nTxSizeEstimate + 190 >= MAX_STANDARD_TX_SIZE)
+                break;
+            nTxSizeEstimate += 190;
 
             COutPoint outpt(out.tx->GetHash(), out.i);
             coinControl->Select(outpt);
@@ -3406,8 +3417,6 @@ void CWallet::AutoCombineDust()
         }
 
         LogPrintf("AutoCombineDust sent transaction\n");
-
-        delete coinControl;
     }
 }
 
