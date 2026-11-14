@@ -5258,8 +5258,23 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
                 LogPrintf("dstx: Got Masternode transaction %s\n", tx.GetHash().ToString());
 
+                // One free transaction per masternode: the allowance is used
+                // up here and only renewed by the masternode's next accepted
+                // dsq, which is rate limited. Leaving it set would let a
+                // masternode bypass the fee, priority and mempool limits for
+                // any number of transactions.
                 ignoreFees = true;
-                pmn->allowFreeTx = true;
+                pmn->allowFreeTx = false;
+
+                // Forget broadcasts whose transaction has left the mempool
+                // (mined, expired or never accepted), so the map stays bounded.
+                map<uint256, CObfuscationBroadcastTx>::iterator itDstx = mapObfuscationBroadcastTxes.begin();
+                while (itDstx != mapObfuscationBroadcastTxes.end()) {
+                    if (!mempool.exists(itDstx->first))
+                        mapObfuscationBroadcastTxes.erase(itDstx++);
+                    else
+                        ++itDstx;
+                }
 
                 if (!mapObfuscationBroadcastTxes.count(tx.GetHash())) {
                     CObfuscationBroadcastTx dstx;
